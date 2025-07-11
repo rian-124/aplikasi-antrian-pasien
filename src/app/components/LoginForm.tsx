@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { LoginFormManager } from "../classes/LoginFormManager";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const manager = new LoginFormManager();
   const fields = manager.getFields();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -25,6 +27,7 @@ export default function LoginForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    router.push("/dashboard")
   };
 
   return (
