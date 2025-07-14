@@ -1,5 +1,4 @@
 import { Patient } from "../classes/Patient";
-// import { FaUserFriends } from "react-icons/fa";
 
 export default function PatientTable({ data }: { data: Patient[] }) {
   return (
@@ -9,7 +8,8 @@ export default function PatientTable({ data }: { data: Patient[] }) {
           <img src="/icons/patient.svg" alt="Patient Icon" className="w-5" />
           Patient List
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 md:items-center text-gray-400">
+          Search Patient
           <input
             type="text"
             placeholder="No. Patient / Lab Reg / Ruang..."
@@ -32,11 +32,11 @@ export default function PatientTable({ data }: { data: Patient[] }) {
                 </colgroup>
                 <thead className="bg-gray-200 text-gray-700 border-b border-gray-300">
                 <tr>
-                    <th className="px-4 py-3">No.</th>
-                    <th className="px-4 py-3">No. Pasien</th>
-                    <th className="px-4 py-3">Lab Reg</th>
-                    <th className="px-4 py-3">Ruang / Outlet</th>
-                    <th className="px-4 py-3">Status</th>
+                    <th className="px-5 py-3">No.</th>
+                    <th className="px-6 py-3">No. Pasien</th>
+                    <th className="px-6 py-3">Lab Reg</th>
+                    <th className="px-6 py-3">Ruang / Outlet</th>
+                    <th className="px-6 py-3">Status</th>
                 </tr>
                 </thead>
                 <tbody>
