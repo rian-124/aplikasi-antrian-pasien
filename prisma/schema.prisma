@@ -49,7 +49,7 @@ model Pasiens {
 
 model StatusRegistrais {
   id Int @id @default(autoincrement())
-  status String @db.VarChar(100)
+  status String @unique @db.VarChar(100)
   pasien Pasiens[]
   created_At DateTime @default(now()) @db.Timestamptz()
   update_At DateTime @updatedAt @db.Timestamptz()
@@ -58,7 +58,7 @@ model StatusRegistrais {
 
 model JenisRegistrasis {
   id Int @id @default(autoincrement())
-  jenis String @db.VarChar(100)
+  jenis String @unique @db.VarChar(100)
   pasien Pasiens[]
   created_At DateTime @default(now()) @db.Timestamptz()
   update_At DateTime @updatedAt @db.Timestamptz()
@@ -69,6 +69,10 @@ model NomorAntrians {
   id Int @id @default(autoincrement())
   nomor String @unique @db.VarChar(100)
   pasien Pasiens?
+  status_antrians_id Int @db.Integer()
+  tahap_antrian_id Int @db.Integer()
+  tahap_antrian TahapAntrians @relation(fields: [tahap_antrian_id], references: [id])
+  status_antrians StatusAntrians @relation(fields: [status_antrians_id], references: [id])
   created_At DateTime @default(now()) @db.Timestamptz()
   update_At DateTime @updatedAt @db.Timestamptz()
   @@map("nomor_antrians")
@@ -88,8 +92,9 @@ model AntrianPasiens {
 
 model TahapAntrians {
   id Int @id @default(autoincrement())
-  tahap String @db.VarChar(100)
+  tahap String @unique @db.VarChar(100)
   antrian_pasien AntrianPasiens[]
+  nomor_antrian NomorAntrians[]
   created_At DateTime @default(now())
   update_At DateTime @updatedAt
   @@map("tahap_antrians")
@@ -97,8 +102,9 @@ model TahapAntrians {
 
 model StatusAntrians {
   id Int @id @default(autoincrement())
-  status String @db.VarChar(100)
+  status String @unique @db.VarChar(100)
   antrian_pasien AntrianPasiens[]
+  nomor_antrian NomorAntrians[]
   created_At DateTime @default(now())
   update_At DateTime @updatedAt
   @@map("status_antrians")
