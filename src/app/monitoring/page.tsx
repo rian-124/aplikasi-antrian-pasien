@@ -1,22 +1,26 @@
 'use client'
 
-import { useEffect, useState } from "react";
-import QueueCard from "../components/QueueCard";
-import QueueHeader from "../components/QueueHeader";
+import { useEffect, useState } from 'react';
+import QueueHeader from '../components/QueueHeader';
+import QueueList from '../components/QueueList';
+import CurrentQueue from '../components/CurrentQueue';
 
-export default function AntrianPage() {
+export interface QueueItem {
+  number: string;
+  table: number;
+  type: string;
+}
+
+export default function MonitoringPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const options = [
-    {
-      title: 'UMUM',
-      image: '/icons/umum.svg',
-    },
-    {
-      title: 'JAMINAN',
-      image: '/icons/jaminan.svg',
-    },
-  ];
+  const items: QueueItem[] = Array.from({ length: 9 }, (_, i) => ({
+    number: `U-00${i + 1}`,
+    table: 2,
+    type: 'UMUM',
+  }));
+
+  const currentItem = items[0];
 
   const handleEnterFullscreen = () => {
     if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
@@ -39,17 +43,12 @@ export default function AntrianPage() {
   }, []);
 
   return (
-    <div className="w-full h-screen flex flex-col bg-white relative">
+    <div className="w-full h-screen bg-white flex flex-col relative">
       <QueueHeader />
-
-      <main className="flex-1 flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-semibold mb-10">Labotorium PK & MK</h1>
-        <div className="flex gap-6 flex-wrap justify-center">
-          {options.map((option, i) => (
-            <QueueCard key={i} title={option.title} image={option.image}/>
-          ))}
-        </div>
-      </main>
+      <div className="flex flex-1 divide-x divide-gray-300 relative">
+        <QueueList items={items} />
+        <CurrentQueue item={currentItem} />
+      </div>
 
       {!isFullscreen && (
         <img
