@@ -59,8 +59,17 @@ export default function Sidebar({
             className={`flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 cursor-pointer
               ${collapsed ? 'justify-center' : ''}`}
           >
-            <Image src="/icons/queue.svg" alt="Queue Manage" width={18} height={18} />
-            {!collapsed && <span>Queue Manage</span>}
+            <Image src="/icons/queue.svg" alt="Queue Managements" width={18} height={18} />
+            {!collapsed && <span>Queue Managements</span>}
+          </li>
+
+          <li
+            onClick={() => router.push('/user')}
+            className={`flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 cursor-pointer
+              ${collapsed ? 'justify-center' : ''}`}
+          >
+            <Image src="/icons/users.svg" alt="Queue Manage" width={18} height={18} />
+            {!collapsed && <span>Users</span>}
           </li>
         </ul>
       </div>

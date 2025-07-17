@@ -9,7 +9,8 @@ export default function Header() {
   const getTitle = (path: string) => {
     const map: Record<string, string> = {
       '/dashboard': 'Dashboard',
-      '/queue': 'Queue Manage',
+      '/queue': 'Queue Managements',
+      '/user': 'Users',
       '/monitoring': 'Monitoring Antrian',
       '/antrian': 'Pilih Antrian',
     };
