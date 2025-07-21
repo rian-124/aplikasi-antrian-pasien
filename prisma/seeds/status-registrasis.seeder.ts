@@ -6,17 +6,17 @@ export class StatusRegistrasis {
   async seed() {
     const data = [
       {
-        status: 'Lama',
+        status: 'LAMA',
       },
       {
-        status: 'Baru',
+        status: 'BARU',
       },
       {
-        status: 'Rujukan',
+        status: 'RUJUKAN',
       },
     ];
 
-    await this.prisma.statusRegistrais.createMany({
+    await this.prisma.statusRegistrasis.createMany({
       data,
       skipDuplicates: true,
     });

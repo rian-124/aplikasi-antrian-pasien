@@ -14,101 +14,93 @@ datasource db {
 }
 
 model Users {
-  id Int @id @default(autoincrement())
-  username String @unique @db.VarChar(200)
-  password String @db.VarChar(100)
-  role_id Int @db.Integer
-  roles Roles @relation(fields: [role_id], references: [id])
+  id         Int      @id @default(autoincrement())
+  username   String   @unique @db.VarChar(200)
+  password   String   @db.VarChar(100)
+  role_id    Int      @db.Integer
+  roles      Roles    @relation(fields: [role_id], references: [id])
   created_At DateTime @default(now()) @db.Timestamptz()
-  updated_At DateTime @updatedAt  @db.Timestamptz()
+  updated_At DateTime @updatedAt @db.Timestamptz()
+
   @@map("users")
 }
 
 model Roles {
-  id Int @id @default(autoincrement())
-  name String @db.VarChar(100)
-  users Users[]
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  users      Users[]
   created_At DateTime @default(now()) @db.Timestamptz()
   updated_At DateTime @updatedAt @db.Timestamptz()
-  @@map("roles") 
+
+  @@map("roles")
 }
 
 model Pasiens {
-  id Int @id @default(autoincrement())
-  nomor_antrian_id Int @unique @db.Integer
-  nomor_registrasi String @db.VarChar(100)
-  jenis_registrasi_id Int @db.Integer
-  status_registrasi_id Int @db.Integer
-  nomor_antrian NomorAntrians @relation(fields: [nomor_antrian_id], references: [id])
-  jenis_registrasis JenisRegistrasis @relation(fields: [jenis_registrasi_id], references: [id])
-  status_registrasis StatusRegistrais @relation(fields: [status_registrasi_id], references: [id])
-  created_At DateTime @default(now()) @db.Timestamptz()
-  updated_At DateTime @updatedAt @db.Timestamptz()
+  id                   Int               @id @default(autoincrement())
+  nomor_registrasi     String            @db.VarChar(100)
+  jenis_registrasi_id  Int               @db.Integer
+  status_registrasi_id Int               @db.Integer
+  jenis_registrasis    JenisRegistrasis  @relation(fields: [jenis_registrasi_id], references: [id])
+  status_registrasis   StatusRegistrasis @relation(fields: [status_registrasi_id], references: [id])
+  created_At           DateTime          @default(now()) @db.Timestamptz()
+  updated_At           DateTime          @updatedAt @db.Timestamptz()
+  AntrianPasiens       AntrianPasiens[]
+
   @@map("pasiens")
 }
 
-model StatusRegistrais {
-  id Int @id @default(autoincrement())
-  status String @unique @db.VarChar(100)
-  pasien Pasiens[]
-  created_At DateTime @default(now()) @db.Timestamptz()
-  update_At DateTime @updatedAt @db.Timestamptz()
-  @@map("status_registrasis")
-}
-
 model JenisRegistrasis {
-  id Int @id @default(autoincrement())
-  jenis String @unique @db.VarChar(100)
-  pasien Pasiens[]
-  created_At DateTime @default(now()) @db.Timestamptz()
-  update_At DateTime @updatedAt @db.Timestamptz()
+  id         Int       @id @default(autoincrement())
+  jenis      String    @unique @db.VarChar(100)
+  pasien     Pasiens[]
+  created_At DateTime  @default(now()) @db.Timestamptz()
+  update_At  DateTime  @updatedAt @db.Timestamptz()
+
   @@map("jenis_registrasis")
 }
 
-model NomorAntrians {
-  id Int @id @default(autoincrement())
-  nomor String @unique @db.VarChar(100)
-  pasien Pasiens?
-  status_antrians_id Int @db.Integer()
-  tahap_antrian_id Int @db.Integer()
-  tahap_antrian TahapAntrians @relation(fields: [tahap_antrian_id], references: [id])
-  status_antrians StatusAntrians @relation(fields: [status_antrians_id], references: [id])
-  created_At DateTime @default(now()) @db.Timestamptz()
-  update_At DateTime @updatedAt @db.Timestamptz()
-  @@map("nomor_antrians")
-}
-
 model AntrianPasiens {
-  id Int @id @default(autoincrement())
-  nomor_Antrian_id Int @db.Integer
-  tahap_antrian_id Int @db.Integer
-  status_antrian_id Int @db.Integer
-  status_antrian StatusAntrians @relation(fields: [status_antrian_id], references: [id])
-  tahap_antrian TahapAntrians @relation(fields: [tahap_antrian_id], references: [id])
-  created_At DateTime @default(now()) @db.Timestamptz()
-  update_At DateTime @updatedAt
+  id                Int            @id @default(autoincrement())
+  pasien_id         Int
+  nomor_Antrian     String         @db.VarChar()
+  tahap_antrian_id  Int            @db.Integer
+  status_antrian_id Int            @db.Integer
+  bintang           Int            @db.Integer() @default(0)
+  pasien            Pasiens        @relation(fields: [pasien_id], references: [id])
+  status_antrian    StatusAntrians @relation(fields: [status_antrian_id], references: [id])
+  tahap_antrian     TahapAntrians  @relation(fields: [tahap_antrian_id], references: [id])
+  created_At        DateTime       @default(now()) @db.Timestamptz()
+  update_At         DateTime       @updatedAt
+
   @@map("antrian_pasiens")
 }
 
+model StatusRegistrasis {
+  id         Int       @id @default(autoincrement())
+  status     String    @unique @db.VarChar(100)
+  pasien     Pasiens[]
+  created_At DateTime  @default(now()) @db.Timestamptz()
+  update_At  DateTime  @updatedAt @db.Timestamptz()
+
+  @@map("status_registrasis")
+}
+
 model TahapAntrians {
-  id Int @id @default(autoincrement())
-  tahap String @unique @db.VarChar(100)
+  id             Int              @id @default(autoincrement())
+  tahap          String           @unique @db.VarChar(100)
   antrian_pasien AntrianPasiens[]
-  nomor_antrian NomorAntrians[]
-  created_At DateTime @default(now())
-  update_At DateTime @updatedAt
+  created_At     DateTime         @default(now())
+  update_At      DateTime         @updatedAt
+
   @@map("tahap_antrians")
 }
 
 model StatusAntrians {
-  id Int @id @default(autoincrement())
-  status String @unique @db.VarChar(100)
+  id             Int              @id @default(autoincrement())
+  status         String           @unique @db.VarChar(100)
   antrian_pasien AntrianPasiens[]
-  nomor_antrian NomorAntrians[]
-  created_At DateTime @default(now())
-  update_At DateTime @updatedAt
+  created_At     DateTime         @default(now())
+  update_At      DateTime         @updatedAt
+
   @@map("status_antrians")
 }
-
-
-

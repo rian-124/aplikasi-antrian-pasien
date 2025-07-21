@@ -1,10 +1,5 @@
-import { ZodType } from 'zod';
 import * as Z from 'zod';
-export class PasiensValidation {
-  static readonly JENIS: ZodType = Z.object({
-    jenis: Z.enum(['UMUM', 'JAMINAN']),
-  });
-}
+import { ZodType } from 'zod';
 
 export class StatusPasienValidation {
   static readonly STATUS: ZodType = Z.object({

@@ -3,18 +3,27 @@ import { PrismaService } from '../common/prisma.service';
 import { Inject, NotFoundException } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { Jenis, PasiensRequest } from '../model/pasiens.model';
+import { PasiensValidation } from './pasiens.validation';
+import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 
 export class PasiensService {
   constructor(
     private prismaService: PrismaService,
     private validationService: ValidationService,
+    private websocketGateAway: WebSocketGateaway,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
-  async storePasiens(request: { jenis: 'JAMINAN' | 'UMUM' }) {
+  async storePasiens(request: PasiensRequest) {
+    const PasiensRequest: PasiensRequest = this.validationService.validate(
+      PasiensValidation.JENIS,
+      request,
+    ) as PasiensRequest;
+
     const jenis = await this.prismaService.jenisRegistrasis.findUnique({
       where: {
-        jenis: request.jenis,
+        jenis: PasiensRequest.jenis,
       },
     });
 
@@ -24,7 +33,7 @@ export class PasiensService {
 
     const status = await this.prismaService.statusAntrians.findUnique({
       where: {
-        status: 'Waiting',
+        status: 'WAITING',
       },
     });
 
@@ -36,7 +45,7 @@ export class PasiensService {
 
     const tahap = await this.prismaService.tahapAntrians.findUnique({
       where: {
-        tahap: 'Loket',
+        tahap: 'LOKET',
       },
     });
 
@@ -44,45 +53,44 @@ export class PasiensService {
       throw new NotFoundException(`Tahap registrasi ${tahap} tidak ditemukan`);
     }
 
-    const prefix = request.jenis === 'UMUM' ? 'U' : 'J';
+    const prefix = request.jenis === Jenis.UMUM ? 'U' : 'J';
 
-    const lastNomor = await this.prismaService.nomorAntrians.findFirst({
+    const lastNomor = await this.prismaService.antrianPasiens.findFirst({
       orderBy: {
         id: 'desc',
       },
       select: {
-        nomor: true,
+        nomor_Antrian: true,
       },
     });
 
     let nextNumber = 1;
-    if (lastNomor && lastNomor.nomor) {
-      const numericPart = lastNomor.nomor.replace(/\D/g, '');
+    if (lastNomor && lastNomor.nomor_Antrian) {
+      const numericPart = String(lastNomor.nomor_Antrian).replace(/\D/g, '');
       nextNumber = parseInt(numericPart, 10) + 1;
     }
 
     const formattedNomor = prefix + String(nextNumber).padStart(5, '0');
 
-    const nomorAntrian = await this.prismaService.nomorAntrians.create({
-      data: {
-        nomor: formattedNomor,
-        status_antrians_id: status.id,
-        tahap_antrian_id: tahap.id,
-      },
-    });
-
     const pasien = await this.prismaService.pasiens.create({
       data: {
-        nomor_antrian_id: nomorAntrian.id,
         nomor_registrasi: 'REG' + Date.now(),
         jenis_registrasi_id: jenis.id,
         status_registrasi_id: 1,
+        AntrianPasiens: {
+          create: {
+            tahap_antrian_id: tahap.id,
+            status_antrian_id: status.id,
+            nomor_Antrian: formattedNomor,
+          },
+        },
       },
       include: {
-        nomor_antrian: true,
+        AntrianPasiens: true,
       },
     });
 
+    this.websocketGateAway.broadcastStatusUpdate(pasien);
     return pasien;
   }
 }

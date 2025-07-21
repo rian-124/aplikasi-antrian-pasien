@@ -6,10 +6,10 @@ export class TahapAntrian {
   async seed() {
     const data = [
       {
-        tahap: 'Loket',
+        tahap: 'LOKET',
       },
       {
-        tahap: 'Meja',
+        tahap: 'MEJA',
       },
     ];
 

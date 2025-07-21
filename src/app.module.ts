@@ -4,8 +4,16 @@ import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { PasiensModule } from './pasiens/pasiens.module';
+import { AntrianPasienModule } from './antrian-pasien/antrian.pasien.module';
 
 @Module({
-  imports: [CommonModule, UserModule, RolesModule, AuthModule, PasiensModule],
+  imports: [
+    CommonModule,
+    UserModule,
+    RolesModule,
+    AuthModule,
+    PasiensModule,
+    AntrianPasienModule,
+  ],
 })
 export class AppModule {}

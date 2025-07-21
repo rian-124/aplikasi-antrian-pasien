@@ -6,6 +6,7 @@ import { PrismaService } from './prisma.service';
 import { ValidationService } from './validation.service';
 import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
+import { WebSocketGateaway } from './websocket.gateaway';
 
 @Global()
 @Module({
@@ -25,7 +26,8 @@ import { ErrorFilter } from './error.filter';
       provide: APP_FILTER,
       useClass: ErrorFilter,
     },
+    WebSocketGateaway,
   ],
-  exports: [PrismaService, ValidationService],
+  exports: [PrismaService, ValidationService, WebSocketGateaway],
 })
 export class CommonModule {}

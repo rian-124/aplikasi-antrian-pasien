@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+      const socket = io('http://192.168.51.236:3000');
+
+      socket.on('connect', () => {
+        console.log('Terhubung ke server WebSocket:', socket.id);
+      });
+
+      socket.on('Antrian-pasien update', (data) => {
+        console.log('Status antrian diperbarui:', data);
+      });
+    </script>
+  </body>
+</html>

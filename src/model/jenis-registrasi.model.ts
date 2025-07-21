@@ -6,6 +6,20 @@ export type Jenis = {
 
 export type PasienWithNomor = Prisma.PasiensGetPayload<{
   include: {
-    nomor_antrian: true;
+    AntrianPasiens;
+  };
+}>;
+
+export type AntrianPasien = Prisma.AntrianPasiensGetPayload<{
+  include: {
+    pasien;
+  };
+}>;
+
+export type AntrianPasienGet = Prisma.AntrianPasiensGetPayload<{
+  include: {
+    pasien;
+    status_antrian;
+    tahap_antrian;
   };
 }>;

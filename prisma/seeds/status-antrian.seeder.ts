@@ -6,13 +6,16 @@ export class StatusAntrian {
   async seed() {
     const data = [
       {
-        status: 'Waiting',
+        status: 'WAITING',
       },
       {
-        status: 'Call',
+        status: 'CALL',
       },
       {
-        status: 'Complete',
+        status: 'COMPLETE',
+      },
+      {
+        status: 'CANCELED',
       },
     ];
 
