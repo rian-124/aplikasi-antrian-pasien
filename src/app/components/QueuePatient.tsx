@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Patient } from "../classes/Patient";
 import PatientCard from "./PatientCard";
 
-
 export default function QueuePatient() {
   type PatientStatus = 'WAITING' | 'CALLED' | 'COMPLETED' | 'CANCELLED';
 
@@ -19,33 +18,33 @@ export default function QueuePatient() {
     CANCELLED: [],
   });
 
-  
   useEffect(() => {
-    const basePatient = new Patient(1, 1, 'U-001', '422183429', 'IPRJ', 'WAITING');
-    const dummyPatients = [
-      { ...basePatient, id: 1, status: 'WAITING' },
-      { ...basePatient, id: 2, status: 'CALLED' },
-      { ...basePatient, id: 3, status: 'COMPLETED' },
-      { ...basePatient, id: 4, status: 'CANCELLED' },
-    ];
+    const statuses: PatientStatus[] = ['WAITING', 'CALLED', 'COMPLETED', 'CANCELLED'];
+    const grouped: PatientMap = {
+      WAITING: [],
+      CALLED: [],
+      COMPLETED: [],
+      CANCELLED: [],
+    };
 
-  const grouped: PatientMap = {
-    WAITING: [],
-    CALLED: [],
-    COMPLETED: [],
-    CANCELLED: [],
-  };
-
-  dummyPatients.forEach((p) => {
-    for (let i = 0; i < 3; i++) {
-        grouped[p.status as PatientStatus].push(
-          new Patient(p.id * 10 + i, i + 1, p.patientNumber, p.labReg, p.outlet, p.status)
+    let globalId = 1;
+    statuses.forEach((status) => {
+      for (let i = 0; i < 3; i++) {
+        grouped[status].push(
+          new Patient(
+            globalId, // id unik
+            i + 1, // nomor urut di status tersebut
+            `U-${globalId.toString().padStart(3, '0')}`,
+            `LAB-${1000 + globalId}`,
+            'IPRJ',
+            status
+          )
         );
+        globalId++;
       }
     });
 
     setPatientsByStatus(grouped);
-
   }, []);
 
   const statusTitles = {
@@ -80,7 +79,7 @@ export default function QueuePatient() {
             <h3 className="font-bold text-lg mb-2">{statusTitles[status as keyof typeof statusTitles]}</h3>
             <div className="space-y-4">
               {patients.map((patient) => (
-                <PatientCard key={patient.no} patient={patient} />
+                <PatientCard key={patient.id} patient={patient} />
               ))}
             </div>
           </div>

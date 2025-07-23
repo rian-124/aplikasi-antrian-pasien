@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { User } from '../classes/User';
 import AddUserModal from './AddUserModal';
+import { UserPlus2 } from "lucide-react";
 
 export default function UserTable({ users }: { users: User[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,7 +15,7 @@ export default function UserTable({ users }: { users: User[] }) {
     <div className="rounded-xl p-4 relative">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div className="flex items-center gap-2 text-base font-semibold text-gray-800">
-            <img src="/icons/patient.svg" alt="User Icon" className="w-5 h-5" />
+            <UserPlus2 className="w-6 h-6 mr-2 text-gray-700" />
             Users List
           </div>
           <button

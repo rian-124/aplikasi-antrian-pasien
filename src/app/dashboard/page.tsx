@@ -29,7 +29,7 @@ export default function DashboardPage() {
       <Sidebar collapsed={collapsed} toggle={toggleSidebar} />
       <div className="flex-1 p-2 bg-gray-50 min-h-screen">
         <Header />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 pt-4 md:grid-cols-4 gap-4 mb-6">
           {stats.map((s, i) => (
             <StatCard key={i} title={s.title} value={s.value} icon={s.icon} color={s.color} />
           ))}
