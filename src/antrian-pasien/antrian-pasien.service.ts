@@ -1,6 +1,10 @@
 import { ValidationService } from '../common/validation.service';
 import { PrismaService } from '../common/prisma.service';
-import { PasienStatusRequest, Status } from '../model/pasiens.model';
+import {
+  PasienStatusRequest,
+  Status,
+  UpdateDataAntrian,
+} from '../model/pasiens.model';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { StatusPasienValidation } from '../pasiens/pasiens.validation';
 
@@ -26,6 +30,42 @@ export class AntrianPasienService {
     return {
       status: 200,
       message: 'Berhasil mengambil data antrian pasien',
+      data: dataStatusAntrian,
+    };
+  }
+
+  async searchStatusAntrian(keyword: string) {
+    const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
+      where: {
+        nomor_Antrian: {
+          contains: keyword,
+          mode: 'insensitive',
+        },
+        OR: [
+          {
+            pasien: {
+              nomor_registrasi: {
+                contains: keyword,
+                mode: 'insensitive',
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        tahap_antrian: true,
+        status_antrian: true,
+        pasien: true,
+      },
+    });
+
+    if (!dataStatusAntrian) {
+      throw new NotFoundException(`Data ${keyword} tidak ditemukan`);
+    }
+
+    return {
+      status: 200,
+      message: 'Berhasil mencari data antrian pasien',
       data: dataStatusAntrian,
     };
   }
@@ -65,6 +105,40 @@ export class AntrianPasienService {
     }
 
     const currentStatus = antrianPasien.status_antrian.status as Status;
+    let nextStatus = PasienStatusRequest.status;
+
+    if (nextStatus === Status.CALL && antrianPasien.bintang >= 3) {
+      nextStatus = Status.CANCELED;
+
+      const newStatusAntrian =
+        await this.prismaService.statusAntrians.findUnique({
+          where: {
+            status: nextStatus,
+          },
+        });
+
+      if (!newStatusAntrian) {
+        throw new NotFoundException(
+          `Tidak dapat menemukan ${newStatusAntrian}`,
+        );
+      }
+
+      statusAntrian.id = newStatusAntrian.id;
+    }
+
+    const incrementBintang =
+      nextStatus === Status.CALL
+        ? antrianPasien.bintang + 1
+        : antrianPasien.bintang;
+
+    const updateData: UpdateDataAntrian = {
+      status_antrian_id: statusAntrian.id,
+      bintang: incrementBintang,
+    };
+
+    if (nextStatus === Status.CALL && antrianPasien.bintang < 3) {
+      updateData.user_id = PasienStatusRequest.user_id;
+    }
 
     if (
       currentStatus === Status.WAITING &&
@@ -80,9 +154,7 @@ export class AntrianPasienService {
       where: {
         id: PasienStatusRequest.antrian_id,
       },
-      data: {
-        status_antrian_id: statusAntrian.id,
-      },
+      data: updateData,
       include: {
         pasien: true,
       },

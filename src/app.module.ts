@@ -3,8 +3,9 @@ import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
-import { PasiensModule } from './pasiens/pasiens.module';
 import { AntrianPasienModule } from './antrian-pasien/antrian.pasien.module';
+import { PasiensModule } from './pasiens/pasiens.module';
+import { OutletsModule } from './outlet/outlet.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AntrianPasienModule } from './antrian-pasien/antrian.pasien.module';
     AuthModule,
     PasiensModule,
     AntrianPasienModule,
+    OutletsModule,
   ],
 })
 export class AppModule {}

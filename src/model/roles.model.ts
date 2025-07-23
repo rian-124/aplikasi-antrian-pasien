@@ -3,5 +3,8 @@ export class RolesRequest {
 }
 
 export class RolesResponse {
-  name: string;
+  status: number;
+  message: string;
+  name?: string;
+  data?: any;
 }

@@ -43,6 +43,16 @@ export class PasiensService {
       );
     }
 
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        id: PasiensRequest.outlet_id,
+      },
+    });
+
+    if (!outlet) {
+      throw new NotFoundException(`Outlet ${outlet} tidak di temukan`);
+    }
+
     const tahap = await this.prismaService.tahapAntrians.findUnique({
       where: {
         tahap: 'LOKET',
@@ -75,12 +85,14 @@ export class PasiensService {
     const pasien = await this.prismaService.pasiens.create({
       data: {
         nomor_registrasi: 'REG' + Date.now(),
+        sample_id: 1,
         jenis_registrasi_id: jenis.id,
         status_registrasi_id: 1,
         AntrianPasiens: {
           create: {
             tahap_antrian_id: tahap.id,
             status_antrian_id: status.id,
+            outlet_id: outlet.id,
             nomor_Antrian: formattedNomor,
           },
         },

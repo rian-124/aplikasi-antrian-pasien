@@ -39,7 +39,19 @@ export class RolesService {
     });
 
     return {
+      status: 200,
+      message: 'Berhasil menambahkan data role',
       name: roles.name,
+    };
+  }
+
+  async getAllRole() {
+    const dataRole = await this.prismaService.roles.findMany();
+
+    return {
+      status: 200,
+      message: 'Berhasil mengambil data role',
+      data: dataRole,
     };
   }
 }

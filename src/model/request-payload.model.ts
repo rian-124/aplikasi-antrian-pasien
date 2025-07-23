@@ -23,3 +23,5 @@ export type AntrianPasienGet = Prisma.AntrianPasiensGetPayload<{
     tahap_antrian;
   };
 }>;
+
+// export type UsersGetAll = Prisma.UsersGetPayload<>;

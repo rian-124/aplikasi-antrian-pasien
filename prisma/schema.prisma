@@ -14,15 +14,30 @@ datasource db {
 }
 
 model Users {
-  id         Int      @id @default(autoincrement())
-  username   String   @unique @db.VarChar(200)
-  password   String   @db.VarChar(100)
-  role_id    Int      @db.Integer
-  roles      Roles    @relation(fields: [role_id], references: [id])
-  created_At DateTime @default(now()) @db.Timestamptz()
-  updated_At DateTime @updatedAt @db.Timestamptz()
+  id              Int              @id @default(autoincrement())
+  email           String           @unique @db.VarChar()
+  name            String           @db.VarChar()
+  password        String           @db.VarChar(100)
+  role_id         Int              @db.Integer
+  outlet_id       Int              @db.Integer
+  antrian_pasiens AntrianPasiens[]
+  outlets         Outlets          @relation(fields: [outlet_id], references: [id])
+  roles           Roles            @relation(fields: [role_id], references: [id])
+  created_At      DateTime         @default(now()) @db.Timestamptz()
+  updated_At      DateTime         @updatedAt @db.Timestamptz()
 
   @@map("users")
+}
+
+model Outlets {
+  id              Int              @id @default(autoincrement())
+  nama_outlet     String           @unique @db.VarChar()
+  users           Users[]
+  antrian_pasiens AntrianPasiens[]
+  created_At      DateTime         @default(now()) @db.Timestamptz()
+  update_At       DateTime         @updatedAt
+
+  @@map("outlets")
 }
 
 model Roles {
@@ -40,6 +55,8 @@ model Pasiens {
   nomor_registrasi     String            @db.VarChar(100)
   jenis_registrasi_id  Int               @db.Integer
   status_registrasi_id Int               @db.Integer
+  sample_id            Int               @db.Integer
+  samples              Samples           @relation(fields: [sample_id], references: [id])
   jenis_registrasis    JenisRegistrasis  @relation(fields: [jenis_registrasi_id], references: [id])
   status_registrasis   StatusRegistrasis @relation(fields: [status_registrasi_id], references: [id])
   created_At           DateTime          @default(now()) @db.Timestamptz()
@@ -62,10 +79,14 @@ model JenisRegistrasis {
 model AntrianPasiens {
   id                Int            @id @default(autoincrement())
   pasien_id         Int
+  user_id           Int?
   nomor_Antrian     String         @db.VarChar()
   tahap_antrian_id  Int            @db.Integer
   status_antrian_id Int            @db.Integer
-  bintang           Int            @db.Integer() @default(0)
+  outlet_id         Int            @db.Integer
+  bintang           Int            @default(0) @db.Integer()
+  users             Users?          @relation(fields: [user_id], references: [id])
+  outlets           Outlets        @relation(fields: [outlet_id], references: [id])
   pasien            Pasiens        @relation(fields: [pasien_id], references: [id])
   status_antrian    StatusAntrians @relation(fields: [status_antrian_id], references: [id])
   tahap_antrian     TahapAntrians  @relation(fields: [tahap_antrian_id], references: [id])
@@ -73,6 +94,16 @@ model AntrianPasiens {
   update_At         DateTime       @updatedAt
 
   @@map("antrian_pasiens")
+}
+
+model Samples {
+  id          Int       @id @default(autoincrement())
+  name_sample String    @unique @db.VarChar()
+  Pasiens     Pasiens[]
+  created_At  DateTime  @default(now())
+  update_t    DateTime  @updatedAt
+
+  @@map("samples")
 }
 
 model StatusRegistrasis {

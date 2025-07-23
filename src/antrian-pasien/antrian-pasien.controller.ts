@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -24,6 +25,18 @@ export class AntrianPasienController {
   // @UseGuards(JwtAuthGuard)
   async getAll(): Promise<WebResponse<AntrianPasienAll>> {
     const result = await this.antrianPasienService.getAllStatusAntrian();
+
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/search')
+  @HttpCode(200)
+  async search(
+    @Query('keyword') keyword: string,
+  ): Promise<WebResponse<AntrianPasienAll>> {
+    const result = await this.antrianPasienService.searchStatusAntrian(keyword);
 
     return {
       data: result,
