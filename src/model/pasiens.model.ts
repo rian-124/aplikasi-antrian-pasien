@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { AntrianPasien, AntrianPasienGet } from './request-payload.model';
 
 export enum Jenis {
@@ -5,7 +6,9 @@ export enum Jenis {
   UMUM = 'UMUM',
 }
 export class PasiensRequest {
+  @ApiProperty()
   outlet_id: number;
+  @ApiProperty()
   jenis: Jenis.JAMINAN | Jenis.UMUM;
 }
 
@@ -25,8 +28,9 @@ export class UpdateDataAntrian {
 }
 
 export class PasienStatusRequest {
-  antrian_id: number;
+  @ApiProperty()
   status: Status;
+  @ApiProperty()
   user_id?: number;
 }
 

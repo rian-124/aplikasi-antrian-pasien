@@ -16,6 +16,12 @@ export type AntrianPasien = Prisma.AntrianPasiensGetPayload<{
   };
 }>;
 
+export type UsersGetAll = Prisma.UsersGetPayload<{
+  include: {
+    outlets;
+  };
+}>;
+
 export type AntrianPasienGet = Prisma.AntrianPasiensGetPayload<{
   include: {
     pasien;

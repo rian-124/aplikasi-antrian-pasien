@@ -1,21 +1,20 @@
 import { ValidationService } from '../common/validation.service';
 import { PrismaService } from '../common/prisma.service';
-import {
-  PasienStatusRequest,
-  Status,
-  UpdateDataAntrian,
-} from '../model/pasiens.model';
+import { PasienStatusRequest, Status } from '../model/pasiens.model';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { StatusPasienValidation } from '../pasiens/pasiens.validation';
+import { StatusAntrianValidation } from './antrian-pasien.validation';
+import { WebSocketGateaway } from '../common/websocket.gateaway';
+import { AntrianPasiens } from '@prisma/client';
 
 @Injectable()
 export class AntrianPasienService {
   constructor(
     private prismaService: PrismaService,
     private validationService: ValidationService,
+    private webSocketGateaway: WebSocketGateaway,
   ) {}
 
-  async getAllStatusAntrian() {
+  async getAllStatusAntrian(): Promise<AntrianPasiens[]> {
     const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
       orderBy: {
         id: 'asc',
@@ -27,14 +26,10 @@ export class AntrianPasienService {
       },
     });
 
-    return {
-      status: 200,
-      message: 'Berhasil mengambil data antrian pasien',
-      data: dataStatusAntrian,
-    };
+    return dataStatusAntrian;
   }
 
-  async searchStatusAntrian(keyword: string) {
+  async searchStatusAntrian(keyword: string): Promise<AntrianPasiens[]> {
     const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
       where: {
         nomor_Antrian: {
@@ -63,63 +58,54 @@ export class AntrianPasienService {
       throw new NotFoundException(`Data ${keyword} tidak ditemukan`);
     }
 
-    return {
-      status: 200,
-      message: 'Berhasil mencari data antrian pasien',
-      data: dataStatusAntrian,
-    };
+    return dataStatusAntrian;
   }
 
-  async updateStatusAntrian(request: PasienStatusRequest) {
-    const PasienStatusRequest: PasienStatusRequest =
-      this.validationService.validate(
-        StatusPasienValidation.STATUS,
-        request,
-      ) as PasienStatusRequest;
+  async updateStatusAntrian(
+    id: number,
+    request: PasienStatusRequest,
+  ): Promise<AntrianPasiens> {
+    const validatedRequest = this.validationService.validate(
+      StatusAntrianValidation.STATUS,
+      request,
+    ) as PasienStatusRequest;
 
     const statusAntrian = await this.prismaService.statusAntrians.findUnique({
       where: {
-        status: PasienStatusRequest.status,
+        status: validatedRequest.status,
       },
     });
 
     if (!statusAntrian) {
       throw new NotFoundException(
-        `Tidak ada status antrian ${statusAntrian} dalam daftar`,
+        `Status antrian ${validatedRequest.status} tidak ditemukan`,
       );
     }
 
     const antrianPasien = await this.prismaService.antrianPasiens.findUnique({
-      where: {
-        id: PasienStatusRequest.antrian_id,
-      },
-      include: {
-        status_antrian: true,
-      },
+      where: { id },
+      include: { status_antrian: true },
     });
 
     if (!antrianPasien) {
       throw new NotFoundException(
-        `Tidak ada antrian pasien dengan id ${antrianPasien}`,
+        `Antrian pasien dengan ID ${id} tidak ditemukan`,
       );
     }
 
     const currentStatus = antrianPasien.status_antrian.status as Status;
-    let nextStatus = PasienStatusRequest.status;
+    let nextStatus = validatedRequest.status;
 
     if (nextStatus === Status.CALL && antrianPasien.bintang >= 3) {
       nextStatus = Status.CANCELED;
-
       const newStatusAntrian =
         await this.prismaService.statusAntrians.findUnique({
-          where: {
-            status: nextStatus,
-          },
+          where: { status: nextStatus },
         });
 
       if (!newStatusAntrian) {
         throw new NotFoundException(
-          `Tidak dapat menemukan ${newStatusAntrian}`,
+          `Status antrian ${nextStatus} tidak ditemukan`,
         );
       }
 
@@ -131,39 +117,35 @@ export class AntrianPasienService {
         ? antrianPasien.bintang + 1
         : antrianPasien.bintang;
 
-    const updateData: UpdateDataAntrian = {
-      status_antrian_id: statusAntrian.id,
-      bintang: incrementBintang,
-    };
-
-    if (nextStatus === Status.CALL && antrianPasien.bintang < 3) {
-      updateData.user_id = PasienStatusRequest.user_id;
-    }
-
     if (
       currentStatus === Status.WAITING &&
-      (PasienStatusRequest.status === Status.CANCELED ||
-        PasienStatusRequest.status === Status.COMPLETE)
+      (nextStatus === Status.CANCELED || nextStatus === Status.COMPLETE)
     ) {
       throw new Error(
-        `Tidak bisa mengubah dari waiting ke ${PasienStatusRequest.status} Call terlebih dahulu`,
+        `Tidak dapat mengubah dari WAITING ke ${nextStatus}. Harus CALL terlebih dahulu.`,
       );
     }
 
-    const antrianPasienUpdate = await this.prismaService.antrianPasiens.update({
-      where: {
-        id: PasienStatusRequest.antrian_id,
-      },
-      data: updateData,
-      include: {
-        pasien: true,
-      },
+    const users = await this.prismaService.users.findUnique({
+      where: { id: validatedRequest.user_id },
     });
 
-    return {
-      status: 200,
-      message: 'Berhasil merubah status antrian pasien',
-      data: antrianPasienUpdate,
-    };
+    if (!users) {
+      throw new NotFoundException(`User id ${users} tidak di temukan`);
+    }
+
+    const updatedAntrian = await this.prismaService.antrianPasiens.update({
+      where: { id },
+      data: {
+        status_antrian_id: statusAntrian.id,
+        bintang: incrementBintang,
+        user_id: validatedRequest.user_id,
+      },
+      include: { pasien: true },
+    });
+
+    this.webSocketGateaway.broadcastStatusUpdate(updatedAntrian);
+
+    return updatedAntrian;
   }
 }

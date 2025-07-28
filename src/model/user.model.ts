@@ -1,21 +1,32 @@
+import { UsersGetAll } from './request-payload.model';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 export class UserRegisterRequest {
+  @ApiProperty()
   email: string;
+  @ApiProperty()
   name: string;
+  @ApiProperty()
   password: string;
+  @ApiProperty()
   outlet_id: number;
+  @ApiProperty()
   role_id: number;
 }
 export class UserUpdateRequest {
+  @ApiPropertyOptional()
   email?: string;
+  @ApiPropertyOptional()
   name?: string;
+  @ApiPropertyOptional()
   password?: string;
+  @ApiPropertyOptional()
   outlet_id?: number;
+  @ApiPropertyOptional()
   role_id?: number;
 }
 
 export class UserUpdateResponse {
-  status: number;
-  message: string;
   data: any;
 }
 
@@ -25,28 +36,25 @@ export class UserDeleteResponse {
 }
 
 export class UserResponseRegister {
-  status: number;
-  message: string;
   email: string;
 }
 
-export class UserResposeGetAll {
-  status: number;
-  message: string;
-  data: any[];
+export class UserResponseGetAll {
+  data: UsersGetAll[];
 }
 
 export class UserResponseLogin {
-  status: number;
-  message: string;
   email: string;
+  name: string;
   role_id: number;
   outlet_id: number;
   token?: string | null;
 }
 
 export class LoginRequest {
+  @ApiProperty()
   email: string;
+  @ApiProperty()
   password: string;
 }
 

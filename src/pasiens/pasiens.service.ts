@@ -1,12 +1,14 @@
 import { ValidationService } from '../common/validation.service';
 import { PrismaService } from '../common/prisma.service';
-import { Inject, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { Jenis, PasiensRequest } from '../model/pasiens.model';
 import { PasiensValidation } from './pasiens.validation';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
+import { Pasiens } from '@prisma/client';
 
+@Injectable()
 export class PasiensService {
   constructor(
     private prismaService: PrismaService,
@@ -15,7 +17,7 @@ export class PasiensService {
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
-  async storePasiens(request: PasiensRequest) {
+  async storePasiens(request: PasiensRequest): Promise<Pasiens> {
     const PasiensRequest: PasiensRequest = this.validationService.validate(
       PasiensValidation.JENIS,
       request,

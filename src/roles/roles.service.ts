@@ -1,10 +1,16 @@
 import { Logger } from 'winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RolesRequest, RolesResponse } from 'src/model/roles.model';
 import { RolesValidation } from './roles.validation';
+import { Roles } from '@prisma/client';
 
 @Injectable()
 export class RolesService {
@@ -13,6 +19,12 @@ export class RolesService {
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private prismaService: PrismaService,
   ) {}
+
+  async getAllRole(): Promise<Roles[]> {
+    const dataRole = await this.prismaService.roles.findMany();
+
+    return dataRole;
+  }
 
   async createRoles(request: RolesRequest): Promise<RolesResponse> {
     this.logger.info(`Add new roles ${request.name}`);
@@ -39,19 +51,57 @@ export class RolesService {
     });
 
     return {
-      status: 200,
-      message: 'Berhasil menambahkan data role',
       name: roles.name,
     };
   }
 
-  async getAllRole() {
-    const dataRole = await this.prismaService.roles.findMany();
+  async updateRoles(id: number, request: RolesRequest): Promise<Roles> {
+    const validationRequest: RolesRequest = this.validationService.validate(
+      RolesValidation.STOREROLES,
+      request,
+    ) as RolesRequest;
 
-    return {
-      status: 200,
-      message: 'Berhasil mengambil data role',
-      data: dataRole,
-    };
+    const rolesData = await this.prismaService.roles.findUnique({
+      where: { id },
+    });
+
+    if (!rolesData) {
+      throw new NotFoundException(
+        `Role dengan id ${rolesData} tidak ditemukan`,
+      );
+    }
+
+    const totalRolesWithSameRoles = await this.prismaService.roles.count({
+      where: {
+        name: validationRequest.name,
+      },
+    });
+
+    if (totalRolesWithSameRoles !== 0) {
+      throw new HttpException(`Roles ${request.name} sudah ada`, 400);
+    }
+
+    const updateRole = await this.prismaService.roles.update({
+      where: { id },
+      data: {
+        name: validationRequest.name,
+      },
+    });
+
+    return updateRole;
+  }
+
+  async deleteRoles(id: number) {
+    const dataRoles = await this.prismaService.roles.findUnique({
+      where: { id },
+    });
+
+    if (!dataRoles) {
+      throw new NotFoundException(`Data roles id ${id} tidak ditemukan`);
+    }
+
+    await this.prismaService.roles.delete({
+      where: { id },
+    });
   }
 }

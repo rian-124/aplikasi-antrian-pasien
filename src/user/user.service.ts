@@ -8,10 +8,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
 import { ValidationService } from '../common/validation.service';
 import {
-  LoginRequest,
-  UserDeleteResponse,
   UserRegisterRequest,
-  UserResponseLogin,
   UserResponseRegister,
   UserUpdateRequest,
   UserUpdateResponse,
@@ -19,7 +16,7 @@ import {
 import { Logger } from 'winston';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
+import { Users } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -28,7 +25,6 @@ export class UserService {
     @Inject(WINSTON_MODULE_PROVIDER)
     private logger: Logger,
     private prismaService: PrismaService,
-    private jwtService: JwtService,
   ) {}
 
   async register(request: UserRegisterRequest): Promise<UserResponseRegister> {
@@ -63,73 +59,21 @@ export class UserService {
     });
 
     return {
-      status: 200,
-      message: 'Berhasil mendaftarkan akun',
       email: user.email,
     };
   }
 
-  async login(request: LoginRequest): Promise<UserResponseLogin> {
-    // info request
-    this.logger.info(`Login user: ${request.email}`);
-    // login request validation
-    const loginRequest: LoginRequest = this.validationService.validate(
-      UserValidation.LOGIN,
-      request,
-    ) as LoginRequest;
-    // if user inst valid
-    const user = await this.prismaService.users.findUnique({
-      where: {
-        email: loginRequest.email,
+  async getAllUser(): Promise<Users[]> {
+    const dataUsers = await this.prismaService.users.findMany({
+      include: {
+        outlets: true,
       },
     });
 
-    if (!user) {
-      throw new HttpException('email or password is invalid!', 401);
-    }
-
-    const passwordIsValid = await bcrypt.compare(
-      loginRequest.password,
-      user?.password,
-    );
-
-    if (!passwordIsValid) {
-      throw new HttpException('email or password is invalid!', 401);
-    }
-
-    // generate jwt token
-
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role_id,
-    };
-
-    const token = this.jwtService.sign(payload);
-
-    //login response
-
-    return {
-      status: 200,
-      message: 'Berhasil login',
-      email: user.email,
-      role_id: user.role_id,
-      outlet_id: user.outlet_id,
-      token,
-    };
+    return dataUsers;
   }
 
-  async getAllUser() {
-    const dataAllUser = await this.prismaService.users.findMany();
-
-    return {
-      status: 200,
-      message: 'Berhasil mengambil data users',
-      data: dataAllUser,
-    };
-  }
-
-  async searchUser(keyword: string) {
+  async searchUser(keyword: string): Promise<Users[]> {
     const dataUsers = await this.prismaService.users.findMany({
       where: {
         OR: [
@@ -147,16 +91,15 @@ export class UserService {
           },
         ],
       },
+      include: {
+        outlets: true,
+      },
     });
 
-    return {
-      status: 200,
-      message: 'Berhasil mengambil data users',
-      data: dataUsers,
-    };
+    return dataUsers;
   }
 
-  async getUserByRoleAdmin(request: string) {
+  async getUserByRoleAdmin(request: string): Promise<Users[]> {
     const adminRole = await this.prismaService.roles.findFirst({
       where: {
         name: request,
@@ -171,18 +114,17 @@ export class UserService {
       where: {
         role_id: adminRole.id,
       },
+      include: {
+        outlets: true,
+      },
     });
 
-    return {
-      status: 200,
-      message: 'Berhasil mengambil data user berdasarkan role',
-      data: dataRoleAdmin,
-    };
+    return dataRoleAdmin;
   }
 
   async updateUser(
     id: number,
-    request: Omit<UserUpdateRequest, 'id'>,
+    request: UserUpdateRequest,
   ): Promise<UserUpdateResponse> {
     this.logger.info(`Update user : ${request.email}`);
 
@@ -199,7 +141,7 @@ export class UserService {
     });
 
     if (!existingUser) {
-      throw new NotFoundException(`User ${existingUser} tidak di temukan`);
+      throw new NotFoundException(`User ${existingUser} not found`);
     }
 
     const data: UserUpdateRequest = {};
@@ -226,28 +168,21 @@ export class UserService {
     });
 
     return {
-      status: 200,
-      message: 'Berhasil mengupdate data user',
       data: updateUser,
     };
   }
 
-  async deleteUser(id: number): Promise<UserDeleteResponse> {
+  async deleteUser(id: number) {
     const deleteUserById = await this.prismaService.users.findUnique({
       where: { id },
     });
 
     if (!deleteUserById) {
-      throw new NotFoundException(`User dengan id ${id} tidak ditemukan`);
+      throw new NotFoundException(`User ${id} not found`);
     }
 
     await this.prismaService.users.delete({
       where: { id },
     });
-
-    return {
-      status: 200,
-      message: 'Berhasil menghapus data user',
-    };
   }
 }

@@ -1,10 +1,28 @@
 import { JwtService } from '@nestjs/jwt';
-import { jwtUserPayload } from 'src/model/user.model';
+import { PrismaService } from 'src/common/prisma.service';
+import { ValidationService } from 'src/common/validation.service';
+import {
+  jwtUserPayload,
+  LoginRequest,
+  UserResponseLogin,
+} from 'src/model/user.model';
+import { UserValidation } from 'src/user/user.validation';
+import * as bcrypt from 'bcrypt';
+import { Logger } from 'winston';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
+@Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private jwtService: JwtService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private logger: Logger,
+    private validationService: ValidationService,
+  ) {}
 
-  async login(user: jwtUserPayload) {
+  async generateAccessToken(user: jwtUserPayload) {
     const payload = {
       username: user.username,
       sub: user.id,
@@ -14,5 +32,58 @@ export class AuthService {
     return {
       'access-token': await this.jwtService.signAsync(payload),
     };
+  }
+
+  async loginWithCrendentials(
+    request: LoginRequest,
+  ): Promise<UserResponseLogin> {
+    // info request
+    this.logger.info(`Login user: ${request.email}`);
+    // login request validation
+    const loginRequest: LoginRequest = this.validationService.validate(
+      UserValidation.LOGIN,
+      request,
+    ) as LoginRequest;
+    // if user inst valid
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        email: loginRequest.email,
+      },
+    });
+
+    if (!user) {
+      throw new HttpException('email or password is invalid!', 401);
+    }
+
+    const passwordIsValid = await bcrypt.compare(
+      loginRequest.password,
+      user?.password,
+    );
+
+    if (!passwordIsValid) {
+      throw new HttpException('email or password is invalid!', 401);
+    }
+
+    // generate jwt token
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role_id,
+    };
+
+    const token = this.jwtService.sign(payload);
+
+    //login response
+
+    const response = {
+      name: user.name,
+      email: user.email,
+      role_id: user.role_id,
+      outlet_id: user.outlet_id,
+      token,
+    };
+
+    return response;
   }
 }
