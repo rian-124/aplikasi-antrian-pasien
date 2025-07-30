@@ -42,7 +42,7 @@ model Outlets {
 
 model Roles {
   id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(100)
+  name       String   @unique @db.VarChar(100)
   users      Users[]
   created_At DateTime @default(now()) @db.Timestamptz()
   updated_At DateTime @updatedAt @db.Timestamptz()
