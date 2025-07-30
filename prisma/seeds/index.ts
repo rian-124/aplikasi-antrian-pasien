@@ -7,6 +7,7 @@ import { OutletSeeder } from './outlet.seeder';
 import { SampleSeeder } from './sample.seeder';
 import { PenjaminSeeder } from './penjamin.seeder';
 import { RolesSeeder } from './roles.seeder';
+import { UserSeeder } from './user.seeder';
 
 export class Seeder {
   private prisma: PrismaClient;
@@ -24,6 +25,7 @@ export class Seeder {
     await new SampleSeeder(this.prisma).seed();
     await new PenjaminSeeder(this.prisma).seed();
     await new RolesSeeder(this.prisma).seed();
+    await new UserSeeder(this.prisma).seed();
   }
 
   async close() {
