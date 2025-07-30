@@ -7,6 +7,12 @@ export class PasiensValidation {
   });
 }
 
+export class PasiensValidationUpdate {
+  static readonly PENJAMINSID: ZodType = Z.object({
+    penjamin_id: Z.number(),
+  });
+}
+
 export class StatusPasienValidation {
   static readonly STATUS: ZodType = Z.object({
     antrian_id: Z.number(),

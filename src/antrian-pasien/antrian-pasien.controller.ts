@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { PasienStatusRequest } from '../model/pasiens.model';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseHelper } from 'src/common/response.helper';
 import { AntrianPasiens } from '@prisma/client';
+import { AuthenticatedRequest } from 'src/model/user.model';
 
 @Controller('/api/antrian-pasien')
 @ApiTags('Antrian Pasien')
@@ -67,10 +69,12 @@ export class AntrianPasienController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() request: PasienStatusRequest,
+    @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<AntrianPasiens>> {
     const result = await this.antrianPasienService.updateStatusAntrian(
       id,
       request,
+      req,
     );
     return ResponseHelper.ok('Successfully updated id antrian pasiens', result);
   }

@@ -54,10 +54,12 @@ model Pasiens {
   id                   Int               @id @default(autoincrement())
   nomor_registrasi     String            @db.VarChar(100)
   jenis_registrasi_id  Int               @db.Integer
+  penjamin_id          Int?              @db.Integer
   status_registrasi_id Int               @db.Integer
   sample_id            Int               @db.Integer
   samples              Samples           @relation(fields: [sample_id], references: [id])
   jenis_registrasis    JenisRegistrasis  @relation(fields: [jenis_registrasi_id], references: [id])
+  penjamin             Penjamins?         @relation(fields: [penjamin_id], references: [id])
   status_registrasis   StatusRegistrasis @relation(fields: [status_registrasi_id], references: [id])
   created_At           DateTime          @default(now()) @db.Timestamptz()
   updated_At           DateTime          @updatedAt @db.Timestamptz()
@@ -67,13 +69,25 @@ model Pasiens {
 }
 
 model JenisRegistrasis {
-  id         Int       @id @default(autoincrement())
-  jenis      String    @unique @db.VarChar(100)
+  id         Int        @id @default(autoincrement())
+  jenis      String     @unique @db.VarChar(100)
   pasien     Pasiens[]
-  created_At DateTime  @default(now()) @db.Timestamptz()
-  update_At  DateTime  @updatedAt @db.Timestamptz()
+  penjamin   Penjamins[]
+  created_At DateTime   @default(now()) @db.Timestamptz()
+  update_At  DateTime   @updatedAt @db.Timestamptz()
 
   @@map("jenis_registrasis")
+}
+
+model Penjamins {
+  id                  Int              @id @default(autoincrement())
+  nama                String           @unique @db.VarChar(100)
+  jenis_registrasi_id Int              @db.Integer()
+  jenis_registrasi    JenisRegistrasis @relation(fields: [jenis_registrasi_id], references: [id])
+  pasiens             Pasiens[]
+  created_At          DateTime         @default(now()) @db.Timestamptz()
+  update_At           DateTime         @updatedAt @db.Timestamptz()
+  @@map("penjamins")
 }
 
 model AntrianPasiens {
@@ -85,7 +99,7 @@ model AntrianPasiens {
   status_antrian_id Int            @db.Integer
   outlet_id         Int            @db.Integer
   bintang           Int            @default(0) @db.Integer()
-  users             Users?          @relation(fields: [user_id], references: [id])
+  users             Users?         @relation(fields: [user_id], references: [id])
   outlets           Outlets        @relation(fields: [outlet_id], references: [id])
   pasien            Pasiens        @relation(fields: [pasien_id], references: [id])
   status_antrian    StatusAntrians @relation(fields: [status_antrian_id], references: [id])

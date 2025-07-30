@@ -1,22 +1,136 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-      const socket = io('http://192.168.51.236:3000');
+<head>
+  <meta charset="UTF-8">
+  <title>Daftar Users</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f3f3f3;
+    }
+  </style>
+</head>
+<body>
 
-      socket.on('connect', () => {
-        console.log('Terhubung ke server WebSocket:', socket.id);
-      });
+  <h1>Daftar Antrian pasiens</h1>
 
-      socket.on('Antrian-pasien update', (data) => {
-        console.log('Status antrian diperbarui:', data);
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nama</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody id="user-table-body">
+    </tbody>
+  </table>
+
+  <h1>Daftar Users</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nama</th>
+        <th>Email</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody id="user-table-body">
+    </tbody>
+  </table>
+
+  <script>
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMzLCJlbWFpbCI6ImVudG9nQGdtYWlsLmNvbSIsInJvbGUiOjEsImlhdCI6MTc1MzY3ODE2MywiZXhwIjoxNzUzNjgxNzYzfQ.oYHJgm6NzwH_9J0Y5q8D_si97iAkUzyMhXLDpYIPVbw';
+
+    async function loadUsers() {
+      try {
+        const res = await fetch('http://localhost:3000/api/users', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const body = await res.json();
+        renderUsers(body.data);
+      } catch (err) {
+        console.error('Gagal load users:', err.message);
+        if (err.message.includes('401')) {
+          alert('Sesi kadaluwarsa. Silakan login kembali.');
+          window.location.href = '/login.html';
+        }
+      }
+    }
+
+    const tbody = document.getElementById('user-table-body');
+    function renderUsers(users) {
+      tbody.innerHTML = '';
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.dataset.id = u.id;
+        tr.innerHTML = `
+          <td>${u.id}</td>
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td class="role">${u.role}</td>
+        `;
+        tbody.appendChild(tr);
       });
-    </script>
-  </body>
+    }
+
+
+    loadUsers();
+
+    const socket = io('http://localhost:3000', {
+      auth: { token }
+    });
+
+    socket.on('connect', () => {
+      console.log('Terhubung ke WebSocket');
+      socket.emit('join_room', { role: 'ADMIN' });
+    });
+
+    socket.on('connect_error', err => {
+      console.error('Gagal konek WebSocket:', err.message);
+    });
+
+    socket.on('users_update', user => {
+      console.log('User update diterima:', user);
+      updateUserRow(user);
+    });
+
+    function updateUserRow(u) {
+      const row = document.querySelector(`tr[data-id="${u.id}"]`);
+      if (row) {
+        row.querySelector('td:nth-child(2)').textContent = u.name;
+        row.querySelector('td:nth-child(3)').textContent = u.email;
+        row.querySelector('.role').textContent = u.role;
+      } else {
+        const tr = document.createElement('tr');
+        tr.dataset.id = u.id;
+        tr.innerHTML = `
+          <td>${u.id}</td>
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td class="role">${u.role}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+  </script>
+</body>
 </html>

@@ -11,12 +11,14 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { RolesRequest, RolesResponse } from 'src/model/roles.model';
 import { RolesValidation } from './roles.validation';
 import { Roles } from '@prisma/client';
+import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 
 @Injectable()
 export class RolesService {
   constructor(
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
+    private wsGateaway: WebSocketGateaway,
     private prismaService: PrismaService,
   ) {}
 
@@ -49,6 +51,8 @@ export class RolesService {
         name: RolesRequest.name,
       },
     });
+
+    this.wsGateaway.broadcastToAdmin(roles);
 
     return {
       name: roles.name,
@@ -88,6 +92,8 @@ export class RolesService {
       },
     });
 
+    this.wsGateaway.broadcastToAdmin(updateRole);
+
     return updateRole;
   }
 
@@ -99,6 +105,8 @@ export class RolesService {
     if (!dataRoles) {
       throw new NotFoundException(`Data roles id ${id} tidak ditemukan`);
     }
+
+    this.wsGateaway.broadcastToAdmin(dataRoles);
 
     await this.prismaService.roles.delete({
       where: { id },

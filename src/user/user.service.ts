@@ -17,6 +17,7 @@ import { Logger } from 'winston';
 import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { Users } from '@prisma/client';
+import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,7 @@ export class UserService {
     private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private logger: Logger,
+    private wsGateaway: WebSocketGateaway,
     private prismaService: PrismaService,
   ) {}
 
@@ -57,6 +59,8 @@ export class UserService {
         role_id: registerRequest.role_id,
       },
     });
+
+    this.wsGateaway.broadcastToAdmin(user);
 
     return {
       email: user.email,
@@ -167,6 +171,8 @@ export class UserService {
       data,
     });
 
+    this.wsGateaway.broadcastToAdmin(updateUser);
+
     return {
       data: updateUser,
     };
@@ -180,6 +186,8 @@ export class UserService {
     if (!deleteUserById) {
       throw new NotFoundException(`User ${id} not found`);
     }
+
+    this.wsGateaway.broadcastToAdmin(deleteUserById);
 
     await this.prismaService.users.delete({
       where: { id },

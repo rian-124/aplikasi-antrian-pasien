@@ -5,6 +5,7 @@ import { StatusAntrian } from './status-antrian.seeder';
 import { TahapAntrian } from './tahap-antrians.seeder';
 import { OutletSeeder } from './outlet.seeder';
 import { SampleSeeder } from './sample.seeder';
+import { PenjaminSeeder } from './penjamin.seeder';
 
 export class Seeder {
   private prisma: PrismaClient;
@@ -20,6 +21,7 @@ export class Seeder {
     await new TahapAntrian(this.prisma).seed();
     await new OutletSeeder(this.prisma).seed();
     await new SampleSeeder(this.prisma).seed();
+    await new PenjaminSeeder(this.prisma).seed();
   }
 
   async close() {

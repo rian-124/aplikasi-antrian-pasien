@@ -4,6 +4,5 @@ import { ZodType } from 'zod';
 export class StatusAntrianValidation {
   static readonly STATUS: ZodType = Z.object({
     status: Z.enum(['WAITING', 'CALL', 'COMPLETE', 'CANCELED']),
-    user_id: Z.coerce.number(),
   });
 }

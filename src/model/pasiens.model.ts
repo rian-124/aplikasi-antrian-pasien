@@ -12,6 +12,11 @@ export class PasiensRequest {
   jenis: Jenis.JAMINAN | Jenis.UMUM;
 }
 
+export class PasiensRequestUpdate {
+  @ApiProperty()
+  penjamin_id: number;
+}
+
 export enum Status {
   WAITING = 'WAITING',
   CALL = 'CALL',
@@ -30,8 +35,6 @@ export class UpdateDataAntrian {
 export class PasienStatusRequest {
   @ApiProperty()
   status: Status;
-  @ApiProperty()
-  user_id?: number;
 }
 
 export class AntrianStatusMessage {

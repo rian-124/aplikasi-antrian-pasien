@@ -4,12 +4,14 @@ import { OutletsRequest } from '../model/outlets.model';
 import { ValidationService } from 'src/common/validation.service';
 import { OutletsValidation } from './outlet.validation';
 import { Outlets } from '@prisma/client';
+import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 
 @Injectable()
 export class OutletService {
   constructor(
     private prismaService: PrismaService,
     private validationService: ValidationService,
+    private wsGateaway: WebSocketGateaway,
   ) {}
 
   async getAllOutlets(): Promise<Outlets[]> {
@@ -35,11 +37,15 @@ export class OutletService {
       throw new HttpException(`Data outlets sudah ada`, 400);
     }
 
-    await this.prismaService.outlets.create({
+    const addOutlets = await this.prismaService.outlets.create({
       data: {
         nama_outlet: validationRequest.nama_outlet,
       },
     });
+
+    this.wsGateaway.broadcastToAdmin(addOutlets);
+
+    return addOutlets;
   }
 
   async updateOutlets(id: number, request: OutletsRequest) {
@@ -71,12 +77,16 @@ export class OutletService {
       );
     }
 
-    await this.prismaService.outlets.update({
+    const updateOutlets = await this.prismaService.outlets.update({
       where: { id },
       data: {
         nama_outlet: validationRequest.nama_outlet,
       },
     });
+
+    this.wsGateaway.broadcastToAdminUsers(updateOutlets);
+
+    return updateOutlets;
   }
 
   async deleteOutlets(id: number) {
@@ -88,8 +98,12 @@ export class OutletService {
       throw new NotFoundException(`Tidak dapat menemukan id ${id} roles`);
     }
 
-    await this.prismaService.outlets.delete({
+    const deleteOutlets = await this.prismaService.outlets.delete({
       where: { id },
     });
+
+    this.wsGateaway.broadcastToAdminUsers(deleteOutlets);
+
+    return deleteOutlets;
   }
 }

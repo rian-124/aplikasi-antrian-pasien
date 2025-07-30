@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { AntrianPasienModule } from './antrian-pasien/antrian.pasien.module';
 import { PasiensModule } from './pasiens/pasiens.module';
 import { OutletsModule } from './outlet/outlet.module';
+import { PenjaminsModule } from './penjamins/penjamins.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { OutletsModule } from './outlet/outlet.module';
     PasiensModule,
     AntrianPasienModule,
     OutletsModule,
+    PenjaminsModule,
   ],
 })
 export class AppModule {}

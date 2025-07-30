@@ -1,10 +1,22 @@
 import { ValidationService } from '../common/validation.service';
 import { PrismaService } from '../common/prisma.service';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { Jenis, PasiensRequest } from '../model/pasiens.model';
-import { PasiensValidation } from './pasiens.validation';
+import {
+  Jenis,
+  PasiensRequest,
+  PasiensRequestUpdate,
+} from '../model/pasiens.model';
+import {
+  PasiensValidation,
+  PasiensValidationUpdate,
+} from './pasiens.validation';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 import { Pasiens } from '@prisma/client';
 
@@ -13,7 +25,7 @@ export class PasiensService {
   constructor(
     private prismaService: PrismaService,
     private validationService: ValidationService,
-    private websocketGateAway: WebSocketGateaway,
+    private wsGateAway: WebSocketGateaway,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
@@ -104,7 +116,61 @@ export class PasiensService {
       },
     });
 
-    this.websocketGateAway.broadcastStatusUpdate(pasien);
+    this.wsGateAway.broadcastToAdminUsers(pasien);
     return pasien;
+  }
+
+  async updatePasiensPenjamins(
+    id: number,
+    request: PasiensRequestUpdate,
+  ): Promise<Pasiens> {
+    const validatedRequest: PasiensRequestUpdate =
+      (await this.validationService.validate(
+        PasiensValidationUpdate.PENJAMINSID,
+        request,
+      )) as PasiensRequestUpdate;
+
+    const pasiens = await this.prismaService.pasiens.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        jenis_registrasis: true,
+      },
+    });
+
+    if (!pasiens) {
+      throw new NotFoundException(`pasiens id ${id} not found`);
+    }
+
+    const penjamins = await this.prismaService.penjamins.findUnique({
+      where: {
+        id: validatedRequest.penjamin_id,
+      },
+      include: {
+        jenis_registrasi: true,
+      },
+    });
+
+    if (!penjamins) {
+      throw new NotFoundException(`Penjamins id not found`);
+    }
+
+    if (penjamins.jenis_registrasi_id !== pasiens.jenis_registrasi_id) {
+      throw new BadRequestException(
+        `Jenis registrasi dari penjamin (${penjamins.jenis_registrasi.jenis}) tidak sesuai dengan jenis registrasi pasien (${pasiens.jenis_registrasis.jenis})`,
+      );
+    }
+
+    const updatePasiens = this.prismaService.pasiens.update({
+      where: {
+        id: id,
+      },
+      data: {
+        penjamin_id: validatedRequest.penjamin_id,
+      },
+    });
+
+    return updatePasiens;
   }
 }

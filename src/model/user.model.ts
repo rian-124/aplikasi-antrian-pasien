@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { UsersGetAll } from './request-payload.model';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -69,3 +70,4 @@ export class JwtUserResponsePayload {
   username: string;
   role: number;
 }
+export type AuthenticatedRequest = Request & { user: JwtUserResponsePayload };

@@ -10,6 +10,13 @@ export type PasienWithNomor = Prisma.PasiensGetPayload<{
   };
 }>;
 
+export interface JwtPayload {
+  email: string;
+  name: string;
+  role_id: number;
+  outlet_id: number;
+}
+
 export type AntrianPasien = Prisma.AntrianPasiensGetPayload<{
   include: {
     pasien;

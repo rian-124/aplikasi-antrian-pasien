@@ -5,13 +5,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { StatusAntrianValidation } from './antrian-pasien.validation';
 import { WebSocketGateaway } from '../common/websocket.gateaway';
 import { AntrianPasiens } from '@prisma/client';
+import { AuthenticatedRequest } from 'src/model/user.model';
 
 @Injectable()
 export class AntrianPasienService {
   constructor(
     private prismaService: PrismaService,
     private validationService: ValidationService,
-    private webSocketGateaway: WebSocketGateaway,
+    private wsGateaway: WebSocketGateaway,
   ) {}
 
   async getAllStatusAntrian(): Promise<AntrianPasiens[]> {
@@ -23,6 +24,7 @@ export class AntrianPasienService {
         tahap_antrian: true,
         status_antrian: true,
         pasien: true,
+        users: true,
       },
     });
 
@@ -51,6 +53,7 @@ export class AntrianPasienService {
         tahap_antrian: true,
         status_antrian: true,
         pasien: true,
+        users: true,
       },
     });
 
@@ -58,12 +61,15 @@ export class AntrianPasienService {
       throw new NotFoundException(`Data ${keyword} tidak ditemukan`);
     }
 
+    this.wsGateaway.broadcastToAdminUsers(dataStatusAntrian);
+
     return dataStatusAntrian;
   }
 
   async updateStatusAntrian(
     id: number,
     request: PasienStatusRequest,
+    req: AuthenticatedRequest,
   ): Promise<AntrianPasiens> {
     const validatedRequest = this.validationService.validate(
       StatusAntrianValidation.STATUS,
@@ -127,7 +133,7 @@ export class AntrianPasienService {
     }
 
     const users = await this.prismaService.users.findUnique({
-      where: { id: validatedRequest.user_id },
+      where: { id: req.user.sub },
     });
 
     if (!users) {
@@ -139,12 +145,15 @@ export class AntrianPasienService {
       data: {
         status_antrian_id: statusAntrian.id,
         bintang: incrementBintang,
-        user_id: validatedRequest.user_id,
+        user_id: req.user.sub,
       },
-      include: { pasien: true },
+      include: {
+        pasien: true,
+        users: true,
+      },
     });
 
-    this.webSocketGateaway.broadcastStatusUpdate(updatedAntrian);
+    this.wsGateaway.broadcastToAdminUsers(updatedAntrian);
 
     return updatedAntrian;
   }
