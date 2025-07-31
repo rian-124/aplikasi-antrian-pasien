@@ -8,6 +8,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from './error.filter';
 import { WebSocketGateaway } from './websocket.gateaway';
 import { ResponseHelper } from './response.helper';
+import { PermissionsGuard } from './guards/permissions.guard';
 
 @Global()
 @Module({
@@ -23,6 +24,7 @@ import { ResponseHelper } from './response.helper';
   providers: [
     PrismaService,
     ValidationService,
+    PermissionsGuard,
     {
       provide: APP_FILTER,
       useClass: ErrorFilter,
@@ -35,6 +37,7 @@ import { ResponseHelper } from './response.helper';
     ValidationService,
     WebSocketGateaway,
     ResponseHelper,
+    PermissionsGuard,
   ],
 })
 export class CommonModule {}

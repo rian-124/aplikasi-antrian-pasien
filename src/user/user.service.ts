@@ -59,6 +59,7 @@ export class UserService {
     const dataUsers = await this.prismaService.users.findMany({
       include: {
         outlets: true,
+        roles: true,
       },
     });
 

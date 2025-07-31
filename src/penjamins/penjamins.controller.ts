@@ -7,19 +7,24 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { Penjamins } from '@prisma/client';
-import { PenjaminsRequest } from 'src/model/penjamins.model';
 import { WebResponse } from 'src/model/web.model';
 import { PenjaminsService } from './penjamins.service';
 import { ResponseHelper } from 'src/common/response.helper';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiOperation } from '@nestjs/swagger';
+import { UpdatePenjaminsDto } from './dtos/update-penjamins.dto';
+import { CreatePenjaminsDto } from './dtos/create-penjamins.dto';
+import { Permissions } from 'src/common/decorators/permission.decorator';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 @Controller('/api/penjamins')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@Permissions('view:ADMINUSERS')
 export class PenjaminsController {
   constructor(private penjaminsService: PenjaminsService) {}
 
@@ -59,15 +64,31 @@ export class PenjaminsController {
   @ApiOperation({
     summary: 'Create new penjamins',
     description:
-      'Menambahkan data penjamins baru ke dalam database. Data dikirim melalui body request dengan format sesuai model `PenjaminsRequest`.',
+      'Menambahkan data penjamins baru ke dalam database. Data dikirim melalui body request dengan format sesuai model `PenjaminsCreateDto`.',
   })
   async storePenjamins(
     @Body()
-    request: PenjaminsRequest,
+    request: CreatePenjaminsDto,
   ): Promise<WebResponse<Penjamins>> {
     const result = await this.penjaminsService.createPenjamins(request);
 
     return ResponseHelper.ok('Successfully added new penjamins', result);
+  }
+
+  @Put(':id')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Update penjamins',
+    description:
+      'Merubah data penjamins yang ada di dalam database. Data dikirim melalui body request dengn format sesuai Dto `PenjaminsUpdateDto`.',
+  })
+  async updatePenjamins(
+    @Param('id') id: number,
+    @Body() request: UpdatePenjaminsDto,
+  ): Promise<WebResponse<Penjamins>> {
+    const result = await this.penjaminsService.updatePenjamins(id, request);
+
+    return ResponseHelper.ok('Successfully update data penjamins', result);
   }
 
   @Delete(':id')

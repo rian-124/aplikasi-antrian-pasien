@@ -10,7 +10,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { PasienStatusRequest } from '../model/pasiens.model';
 import { WebResponse } from '../model/web.model';
 import { AntrianPasienService } from './antrian-pasien.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -18,11 +17,15 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseHelper } from 'src/common/response.helper';
 import { AntrianPasiens } from '@prisma/client';
 import { AuthenticatedRequest } from 'src/model/user.model';
+import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permission.decorator';
 
 @Controller('/api/antrian-pasien')
 @ApiTags('Antrian Pasien')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@Permissions('view:ADMINUSERS')
 export class AntrianPasienController {
   constructor(private antrianPasienService: AntrianPasienService) {}
 
@@ -68,7 +71,7 @@ export class AntrianPasienController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: PasienStatusRequest,
+    @Body() request: UpdateStatusAntrianDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<AntrianPasiens>> {
     const result = await this.antrianPasienService.updateStatusAntrian(

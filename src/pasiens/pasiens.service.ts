@@ -1,4 +1,3 @@
-import { ValidationService } from '../common/validation.service';
 import { PrismaService } from '../common/prisma.service';
 import {
   BadRequestException,
@@ -8,36 +7,28 @@ import {
 } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import {
-  Jenis,
-  PasiensRequest,
-  PasiensRequestUpdate,
-} from '../model/pasiens.model';
-import {
-  PasiensValidation,
-  PasiensValidationUpdate,
-} from './pasiens.validation';
+import { Jenis } from '../model/pasiens.model';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 import { Pasiens } from '@prisma/client';
+import { UpdatePasiensDto } from './dtos/update-pasiens.dto';
+import { CreatePasiensDto } from './dtos/create-pasiens.dto';
+import { AuthenticatedRequest } from 'src/model/user.model';
 
 @Injectable()
 export class PasiensService {
   constructor(
     private prismaService: PrismaService,
-    private validationService: ValidationService,
     private wsGateAway: WebSocketGateaway,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
-  async storePasiens(request: PasiensRequest): Promise<Pasiens> {
-    const PasiensRequest: PasiensRequest = this.validationService.validate(
-      PasiensValidation.JENIS,
-      request,
-    ) as PasiensRequest;
-
+  async storePasiens(
+    request: CreatePasiensDto,
+    req: AuthenticatedRequest,
+  ): Promise<Pasiens> {
     const jenis = await this.prismaService.jenisRegistrasis.findUnique({
       where: {
-        jenis: PasiensRequest.jenis,
+        jenis: request.jenis,
       },
     });
 
@@ -59,7 +50,7 @@ export class PasiensService {
 
     const outlet = await this.prismaService.outlets.findUnique({
       where: {
-        id: PasiensRequest.outlet_id,
+        nama_outlet: req.user.outlet,
       },
     });
 
@@ -122,14 +113,8 @@ export class PasiensService {
 
   async updatePasiensPenjamins(
     id: number,
-    request: PasiensRequestUpdate,
+    request: UpdatePasiensDto,
   ): Promise<Pasiens> {
-    const validatedRequest: PasiensRequestUpdate =
-      (await this.validationService.validate(
-        PasiensValidationUpdate.PENJAMINSID,
-        request,
-      )) as PasiensRequestUpdate;
-
     const pasiens = await this.prismaService.pasiens.findUnique({
       where: {
         id,
@@ -145,7 +130,7 @@ export class PasiensService {
 
     const penjamins = await this.prismaService.penjamins.findUnique({
       where: {
-        id: validatedRequest.penjamin_id,
+        id: request.penjamin_id,
       },
       include: {
         jenis_registrasi: true,
@@ -167,7 +152,7 @@ export class PasiensService {
         id: id,
       },
       data: {
-        penjamin_id: validatedRequest.penjamin_id,
+        penjamin_id: request.penjamin_id,
       },
     });
 

@@ -1,16 +1,11 @@
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/common/prisma.service';
-import { ValidationService } from 'src/common/validation.service';
-import {
-  jwtUserPayload,
-  LoginRequest,
-  UserResponseLogin,
-} from 'src/model/user.model';
-import { UserValidation } from 'src/user/user.validation';
+import { UserResponseLogin } from 'src/model/user.model';
 import * as bcrypt from 'bcrypt';
 import { Logger } from 'winston';
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { LoginUserDto } from './dtos/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,35 +14,34 @@ export class AuthService {
     private jwtService: JwtService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private logger: Logger,
-    private validationService: ValidationService,
   ) {}
 
-  async generateAccessToken(user: jwtUserPayload) {
-    const payload = {
-      username: user.username,
-      sub: user.id,
-      role: user.role_id,
-    };
+  // async generateAccessToken(user: jwtUserPayload) {
+  //   const payload = {
+  //     email: user.email,
+  //     sub: user.id,
+  //     role: user.role,
+  //   };
 
-    return {
-      'access-token': await this.jwtService.signAsync(payload),
-    };
-  }
+  //   return {
+  //     'access-token': await this.jwtService.signAsync(payload),
+  //   };
+  // }
 
   async loginWithCrendentials(
-    request: LoginRequest,
+    request: LoginUserDto,
   ): Promise<UserResponseLogin> {
     // info request
     this.logger.info(`Login user: ${request.email}`);
-    // login request validation
-    const loginRequest: LoginRequest = this.validationService.validate(
-      UserValidation.LOGIN,
-      request,
-    ) as LoginRequest;
+
     // if user inst valid
     const user = await this.prismaService.users.findUnique({
       where: {
-        email: loginRequest.email,
+        email: request.email,
+      },
+      include: {
+        roles: true,
+        outlets: true,
       },
     });
 
@@ -56,7 +50,7 @@ export class AuthService {
     }
 
     const passwordIsValid = await bcrypt.compare(
-      loginRequest.password,
+      request.password,
       user?.password,
     );
 
@@ -69,8 +63,9 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      role_id: user.role_id,
-      outlet_id: user.outlet_id,
+      role: user.roles.name,
+      outlet: user.outlets.nama_outlet,
+      permission: [`view:${user.roles.name}`],
     };
 
     const token = this.jwtService.sign(payload);

@@ -4,6 +4,8 @@ import { ValidationService } from 'src/common/validation.service';
 import { PenjaminsRequest } from 'src/model/penjamins.model';
 import { ValidationRequestPenjamin } from './penjamins.validation';
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreatePenjaminsDto } from './dtos/create-penjamins.dto';
+import { UpdatePenjaminsDto } from './dtos/update-penjamins.dto';
 
 @Injectable()
 export class PenjaminsService {
@@ -40,7 +42,34 @@ export class PenjaminsService {
     return getPenjaminsByJenisRegistrasis;
   }
 
-  async createPenjamins(request: PenjaminsRequest): Promise<Penjamins> {
+  async updatePenjamins(
+    id: number,
+    request: UpdatePenjaminsDto,
+  ): Promise<Penjamins> {
+    const jenisRegistrasi =
+      await this.prismaService.jenisRegistrasis.findUnique({
+        where: {
+          id: request.jenis_registrasi_id,
+        },
+      });
+
+    if (!jenisRegistrasi) {
+      throw new NotFoundException(`Jenis registrasi not found`);
+    }
+
+    const penjamins = this.prismaService.penjamins.update({
+      where: {
+        id,
+      },
+      data: {
+        nama: request.nama,
+      },
+    });
+
+    return penjamins;
+  }
+
+  async createPenjamins(request: CreatePenjaminsDto): Promise<Penjamins> {
     const validationRequest: PenjaminsRequest =
       (await this.validationService.validate(
         ValidationRequestPenjamin.PENJAMINS,

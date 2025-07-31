@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { OutletService } from './outlet.service';
 import { WebResponse } from 'src/model/web.model';
-import { OutletsRequest, OutletsResponse } from 'src/model/outlets.model';
+import { OutletsResponse } from 'src/model/outlets.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import {
   ApiBearerAuth,
@@ -22,11 +22,16 @@ import {
 } from '@nestjs/swagger';
 import { Outlets } from '@prisma/client';
 import { ResponseHelper } from 'src/common/response.helper';
+import { CreateOutletsDto } from './dtos/create-outlets.dto';
+import { UpdateOutletsDto } from './dtos/update-outlets.dto';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permission.decorator';
 
 @Controller('/api/outlet')
 @ApiTags('Outlet')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@Permissions('view:ADMIN')
 export class OutletController {
   constructor(private outletService: OutletService) {}
 
@@ -51,7 +56,7 @@ export class OutletController {
   })
   @ApiResponse({ status: 200, description: 'Berhasil menambahkan outlet.' })
   async storeOutlets(
-    @Body() request: OutletsRequest,
+    @Body() request: CreateOutletsDto,
   ): Promise<WebResponse<OutletsResponse>> {
     await this.outletService.storeOutlets(request);
 
@@ -67,7 +72,7 @@ export class OutletController {
   @ApiResponse({ status: 200, description: 'Berhasil memperbarui outlet.' })
   async updateOutlets(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: OutletsRequest,
+    @Body() request: UpdateOutletsDto,
   ): Promise<WebResponse<OutletsResponse>> {
     await this.outletService.updateOutlets(id, request);
 

@@ -1,16 +1,14 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
-import { OutletsRequest } from '../model/outlets.model';
-import { ValidationService } from 'src/common/validation.service';
-import { OutletsValidation } from './outlet.validation';
 import { Outlets } from '@prisma/client';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
+import { CreateOutletsDto } from './dtos/create-outlets.dto';
+import { UpdateOutletsDto } from './dtos/update-outlets.dto';
 
 @Injectable()
 export class OutletService {
   constructor(
     private prismaService: PrismaService,
-    private validationService: ValidationService,
     private wsGateaway: WebSocketGateaway,
   ) {}
 
@@ -20,16 +18,10 @@ export class OutletService {
     return dataAllOutlets;
   }
 
-  async storeOutlets(request: OutletsRequest) {
-    const validationRequest: OutletsRequest =
-      (await this.validationService.validate(
-        OutletsValidation.OUTLETS,
-        request,
-      )) as OutletsRequest;
-
+  async storeOutlets(request: CreateOutletsDto) {
     const dataOutletsWithSameName = await this.prismaService.outlets.count({
       where: {
-        nama_outlet: validationRequest.nama_outlet,
+        nama_outlet: request.nama_outlet,
       },
     });
 
@@ -39,7 +31,7 @@ export class OutletService {
 
     const addOutlets = await this.prismaService.outlets.create({
       data: {
-        nama_outlet: validationRequest.nama_outlet,
+        nama_outlet: request.nama_outlet,
       },
     });
 
@@ -48,12 +40,7 @@ export class OutletService {
     return addOutlets;
   }
 
-  async updateOutlets(id: number, request: OutletsRequest) {
-    const validationRequest: OutletsRequest = this.validationService.validate(
-      OutletsValidation.OUTLETS,
-      request,
-    ) as OutletsRequest;
-
+  async updateOutlets(id: number, request: UpdateOutletsDto) {
     const dataOutlets = await this.prismaService.outlets.findUnique({
       where: { id },
     });
@@ -66,7 +53,7 @@ export class OutletService {
 
     const dataOutletsWithSameName = await this.prismaService.outlets.count({
       where: {
-        nama_outlet: validationRequest.nama_outlet,
+        nama_outlet: request.nama_outlet,
       },
     });
 
@@ -80,7 +67,7 @@ export class OutletService {
     const updateOutlets = await this.prismaService.outlets.update({
       where: { id },
       data: {
-        nama_outlet: validationRequest.nama_outlet,
+        nama_outlet: request.nama_outlet,
       },
     });
 

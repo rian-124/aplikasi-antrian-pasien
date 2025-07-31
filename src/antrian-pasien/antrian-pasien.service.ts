@@ -1,17 +1,15 @@
-import { ValidationService } from '../common/validation.service';
 import { PrismaService } from '../common/prisma.service';
-import { PasienStatusRequest, Status } from '../model/pasiens.model';
+import { Status } from '../model/pasiens.model';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { StatusAntrianValidation } from './antrian-pasien.validation';
 import { WebSocketGateaway } from '../common/websocket.gateaway';
 import { AntrianPasiens } from '@prisma/client';
 import { AuthenticatedRequest } from 'src/model/user.model';
+import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
 
 @Injectable()
 export class AntrianPasienService {
   constructor(
     private prismaService: PrismaService,
-    private validationService: ValidationService,
     private wsGateaway: WebSocketGateaway,
   ) {}
 
@@ -68,23 +66,18 @@ export class AntrianPasienService {
 
   async updateStatusAntrian(
     id: number,
-    request: PasienStatusRequest,
+    request: UpdateStatusAntrianDto,
     req: AuthenticatedRequest,
   ): Promise<AntrianPasiens> {
-    const validatedRequest = this.validationService.validate(
-      StatusAntrianValidation.STATUS,
-      request,
-    ) as PasienStatusRequest;
-
     const statusAntrian = await this.prismaService.statusAntrians.findUnique({
       where: {
-        status: validatedRequest.status,
+        status: request.status,
       },
     });
 
     if (!statusAntrian) {
       throw new NotFoundException(
-        `Status antrian ${validatedRequest.status} tidak ditemukan`,
+        `Status antrian ${request.status} tidak ditemukan`,
       );
     }
 
@@ -100,7 +93,7 @@ export class AntrianPasienService {
     }
 
     const currentStatus = antrianPasien.status_antrian.status as Status;
-    let nextStatus = validatedRequest.status;
+    let nextStatus = request.status;
 
     if (nextStatus === Status.CALL && antrianPasien.bintang >= 3) {
       nextStatus = Status.CANCELED;

@@ -1,6 +1,5 @@
 import { Logger } from 'winston';
 import { PrismaService } from '../common/prisma.service';
-import { ValidationService } from '../common/validation.service';
 import {
   HttpException,
   Inject,
@@ -8,15 +7,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { RolesRequest, RolesResponse } from 'src/model/roles.model';
-import { RolesValidation } from './roles.validation';
+import { RolesResponse } from 'src/model/roles.model';
 import { Roles } from '@prisma/client';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
+import { CreateRolesDto } from './dtos/create-roles.dto';
+import { UpdateRolesDto } from './dtos/update-roles.dto';
 
 @Injectable()
 export class RolesService {
   constructor(
-    private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
     private wsGateaway: WebSocketGateaway,
     private prismaService: PrismaService,
@@ -28,17 +27,12 @@ export class RolesService {
     return dataRole;
   }
 
-  async createRoles(request: RolesRequest): Promise<RolesResponse> {
+  async createRoles(request: CreateRolesDto): Promise<RolesResponse> {
     this.logger.info(`Add new roles ${request.name}`);
-
-    const RolesRequest: RolesRequest = this.validationService.validate(
-      RolesValidation.STOREROLES,
-      request,
-    ) as RolesRequest;
 
     const totalRolesWithSameRoles = await this.prismaService.roles.count({
       where: {
-        name: RolesRequest.name,
+        name: request.name,
       },
     });
 
@@ -48,7 +42,7 @@ export class RolesService {
 
     const roles = await this.prismaService.roles.create({
       data: {
-        name: RolesRequest.name,
+        name: request.name,
       },
     });
 
@@ -59,12 +53,7 @@ export class RolesService {
     };
   }
 
-  async updateRoles(id: number, request: RolesRequest): Promise<Roles> {
-    const validationRequest: RolesRequest = this.validationService.validate(
-      RolesValidation.STOREROLES,
-      request,
-    ) as RolesRequest;
-
+  async updateRoles(id: number, request: UpdateRolesDto): Promise<Roles> {
     const rolesData = await this.prismaService.roles.findUnique({
       where: { id },
     });
@@ -77,7 +66,7 @@ export class RolesService {
 
     const totalRolesWithSameRoles = await this.prismaService.roles.count({
       where: {
-        name: validationRequest.name,
+        name: request.name,
       },
     });
 
@@ -88,7 +77,7 @@ export class RolesService {
     const updateRole = await this.prismaService.roles.update({
       where: { id },
       data: {
-        name: validationRequest.name,
+        name: request.name,
       },
     });
 

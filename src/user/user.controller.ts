@@ -20,6 +20,8 @@ import { ResponseHelper } from 'src/common/response.helper';
 import { Users } from '@prisma/client';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permission.decorator';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -33,7 +35,8 @@ export class UserController {
     description: 'Mengambil seluruh data user yang terdaftar di sistem.',
   })
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMIN')
   async getAllUsers(): Promise<WebResponse<Users[]>> {
     const result = await this.userService.getAllUser();
     return ResponseHelper.ok('successfully retrieved user data', result);
@@ -46,7 +49,8 @@ export class UserController {
       'Cari user berdasarkan nama, email, atau nomor registrasi yang sesuai dengan kata kunci.',
   })
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMIN')
   async searchUser(
     @Query('keyword') keyword: string,
   ): Promise<WebResponse<Users[]>> {
@@ -65,7 +69,8 @@ export class UserController {
       'Mengambil user berdasarkan peran atau jabatan tertentu seperti admin atau kasir.',
   })
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMIN')
   async getUsersByrole(
     @Query('role') role: string,
   ): Promise<WebResponse<Users[]>> {
@@ -82,7 +87,8 @@ export class UserController {
     description: 'Melakukan pembaruan terhadap data user berdasarkan ID-nya.',
   })
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMIN')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() request: UpdateUserDto,
@@ -99,6 +105,7 @@ export class UserController {
   })
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
+  @Permissions('view:ADMIN')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<UserDeleteResponse>> {
@@ -113,7 +120,8 @@ export class UserController {
       'Mendaftarkan user baru ke sistem. Hanya bisa dilakukan oleh admin.',
   })
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMIN')
   async register(
     @Body() request: RegisterUserDto,
   ): Promise<WebResponse<UserResponseRegister>> {

@@ -11,20 +11,21 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  RolesDeleteResponse,
-  RolesRequest,
-  RolesResponse,
-} from '../model/roles.model';
+import { RolesDeleteResponse, RolesResponse } from '../model/roles.model';
 import { WebResponse } from '../model/web.model';
 import { RolesService } from './roles.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseHelper } from 'src/common/response.helper';
 import { Roles } from '@prisma/client';
+import { CreateRolesDto } from './dtos/create-roles.dto';
+import { UpdateRolesDto } from './dtos/update-roles.dto';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/common/decorators/permission.decorator';
 
 @ApiTags('Roles')
 @Controller('/api/roles')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@Permissions('view:ADMIN')
 @ApiBearerAuth('access-token')
 export class RolesController {
   constructor(private rolesServices: RolesService) {}
@@ -47,7 +48,7 @@ export class RolesController {
     description: 'Menambahkan data peran (role) baru ke dalam sistem.',
   })
   async store(
-    @Body() request: RolesRequest,
+    @Body() request: CreateRolesDto,
   ): Promise<WebResponse<RolesResponse>> {
     const result = await this.rolesServices.createRoles(request);
     return { data: result };
@@ -61,7 +62,7 @@ export class RolesController {
   })
   async updateRoles(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: RolesRequest,
+    @Body() request: UpdateRolesDto,
   ): Promise<WebResponse<Roles>> {
     const result = await this.rolesServices.updateRoles(id, request);
     return ResponseHelper.ok('Successfully changed role data', result);

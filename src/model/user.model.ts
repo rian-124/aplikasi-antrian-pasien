@@ -57,13 +57,15 @@ export class LoginRequest {
 
 export class jwtUserPayload {
   id: number;
-  username: string;
-  role_id: number;
+  email: string;
+  role: string;
 }
 
 export class JwtUserResponsePayload {
   sub: number;
-  username: string;
-  role: number;
+  email: string;
+  role: string;
+  outlet: string;
+  permission: string[];
 }
 export type AuthenticatedRequest = Request & { user: JwtUserResponsePayload };
