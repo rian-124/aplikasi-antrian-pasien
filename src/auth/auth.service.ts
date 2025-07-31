@@ -77,10 +77,6 @@ export class AuthService {
     //login response
 
     const response = {
-      name: user.name,
-      email: user.email,
-      role_id: user.role_id,
-      outlet_id: user.outlet_id,
       token,
     };
 

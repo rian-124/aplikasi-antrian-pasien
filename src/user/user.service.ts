@@ -6,41 +6,29 @@ import {
 } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
-import { ValidationService } from '../common/validation.service';
-import {
-  UserRegisterRequest,
-  UserResponseRegister,
-  UserUpdateRequest,
-  UserUpdateResponse,
-} from '../model/user.model';
+import { UserResponseRegister } from '../model/user.model';
 import { Logger } from 'winston';
-import { UserValidation } from './user.validation';
 import * as bcrypt from 'bcrypt';
 import { Users } from '@prisma/client';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
+import { RegisterUserDto } from './dtos/register-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    private validationService: ValidationService,
     @Inject(WINSTON_MODULE_PROVIDER)
     private logger: Logger,
     private wsGateaway: WebSocketGateaway,
     private prismaService: PrismaService,
   ) {}
 
-  async register(request: UserRegisterRequest): Promise<UserResponseRegister> {
+  async register(request: RegisterUserDto): Promise<UserResponseRegister> {
     this.logger.info(`Register new user: ${request.email}`);
-
-    const registerRequest: UserRegisterRequest =
-      this.validationService.validate(
-        UserValidation.REGISTER,
-        request,
-      ) as UserRegisterRequest;
 
     const totalUserWithSameEmail = await this.prismaService.users.count({
       where: {
-        email: registerRequest.email,
+        email: request.email,
       },
     });
 
@@ -48,15 +36,15 @@ export class UserService {
       throw new HttpException('Username already exists', 400);
     }
 
-    registerRequest.password = await bcrypt.hash(registerRequest.password, 10);
+    request.password = await bcrypt.hash(request.password, 10);
 
     const user = await this.prismaService.users.create({
       data: {
-        email: registerRequest.email,
-        name: registerRequest.name,
-        password: registerRequest.password,
-        outlet_id: registerRequest.outlet_id,
-        role_id: registerRequest.role_id,
+        email: request.email,
+        name: request.name,
+        password: request.password,
+        outlet_id: request.outlet_id,
+        role_id: request.role_id,
       },
     });
 
@@ -126,17 +114,8 @@ export class UserService {
     return dataRoleAdmin;
   }
 
-  async updateUser(
-    id: number,
-    request: UserUpdateRequest,
-  ): Promise<UserUpdateResponse> {
+  async updateUser(id: number, request: UpdateUserDto): Promise<Users> {
     this.logger.info(`Update user : ${request.email}`);
-
-    const UserUpdateRequest =
-      this.validationService.validate<UserUpdateRequest>(
-        UserValidation.UPDATE,
-        request,
-      );
 
     const existingUser = await this.prismaService.users.findUnique({
       where: {
@@ -148,23 +127,20 @@ export class UserService {
       throw new NotFoundException(`User ${existingUser} not found`);
     }
 
-    const data: UserUpdateRequest = {};
+    const data: UpdateUserDto = {};
 
-    if (UserUpdateRequest.name !== undefined)
-      data.name = UserUpdateRequest.name;
+    if (request.name !== undefined) data.name = request.name;
 
-    if (UserUpdateRequest.email !== undefined)
-      data.email = UserUpdateRequest.email;
+    if (request.email !== undefined) data.email = request.email;
 
-    if (UserUpdateRequest.password !== undefined)
-      data.password = await bcrypt.hash(UserUpdateRequest.password, 10);
+    if (request.password !== undefined)
+      data.password = await bcrypt.hash(request.password, 10);
 
-    if (UserUpdateRequest.outlet_id !== undefined) {
-      data.outlet_id = UserUpdateRequest.outlet_id;
+    if (request.outlet_id !== undefined) {
+      data.outlet_id = request.outlet_id;
     }
 
-    if (UserUpdateRequest.role_id !== undefined)
-      data.role_id = UserUpdateRequest.role_id;
+    if (request.role_id !== undefined) data.role_id = request.role_id;
 
     const updateUser = await this.prismaService.users.update({
       where: { id },
@@ -173,9 +149,7 @@ export class UserService {
 
     this.wsGateaway.broadcastToAdmin(updateUser);
 
-    return {
-      data: updateUser,
-    };
+    return updateUser;
   }
 
   async deleteUser(id: number) {

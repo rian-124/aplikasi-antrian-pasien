@@ -45,10 +45,6 @@ export class UserResponseGetAll {
 }
 
 export class UserResponseLogin {
-  email: string;
-  name: string;
-  role_id: number;
-  outlet_id: number;
   token?: string | null;
 }
 

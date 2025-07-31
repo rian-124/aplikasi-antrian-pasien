@@ -13,17 +13,13 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { WebResponse } from '../model/web.model';
-import {
-  UserDeleteResponse,
-  UserRegisterRequest,
-  UserResponseRegister,
-  UserUpdateRequest,
-  UserUpdateResponse,
-} from '../model/user.model';
+import { UserDeleteResponse, UserResponseRegister } from '../model/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseHelper } from 'src/common/response.helper';
 import { Users } from '@prisma/client';
+import { RegisterUserDto } from './dtos/register-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -89,8 +85,8 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: UserUpdateRequest,
-  ): Promise<WebResponse<UserUpdateResponse>> {
+    @Body() request: UpdateUserDto,
+  ): Promise<WebResponse<Users>> {
     const result = await this.userService.updateUser(id, request);
     return ResponseHelper.ok('successfully changed user data', result);
   }
@@ -119,7 +115,7 @@ export class UserController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async register(
-    @Body() request: UserRegisterRequest,
+    @Body() request: RegisterUserDto,
   ): Promise<WebResponse<UserResponseRegister>> {
     const result = await this.userService.register(request);
     return ResponseHelper.ok('successfully created an account', result);

@@ -2,12 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { LoggerService } from '@nestjs/common';
+import { LoggerService, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger: LoggerService = app.get(WINSTON_MODULE_NEST_PROVIDER);
 
+  app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
     .setTitle('RestFull API Antrian Pasien')
     .setDescription(
