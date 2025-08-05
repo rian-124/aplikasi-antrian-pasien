@@ -35,8 +35,10 @@ export class AntrianPasienController {
     summary: 'Get all patient queue status',
     description: 'Mengambil semua data status antrian pasien secara lengkap.',
   })
-  async getAll(): Promise<WebResponse<AntrianPasiens[]>> {
-    const result = await this.antrianPasienService.getAllStatusAntrian();
+  async getAll(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WebResponse<AntrianPasiens[]>> {
+    const result = await this.antrianPasienService.getAllStatusAntrian(req);
 
     return ResponseHelper.ok(
       'Successfully get all data Antrian pasiens',

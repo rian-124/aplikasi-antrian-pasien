@@ -13,10 +13,22 @@ export class AntrianPasienService {
     private wsGateaway: WebSocketGateaway,
   ) {}
 
-  async getAllStatusAntrian(): Promise<AntrianPasiens[]> {
+  async getAllStatusAntrian(
+    req: AuthenticatedRequest,
+  ): Promise<AntrianPasiens[]> {
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        nama_outlet: req.user.outlet,
+      },
+    });
+
+    if (!outlet) {
+      throw new NotFoundException('Outlet id notfound!');
+    }
+
     const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
-      orderBy: {
-        id: 'asc',
+      where: {
+        outlet_id: outlet.id,
       },
       include: {
         tahap_antrian: true,

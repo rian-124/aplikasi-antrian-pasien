@@ -71,6 +71,12 @@ export class PasiensService {
     const prefix = request.jenis === Jenis.UMUM ? 'U' : 'J';
 
     const lastNomor = await this.prismaService.antrianPasiens.findFirst({
+      where: {
+        outlet_id: outlet.id,
+        nomor_Antrian: {
+          startsWith: prefix,
+        },
+      },
       orderBy: {
         id: 'desc',
       },
