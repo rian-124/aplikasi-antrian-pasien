@@ -16,13 +16,14 @@ import { WebResponse } from 'src/model/web.model';
 import { PenjaminsService } from './penjamins.service';
 import { ResponseHelper } from 'src/common/response.helper';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { UpdatePenjaminsDto } from './dtos/update-penjamins.dto';
 import { CreatePenjaminsDto } from './dtos/create-penjamins.dto';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 
 @Controller('/api/penjamins')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Permissions('view:ADMINUSERS')
 export class PenjaminsController {
