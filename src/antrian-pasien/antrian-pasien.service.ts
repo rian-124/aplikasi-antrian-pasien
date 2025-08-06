@@ -155,6 +155,7 @@ export class AntrianPasienService {
       include: {
         pasien: true,
         users: true,
+        outlets: true,
       },
     });
 
