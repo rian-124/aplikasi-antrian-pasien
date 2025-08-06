@@ -1,9 +1,14 @@
 'use client';
 
 import { Patient } from "../classes/Patient";
-import { ArrowRight, Circle, Star } from "lucide-react";
+import { ArrowRight, Circle } from "lucide-react";
 
-export default function PatientCard({ patient }: { patient: Patient }) {
+interface PatientCardProps {
+  patient: Patient;
+  onCall: () => void;
+}
+
+export default function PatientCard({ patient, onCall }: PatientCardProps) {
   return (
     <div className="bg-white shadow rounded-xl p-4 border border-gray-200">
       <div className="flex justify-between items-center">
@@ -17,7 +22,10 @@ export default function PatientCard({ patient }: { patient: Patient }) {
       <p className="text-sm text-gray-600 mt-1">Lab Reg: {patient.labReg}</p>
 
       <div className="flex justify-end mt-3">
-        <button className="border rounded-md p-1 text-gray-600 hover:bg-gray-100">
+        <button
+          onClick={onCall}
+          className="border rounded-md p-1 text-gray-600 hover:bg-gray-100"
+        >
           <ArrowRight className="w-5 h-5" />
         </button>
       </div>

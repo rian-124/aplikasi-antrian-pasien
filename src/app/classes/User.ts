@@ -3,7 +3,7 @@ export class User {
         public id: number,
         public email: string,
         public name: string,
-        public outlet: string,
-        public role: string
+        public outlet_id: number,
+        public role_id: number
     ) {}
 }

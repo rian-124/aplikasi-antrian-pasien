@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Sidebar({
@@ -11,6 +12,20 @@ export default function Sidebar({
   toggle: () => void;
 }) {
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null); 
+
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      try {
+        const user = JSON.parse(userString);
+        console.log('User role:', user.role); 
+        setRole(user.role); 
+      } catch (err) {
+        console.error("Failed to parse user data:", err);
+      }
+    }
+  }, []);
 
   return (
     <div
@@ -40,7 +55,7 @@ export default function Sidebar({
         </button>
       </div>
 
-      <div className="px-2">
+      <div className="px-2 flex-1">
         {!collapsed && (
           <p className="text-gray-400 text-xs font-semibold mb-3 ml-2">NAVIGATION</p>
         )}
@@ -59,18 +74,20 @@ export default function Sidebar({
             className={`flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 cursor-pointer
               ${collapsed ? 'justify-center' : ''}`}
           >
-            <Image src="/icons/queue.svg" alt="Queue Managements" width={18} height={18} />
+            <Image src="/icons/queue.svg" alt="Queue" width={18} height={18} />
             {!collapsed && <span>Queue Managements</span>}
           </li>
 
-          <li
-            onClick={() => router.push('/user')}
-            className={`flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 cursor-pointer
-              ${collapsed ? 'justify-center' : ''}`}
-          >
-            <Image src="/icons/users.svg" alt="Queue Manage" width={18} height={18} />
-            {!collapsed && <span>Users</span>}
-          </li>
+          {role === 'ADMIN' && (
+            <li
+              onClick={() => router.push('/user')}
+              className={`flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 cursor-pointer
+                ${collapsed ? 'justify-center' : ''}`}
+            >
+              <Image src="/icons/users.svg" alt="Users" width={18} height={18} />
+              {!collapsed && <span>Users</span>}
+            </li>
+          )}
         </ul>
       </div>
     </div>

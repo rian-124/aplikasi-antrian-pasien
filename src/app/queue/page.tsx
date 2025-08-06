@@ -1,8 +1,7 @@
-// Updated QueuePage.tsx (Responsive Layout)
-'use client';
+"use client";
 
-import { useState } from "react";
-import { Patient } from "../classes/Patient";
+import { useEffect, useState } from "react";
+import { Patient, PatientStatus } from "../classes/Patient";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import QueueStats from "../components/QueueStats";
@@ -13,29 +12,106 @@ export default function QueuePage() {
   const [collapsed, setCollapsed] = useState(false);
   const toggleSidebar = () => setCollapsed(!collapsed);
   const [activeFilter, setActiveFilter] = useState("TOTAL");
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
 
-  const patients: Patient[] = Array.from({ length: 7 }, (_, i) => {
-    const status = i % 3 === 0 ? "CANCELLED" : i % 2 === 0 ? "COMPLETED" : "WAITING";
-    return new Patient(
-      i + 1,
-      i + 1,
-      `00${i + 1}`,
-      `LAB-${1000 + i}`,
-      `Outlet ${i + 1}`,
-      status as any
-    );
+  const fetchPatients = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch("http://192.168.50.2:4000/api/antrian-pasien", {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const json = await res.json();
+      const fetchedPatients = json.data.map((p: any, index: number) => Patient.fromJSON(p, index));
+
+
+      setPatients(fetchedPatients);
+    } catch (error) {
+      console.error("Failed to fetch patients:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const filteredListPatients = patients.filter((p) => {
+    if (p.status === "WAITING") return true;
+    if (p.status === "CALL" && currentPatient && p.id === currentPatient.id) return true;
+    return false;
   });
 
-  const filteredPatients =
-    activeFilter === "TOTAL"
-      ? patients
-      : patients.filter((p) => p.status === activeFilter);
+  const filteredTablePatients = patients.filter((p) => {
+    if (activeFilter === "TOTAL") return true;
+    return p.status === activeFilter;
+  });
 
   const stats = {
     TOTAL: patients.length,
-    COMPLETED: patients.filter((p) => p.status === "COMPLETED").length,
-    CANCELLED: patients.filter((p) => p.status === "CANCELLED").length,
+    COMPLETE: patients.filter((p) => p.status === "COMPLETE").length,
+    CANCELED: patients.filter((p) => p.status === "CANCELED").length,
     WAITING: patients.filter((p) => p.status === "WAITING").length,
+  };
+
+  const handleCallPatient = async (patient: Patient) => {
+    if (patient.status !== "WAITING") {
+      alert("Only patients with status WAITING can be called.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const url = `http://192.168.50.2:4000/api/antrian-pasien/${patient.id}`;
+
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'CALL' })
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      setCurrentPatient(patient);
+      fetchPatients();
+    } catch (error) {
+      console.error("Failed to call patient:", error);
+    }
+  };
+
+  const handleStatusChange = async (status: PatientStatus) => {
+    if (!currentPatient) return;
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`http://192.168.50.2:4000/api/antrian-pasien/${currentPatient.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      setCurrentPatient(null);
+      fetchPatients();
+    } catch (error) {
+      console.error(`Failed to update status to ${status}:`, error);
+    }
   };
 
   return (
@@ -46,15 +122,16 @@ export default function QueuePage() {
         <div className="flex-1 overflow-hidden p-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
             <div className="lg:col-span-3 h-full overflow-y-auto min-h-0">
-              <PatientList patients={patients} />
+              <PatientList patients={filteredListPatients} onCallPatient={handleCallPatient} />
             </div>
             <div className="lg:col-span-6 h-full overflow-y-auto min-h-0">
               <QueueDetail
-                onComplete={() => console.log("Complete")}
-                onRecall={() => console.log("Recall")}
-                onSkip={() => console.log("Skip")}
-                onCancel={() => console.log("Cancel")}
-                patients={filteredPatients}
+                onComplete={() => handleStatusChange("COMPLETE")}
+                onRecall={() => handleStatusChange("CALL")}
+                onSkip={() => handleStatusChange("SKIP")}
+                onCancel={() => handleStatusChange("CANCELED")}
+                patients={filteredTablePatients}
+                currentPatient={currentPatient}
               />
             </div>
             <div className="lg:col-span-3 h-full overflow-y-auto min-h-0">

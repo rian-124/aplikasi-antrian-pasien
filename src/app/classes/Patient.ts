@@ -1,4 +1,4 @@
-export type PatientStatus = 'WAITING' | 'CALLED'| 'COMPLETED'| 'CANCELLED';
+export type PatientStatus = 'WAITING' | 'CALL' | 'COMPLETE' | 'CANCELED' | 'SKIP';
 
 export class Patient {
   constructor(
@@ -8,6 +8,7 @@ export class Patient {
     public labReg: string,
     public outlet: string,
     public status: PatientStatus,
+    public userName: string,         
     public createdAt: Date = new Date(),
     public updatedAt: Date = new Date()
   ) {}
@@ -17,16 +18,17 @@ export class Patient {
     this.updatedAt = new Date();
   }
 
-  static fromJSON(data: any): Patient {
+    static fromJSON(data: any, index: number): Patient {
     return new Patient(
       data.id,
-      data.no,
-      data.patientNumber,
-      data.labReg,
-      data.outlet,
-      data.status as PatientStatus,
-      new Date(data.createdAt),
-      new Date(data.updatedAt)
+      index + 1,
+      data.nomor_Antrian,                          
+      data.pasien.nomor_registrasi,              
+      data.outlet?.nama_outlet || "-",            
+      data.status_antrian.status as PatientStatus, 
+      data.users?.name || "-",                    
+      new Date(data.created_At),                  
+      new Date(data.update_At)                    
     );
   }
 }

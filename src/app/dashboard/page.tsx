@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Stat } from "../classes/Stat";
 import { Patient } from "../classes/Patient";
 import Sidebar from "../components/Sidebar";
@@ -12,17 +12,47 @@ export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
   const toggleSidebar = () => setCollapsed(!collapsed);
 
-  const stats = [
-    new Stat('Waiting', 26, '/icons/wait.svg', 'text-black'),
-    new Stat('Called', 2, '/icons/called.svg', 'text-black'),
-    new Stat('Completed', 17, '/icons/completed.svg', 'text-black'),
-    new Stat('Cancelled', 8, '/icons/cancelled.svg', 'text-black'),
-  ];
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [stats, setStats] = useState<Stat[]>([]);
 
-  const patient = new Patient(1, 1, 'F-100', '120983189', 'IPRJ', 'COMPLETED');
-  const patients = Array.from({ length: 10 }, (_, i) =>
-    new Patient(i + 1, i + 1, patient.patientNumber, patient.labReg, patient.outlet, patient.status)
-  );
+  const fetchPatients = async () => {
+    try {
+      const token = localStorage.getItem('access_token');
+      const res = await fetch("http://192.168.50.2:4000/api/antrian-pasien", {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const json = await res.json();
+      const fetchedPatients: Patient[] = json.data.map((p: any, index: number) => Patient.fromJSON(p, index));
+      setPatients(fetchedPatients);
+
+      const waitingCount = fetchedPatients.filter(p => p.status === 'WAITING').length;
+      const completedCount = fetchedPatients.filter(p => p.status === 'COMPLETE').length;
+      const canceledCount = fetchedPatients.filter(p => p.status === 'CANCELED').length;
+      const totalCount = fetchedPatients.length;
+
+      const newStats: Stat[] = [
+        new Stat('Total', totalCount, '/icons/called.svg', 'text-black'),
+        new Stat('Waiting', waitingCount, '/icons/wait.svg', 'text-black'),
+        new Stat('Completed', completedCount, '/icons/completed.svg', 'text-black'),
+        new Stat('Cancelled', canceledCount, '/icons/cancelled.svg', 'text-black'),
+      ];
+
+      setStats(newStats);
+    } catch (error) {
+      console.error("Failed to fetch patients:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
 
   return (
     <div className="flex">

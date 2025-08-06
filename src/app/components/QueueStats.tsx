@@ -7,13 +7,13 @@ type Props = {
   onFilterChange: (filter: string) => void;
   stats: {
     TOTAL: number;
-    COMPLETED: number;
-    CANCELLED: number;
+    COMPLETE: number;
+    CANCELED: number;
     WAITING: number;
   };
 };
 
-const statusList = ["TOTAL", "COMPLETED", "CANCELLED", "WAITING"];
+const statusList = ["TOTAL", "COMPLETE", "CANCELED", "WAITING"];
 
 const QueueStats: React.FC<Props> = ({ activeFilter, onFilterChange, stats }) => {
   return (

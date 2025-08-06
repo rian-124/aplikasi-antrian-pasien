@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { LoginFormManager } from "../classes/LoginFormManager";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AuthService } from "../classes/AuthService";
+import { LoginFormManager } from "../classes/LoginFormManager";
 
 export default function LoginForm() {
-  const manager = new LoginFormManager();
-  const fields = manager.getFields();
   const router = useRouter();
+  const formManager = new LoginFormManager();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -16,19 +16,38 @@ export default function LoginForm() {
     remember: false,
   });
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    router.push("/dashboard")
+    setError(null);
+
+    try {
+      const userData = await AuthService.login(formData.email, formData.password);
+
+      const user = {
+        token: userData.token,
+        email: userData.email,
+        role: userData.role,
+        outlet: userData.outlet,
+      };
+
+      localStorage.setItem("user", JSON.stringify(user));
+
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
+
 
   return (
     <div className="bg-white p-10 rounded-xl shadow-md w-96">
@@ -36,18 +55,21 @@ export default function LoginForm() {
       <p className="text-gray-500 text-center mb-6">Sign in with your email</p>
 
       <form onSubmit={handleSubmit}>
-        {fields.map((field) => (
-          <div key={field.name} className="mb-4">
-            <input
-              type={field.type}
-              name={field.name}
-              placeholder={field.placeholder}
-              value={formData[field.name as keyof typeof formData] as string}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        ))}
+        {formManager.getFields().map((field) =>
+          field.type === "checkbox" ? null : (
+            <div className="mb-4" key={field.name}>
+              <input
+                type={field.type}
+                name={field.name}
+                placeholder={field.placeholder}
+                value={formData[field.name as "email" | "password"]}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          )
+        )}
 
         <div className="flex items-center justify-between text-sm mb-6">
           <label className="flex items-center gap-2">
@@ -61,9 +83,11 @@ export default function LoginForm() {
             Remember me
           </label>
           <Link href="/forgot-password" className="text-blue-600 hover:underline">
-            Forget Password?
+            Forgot Password?
           </Link>
         </div>
+
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
         <button
           type="submit"
