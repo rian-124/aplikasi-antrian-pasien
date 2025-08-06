@@ -44,11 +44,13 @@ export class AntrianPasienService {
   async searchStatusAntrian(keyword: string): Promise<AntrianPasiens[]> {
     const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
       where: {
-        nomor_Antrian: {
-          contains: keyword,
-          mode: 'insensitive',
-        },
         OR: [
+          {
+            nomor_Antrian: {
+              contains: keyword,
+              mode: 'insensitive',
+            },
+          },
           {
             pasien: {
               nomor_registrasi: {
@@ -67,7 +69,7 @@ export class AntrianPasienService {
       },
     });
 
-    if (!dataStatusAntrian) {
+    if (dataStatusAntrian.length === 0) {
       throw new NotFoundException(`Data ${keyword} tidak ditemukan`);
     }
 
