@@ -31,7 +31,7 @@ import { Permissions } from 'src/common/decorators/permission.decorator';
 @ApiTags('Outlet')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@Permissions('view:ADMIN')
+@Permissions('view:ADMINUSERS')
 export class OutletController {
   constructor(private outletService: OutletService) {}
 
