@@ -24,7 +24,7 @@ import { AuthenticatedRequest } from 'src/model/user.model';
 @Controller('/api/pasiens')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@Permissions('view:ADMINUSERS')
+@Permissions('view:ADMINUSERS', 'view:ADMIN')
 export class PasiensController {
   constructor(private pasienService: PasiensService) {}
 

@@ -30,7 +30,7 @@ export class PermissionsGuard implements CanActivate {
     console.log('User permissions:', userPermissions);
     console.log('Required permissions:', requiredPermissions);
 
-    const hasPermission = requiredPermissions.every((permission) =>
+    const hasPermission = requiredPermissions.some((permission) =>
       userPermissions.includes(permission),
     );
 

@@ -25,7 +25,7 @@ import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 @Controller('/api/penjamins')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@Permissions('view:ADMINUSERS')
+@Permissions('view:ADMINUSERS', 'view:ADMIN')
 export class PenjaminsController {
   constructor(private penjaminsService: PenjaminsService) {}
 

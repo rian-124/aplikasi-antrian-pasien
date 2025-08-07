@@ -25,7 +25,7 @@ import { Permissions } from 'src/common/decorators/permission.decorator';
 @ApiTags('Antrian Pasien')
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
-@Permissions('view:ADMINUSERS')
+@Permissions('view:ADMINUSERS', 'view:ADMIN')
 export class AntrianPasienController {
   constructor(private antrianPasienService: AntrianPasienService) {}
 
