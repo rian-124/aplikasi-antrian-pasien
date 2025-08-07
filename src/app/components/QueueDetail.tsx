@@ -1,12 +1,11 @@
 "use client";
 
-import { Circle } from "lucide-react";
+import { Circle, Star } from "lucide-react";
 import { Patient } from "../classes/Patient";
 
 interface QueueDetailProps {
   onComplete: () => void;
   onRecall: () => void;
-  onSkip: () => void;
   onCancel: () => void;
   patients: Patient[];
   currentPatient: Patient | null;
@@ -17,7 +16,6 @@ export default function QueueDetail({
   currentPatient,
   onComplete,
   onRecall,
-  onSkip,
   onCancel,
 }: QueueDetailProps) {
   return (
@@ -50,14 +48,15 @@ export default function QueueDetail({
                   })}
                 </p>
               </div>
-              {/* <div>
+              <div>
                 <p className="font-semibold">Name</p>
                 <p className="text-gray-600">{currentPatient.userName}</p>
-              </div> */}
+              </div>
               <div className="flex items-center gap-1">
                 <p className="font-semibold mr-2">Calling</p>
-                <Circle className="w-5 h-5 text-blue-500 fill-blue-500" />
-                <Circle className="w-5 h-5 text-blue-500 fill-blue-500" />
+                {Array.from({ length: 2 }, (_, i) => (
+                  <Circle key={i} className={`w-5 h-5 ${i < currentPatient.bintang ? "text-blue-500 fill-blue-500" : "text-gray-300"}`} />
+                ))}
               </div>
             </div>
 
@@ -74,12 +73,6 @@ export default function QueueDetail({
                   className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Recall
-                </button>
-                <button
-                  onClick={onSkip}
-                  className="bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md font-semibold text-sm"
-                >
-                  Skip
                 </button>
                 <button
                   onClick={onCancel}

@@ -1,34 +1,65 @@
-export type PatientStatus = 'WAITING' | 'CALL' | 'COMPLETE' | 'CANCELED' | 'SKIP';
+class Patient {
+  id: number;
+  no: number;
+  patientNumber: string;
+  labReg: string;
+  outletId: number;
+  outlet: string;
+  userName: string;
+  bintang: number;
+  status: PatientStatus;
+  createdAt: Date;
+  updatedAt: Date;
 
-export class Patient {
   constructor(
-    public id: number,
-    public no: number,
-    public patientNumber: string,
-    public labReg: string,
-    public outlet: string,
-    public status: PatientStatus,
-    public userName: string,         
-    public createdAt: Date = new Date(),
-    public updatedAt: Date = new Date()
-  ) {}
-
-  updateStatus(newStatus: PatientStatus) {
-    this.status = newStatus;
-    this.updatedAt = new Date();
+    id: number,
+    no: number,
+    patientNumber: string,
+    labReg: string,
+    outletId: number,
+    outlet: string,
+    userName: string,
+    bintang: number,
+    status: PatientStatus,
+    createdAt: Date,
+    updatedAt: Date
+  ) {
+    this.id = id;
+    this.no = no;
+    this.patientNumber = patientNumber;
+    this.labReg = labReg;
+    this.outletId = outletId;
+    this.outlet = outlet;
+    this.userName = userName;
+    this.bintang = bintang;
+    this.status = status;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
-    static fromJSON(data: any, index: number): Patient {
+  static fromJSON(data: any, index: number, outletMap: Map<number, string>): Patient {
+    if (!data) {
+      throw new Error("Invalid patient data: data is null or undefined");
+    }
+
+    const outletId = data.outlet_id ?? 0;
+    const outletName = outletMap.get(outletId) ?? "-";
+
     return new Patient(
-      data.id,
+      data.id ?? 0,
       index + 1,
-      data.nomor_Antrian,                          
-      data.pasien.nomor_registrasi,              
-      data.outlet?.nama_outlet || "-",            
-      data.status_antrian.status as PatientStatus, 
-      data.users?.name || "-",                    
-      new Date(data.created_At),                  
-      new Date(data.update_At)                    
+      data.nomor_Antrian ?? "-",
+      data.pasien?.nomor_registrasi ?? "-",
+      outletId,
+      outletName,
+      data.users?.name ?? "-",
+      data.bintang ?? 0,
+      data.status_antrian?.status as PatientStatus ?? "WAITING",
+      new Date(data.created_at ?? Date.now()),
+      new Date(data.updated_at ?? Date.now())
     );
   }
 }
+
+export type PatientStatus = "WAITING" | "CALL" | "COMPLETE" | "CANCELED";
+export { Patient };

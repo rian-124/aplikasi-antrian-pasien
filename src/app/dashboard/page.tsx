@@ -15,38 +15,76 @@ export default function DashboardPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [stats, setStats] = useState<Stat[]>([]);
 
+  const [activeFilter, setActiveFilter] = useState<string>("TOTAL");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const handleSearch = () => {
+    console.log("Searching for:", searchTerm);
+  };
+
+const filteredPatients = patients
+  .filter((p) => {
+    if (activeFilter === "TOTAL") return true;
+    if (activeFilter === "Menunggu") return p.status === "WAITING";
+    if (activeFilter === "Selesai") return p.status === "COMPLETE";
+    if (activeFilter === "Dibatalkan") return p.status === "CANCELED";
+    return true;
+  })
+  .filter((p) => {
+    const keyword = searchTerm.toLowerCase();
+    return (
+      p.patientNumber?.toLowerCase().includes(keyword) ||
+      p.labReg?.toLowerCase().includes(keyword) ||
+      p.outlet?.toLowerCase().includes(keyword)
+    );
+  });
+
+
   const fetchPatients = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      const res = await fetch("http://192.168.50.2:4000/api/antrian-pasien", {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const token = localStorage.getItem("access_token");
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+      const [patientRes, outletRes] = await Promise.all([
+        fetch("http://192.168.50.2:4000/api/antrian-pasien", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("http://192.168.50.2:4000/api/outlet", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      if (!patientRes.ok || !outletRes.ok) {
+        throw new Error("Error fetching patients or outlets");
       }
 
-      const json = await res.json();
-      const fetchedPatients: Patient[] = json.data.map((p: any, index: number) => Patient.fromJSON(p, index));
+      const [patientJson, outletJson] = await Promise.all([
+        patientRes.json(),
+        outletRes.json(),
+      ]);
+
+      const outlets = outletJson.data;
+      const outletMap = new Map<number, string>();
+      outlets.forEach((o: any) => outletMap.set(o.id, o.nama_outlet));
+
+      const fetchedPatients: Patient[] = patientJson.data.map(
+        (p: any, index: number) => Patient.fromJSON(p, index, outletMap)
+      );
+
       setPatients(fetchedPatients);
 
-      const waitingCount = fetchedPatients.filter(p => p.status === 'WAITING').length;
-      const completedCount = fetchedPatients.filter(p => p.status === 'COMPLETE').length;
-      const canceledCount = fetchedPatients.filter(p => p.status === 'CANCELED').length;
-      const totalCount = fetchedPatients.length;
+      const total = fetchedPatients.length;
+      const waiting = fetchedPatients.filter(p => p.status === "WAITING").length;
+      const completed = fetchedPatients.filter(p => p.status === "COMPLETE").length;
+      const canceled = fetchedPatients.filter(p => p.status === "CANCELED").length;
 
-      const newStats: Stat[] = [
-        new Stat('Total', totalCount, '/icons/called.svg', 'text-black'),
-        new Stat('Waiting', waitingCount, '/icons/wait.svg', 'text-black'),
-        new Stat('Completed', completedCount, '/icons/completed.svg', 'text-black'),
-        new Stat('Cancelled', canceledCount, '/icons/cancelled.svg', 'text-black'),
-      ];
+      setStats([
+        new Stat("Total Pasien", total, "/icons/wait.svg", "text-blue-600"),
+        new Stat("Menunggu", waiting, "/icons/called.svg", "text-yellow-500"),
+        new Stat("Selesai", completed, "/icons/completed.svg", "text-green-600"),
+        new Stat("Dibatalkan", canceled, "/icons/cancelled.svg", "text-red-600"),
+      ]);
 
-      setStats(newStats);
     } catch (error) {
-      console.error("Failed to fetch patients:", error);
+      console.error("Failed to fetch patients or outlets:", error);
     }
   };
 
@@ -61,10 +99,23 @@ export default function DashboardPage() {
         <Header />
         <div className="grid grid-cols-2 pt-4 md:grid-cols-4 gap-4 mb-6">
           {stats.map((s, i) => (
-            <StatCard key={i} title={s.title} value={s.value} icon={s.icon} color={s.color} />
+            <StatCard
+              key={i}
+              title={s.title}
+              value={s.value}
+              icon={s.icon}
+              color={s.color}
+              active={activeFilter === s.title}
+              onClick={() => setActiveFilter(s.title)}
+            />
           ))}
         </div>
-        <PatientTable data={patients} />
+          <PatientTable
+            data={filteredPatients}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            handleSearch={handleSearch}
+          />
       </div>
     </div>
   );

@@ -1,20 +1,28 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Circle, Star } from "lucide-react";
 import { useState } from "react";
 import { Patient } from "../classes/Patient";
 
 interface PatientListProps {
   patients: Patient[];
   onCallPatient: (patient: Patient) => void;
+  currentPatient: Patient | null;
 }
 
-export default function PatientList({ patients, onCallPatient }: PatientListProps) {
+export default function PatientList({ patients, onCallPatient, currentPatient }: PatientListProps) {
   const [search, setSearch] = useState("");
 
-  const filteredPatients = patients.filter((p) =>
-    p.patientNumber.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredPatients = patients.filter((p) => {
+    const term = search.toLowerCase();
+    return (
+      p.patientNumber.toLowerCase().includes(term) ||
+      p.labReg.toLowerCase().includes(term)
+    );
+  });
+
+  const firstWaitingPatientId = filteredPatients.find(p => p.status === "WAITING")?.id;
+
 
   return (
     <div className="h-full flex flex-col">
@@ -37,23 +45,32 @@ export default function PatientList({ patients, onCallPatient }: PatientListProp
       </div>
 
       <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-230px)] pr-1">
-        {filteredPatients.map((patient) => (
+        {filteredPatients.map((patient, index) => (
           <div key={patient.id} className="bg-white shadow rounded-xl p-4 border border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-bold text-gray-800">{patient.patientNumber}</h3>
               <div className="flex gap-1 text-blue-500">
-                <div className="w-5 h-5 bg-blue-500 rounded-full" />
-                <div className="w-5 h-5 bg-blue-500 rounded-full" />
+                {Array.from({ length: 2 }, (_, i) => (
+                  <Circle
+                    key={i}
+                    className={`w-5 h-5 ${i < patient.bintang ? "text-blue-500 fill-blue-500" : "text-gray-300"}`}
+                  />
+                ))}
               </div>
             </div>
 
             <p className="text-sm text-gray-600 mt-1">Lab Reg: {patient.labReg}</p>
 
-            <div className="flex justify-end mt-3">
-              <button onClick={() => onCallPatient(patient)} className="border rounded-md p-1 text-gray-600 hover:bg-gray-100">
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
+            {!currentPatient && patient.id === firstWaitingPatientId && (
+              <div className="flex justify-end mt-3">
+                <button
+                  onClick={() => onCallPatient(patient)}
+                  className="border rounded-md p-1 text-gray-600 hover:bg-gray-100"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>

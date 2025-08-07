@@ -13,7 +13,7 @@ type Props = {
   };
 };
 
-const statusList = ["TOTAL", "COMPLETE", "CANCELED", "WAITING"];
+const statusList = [ "WAITING", "COMPLETE", "CANCELED", "TOTAL"];
 
 const QueueStats: React.FC<Props> = ({ activeFilter, onFilterChange, stats }) => {
   return (
