@@ -20,6 +20,7 @@ import { AuthenticatedRequest } from 'src/model/user.model';
 import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
+import { NomorAntrianPasienResponse } from 'src/model/antrianpasien.model';
 
 @Controller('/api/antrian-pasien')
 @ApiTags('Antrian Pasien')
@@ -44,6 +45,16 @@ export class AntrianPasienController {
       'Successfully get all data Antrian pasiens',
       result,
     );
+  }
+
+  @Get('/nomor-antrian-pasien')
+  @HttpCode(200)
+  async getNomorAntrian(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
+    const result = await this.antrianPasienService.getNomorAntrian(req);
+
+    return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
   }
 
   @Get('/search')

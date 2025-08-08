@@ -5,6 +5,7 @@ import { WebSocketGateaway } from '../common/websocket.gateaway';
 import { AntrianPasiens } from '@prisma/client';
 import { AuthenticatedRequest } from 'src/model/user.model';
 import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
+import { NomorAntrianPasienResponse } from 'src/model/antrianpasien.model';
 
 @Injectable()
 export class AntrianPasienService {
@@ -39,6 +40,46 @@ export class AntrianPasienService {
     });
 
     return dataStatusAntrian;
+  }
+
+  async getNomorAntrian(
+    req: AuthenticatedRequest,
+  ): Promise<NomorAntrianPasienResponse[]> {
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        nama_outlet: req.user.outlet,
+      },
+    });
+
+    if (!outlet) {
+      throw new NotFoundException('Outlet tidak di temukan dalam payload');
+    }
+
+    const dataNomorAntrianPasien =
+      await this.prismaService.antrianPasiens.findMany({
+        where: {
+          outlet_id: outlet.id,
+        },
+        select: {
+          nomor_Antrian: true,
+          users: {
+            select: {
+              name: true,
+            },
+          },
+          pasien: {
+            select: {
+              jenis_registrasis: {
+                select: {
+                  jenis: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+    return dataNomorAntrianPasien;
   }
 
   async searchStatusAntrian(keyword: string): Promise<AntrianPasiens[]> {
