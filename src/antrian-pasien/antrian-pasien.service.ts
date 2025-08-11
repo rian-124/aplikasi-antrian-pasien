@@ -121,18 +121,18 @@ export class AntrianPasienService {
 
   async updateStatusAntrian(
     id: number,
-    request: UpdateStatusAntrianDto,
+    body: UpdateStatusAntrianDto,
     req: AuthenticatedRequest,
   ): Promise<AntrianPasiens> {
     const statusAntrian = await this.prismaService.statusAntrians.findUnique({
       where: {
-        status: request.status,
+        status: body.status,
       },
     });
 
     if (!statusAntrian) {
       throw new NotFoundException(
-        `Status antrian ${request.status} tidak ditemukan`,
+        `Status antrian ${body.status} tidak ditemukan`,
       );
     }
 
@@ -148,7 +148,7 @@ export class AntrianPasienService {
     }
 
     const currentStatus = antrianPasien.status_antrian.status as Status;
-    let nextStatus = request.status;
+    let nextStatus = body.status;
 
     if (nextStatus === Status.CALL && antrianPasien.bintang >= 3) {
       nextStatus = Status.CANCELED;

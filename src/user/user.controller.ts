@@ -91,9 +91,9 @@ export class UserController {
   @Permissions('view:ADMIN')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: UpdateUserDto,
+    @Body() body: UpdateUserDto,
   ): Promise<WebResponse<Users>> {
-    const result = await this.userService.updateUser(id, request);
+    const result = await this.userService.updateUser(id, body);
     return ResponseHelper.ok('successfully changed user data', result);
   }
 
@@ -123,9 +123,9 @@ export class UserController {
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN')
   async register(
-    @Body() request: RegisterUserDto,
+    @Body() body: RegisterUserDto,
   ): Promise<WebResponse<UserResponseRegister>> {
-    const result = await this.userService.register(request);
+    const result = await this.userService.register(body);
     return ResponseHelper.ok('successfully created an account', result);
   }
 }

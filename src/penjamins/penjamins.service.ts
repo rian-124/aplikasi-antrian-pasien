@@ -20,11 +20,11 @@ export class PenjaminsService {
     return dataPenjamins;
   }
 
-  async getPenjaminsByJenisRegistrasi(request: string): Promise<Penjamins[]> {
+  async getPenjaminsByJenisRegistrasi(body: string): Promise<Penjamins[]> {
     const jenisRegistrasi =
       await this.prismaService.jenisRegistrasis.findUnique({
         where: {
-          jenis: request,
+          jenis: body,
         },
       });
 
@@ -44,12 +44,12 @@ export class PenjaminsService {
 
   async updatePenjamins(
     id: number,
-    request: UpdatePenjaminsDto,
+    body: UpdatePenjaminsDto,
   ): Promise<Penjamins> {
     const jenisRegistrasi =
       await this.prismaService.jenisRegistrasis.findUnique({
         where: {
-          id: request.jenis_registrasi_id,
+          id: body.jenis_registrasi_id,
         },
       });
 
@@ -62,18 +62,18 @@ export class PenjaminsService {
         id,
       },
       data: {
-        nama: request.nama,
+        nama: body.nama,
       },
     });
 
     return penjamins;
   }
 
-  async createPenjamins(request: CreatePenjaminsDto): Promise<Penjamins> {
+  async createPenjamins(body: CreatePenjaminsDto): Promise<Penjamins> {
     const validationRequest: PenjaminsRequest =
       (await this.validationService.validate(
         ValidationRequestPenjamin.PENJAMINS,
-        request,
+        body,
       )) as PenjaminsRequest;
 
     const jenisRegistrasi =

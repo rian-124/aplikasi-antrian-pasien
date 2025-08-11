@@ -1,136 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Daftar Users</title>
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-    th {
-      background-color: #f3f3f3;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Daftar Users</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: left;
+      }
+      th {
+        background-color: #f3f3f3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Daftar Antrian pasiens</h1>
 
-  <h1>Daftar Antrian pasiens</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody id="user-table-body"></tbody>
+    </table>
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nama</th>
-        <th>Email</th>
-        <th>Role</th>
-      </tr>
-    </thead>
-    <tbody id="user-table-body">
-    </tbody>
-  </table>
+    <h1>Daftar Users</h1>
 
-  <h1>Daftar Users</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nama</th>
+          <th>Email</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody id="user-table-body"></tbody>
+    </table>
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nama</th>
-        <th>Email</th>
-        <th>Role</th>
-      </tr>
-    </thead>
-    <tbody id="user-table-body">
-    </tbody>
-  </table>
+    <script>
+      const token =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImVtYWlsIjoiYWRtaW5Vc2Vyc0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU5VU0VSUyIsIm91dGxldCI6IkdFRFVORyBBIiwicGVybWlzc2lvbiI6WyJ2aWV3OkFETUlOVVNFUlMiXSwiaWF0IjoxNzU0ODg2MDY0LCJleHAiOjE3NTQ4ODk2NjR9.DQHe3CvV79SASGtbQuXHpJslUuSVD4oOI1gpq4GGkYo';
 
-  <script>
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMzLCJlbWFpbCI6ImVudG9nQGdtYWlsLmNvbSIsInJvbGUiOjEsImlhdCI6MTc1MzY3ODE2MywiZXhwIjoxNzUzNjgxNzYzfQ.oYHJgm6NzwH_9J0Y5q8D_si97iAkUzyMhXLDpYIPVbw';
+      async function loadUsers() {
+        try {
+          const res = await fetch('http://localhost:3000/api/antrian-pasien', {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-    async function loadUsers() {
-      try {
-        const res = await fetch('http://localhost:3000/api/users', {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const body = await res.json();
+          renderNomorAntrian(body.data)
+        } catch (err) {
+          console.error('Gagal load users:', err.message);
+          if (err.message.includes('401')) {
+            alert('Sesi kadaluwarsa. Silakan login kembali.');
+            window.location.href = '/login.html';
           }
-        });
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const body = await res.json();
-        renderUsers(body.data);
-      } catch (err) {
-        console.error('Gagal load users:', err.message);
-        if (err.message.includes('401')) {
-          alert('Sesi kadaluwarsa. Silakan login kembali.');
-          window.location.href = '/login.html';
         }
       }
-    }
 
-    const tbody = document.getElementById('user-table-body');
-    function renderUsers(users) {
-      tbody.innerHTML = '';
-      users.forEach(u => {
-        const tr = document.createElement('tr');
-        tr.dataset.id = u.id;
-        tr.innerHTML = `
-          <td>${u.id}</td>
-          <td>${u.name}</td>
-          <td>${u.email}</td>
-          <td class="role">${u.role}</td>
+      loadUsers()
+
+      const tbody = document.getElementById('user-table-body');
+      function renderNomorAntrian(users) {
+        tbody.innerHTML = '';
+        users.forEach((u) => {
+          const tr = document.createElement('tr');
+          tr.dataset.id = u.id;
+          tr.innerHTML = `
+          <td>${u.nomor_Antrian}</td>
         `;
-        tbody.appendChild(tr);
-      });
-    }
-
-
-    loadUsers();
-
-    const socket = io('http://localhost:3000', {
-      auth: { token }
-    });
-
-    socket.on('connect', () => {
-      console.log('Terhubung ke WebSocket');
-      socket.emit('join_room', { role: 'ADMIN' });
-    });
-
-    socket.on('connect_error', err => {
-      console.error('Gagal konek WebSocket:', err.message);
-    });
-
-    socket.on('users_update', user => {
-      console.log('User update diterima:', user);
-      updateUserRow(user);
-    });
-
-    function updateUserRow(u) {
-      const row = document.querySelector(`tr[data-id="${u.id}"]`);
-      if (row) {
-        row.querySelector('td:nth-child(2)').textContent = u.name;
-        row.querySelector('td:nth-child(3)').textContent = u.email;
-        row.querySelector('.role').textContent = u.role;
-      } else {
-        const tr = document.createElement('tr');
-        tr.dataset.id = u.id;
-        tr.innerHTML = `
-          <td>${u.id}</td>
-          <td>${u.name}</td>
-          <td>${u.email}</td>
-          <td class="role">${u.role}</td>
-        `;
-        tbody.appendChild(tr);
+          tbody.appendChild(tr);
+        });
       }
-    }
-  </script>
-</body>
+
+      const socket = io('http://localhost:3000', {
+        auth: { token },
+      });
+
+      socket.on('connect', () => {
+        console.log('Terhubung ke WebSocket');
+        socket.emit('join_room', { role: 'ADMINUSERS' });
+      });
+
+      socket.on('connect_error', (err) => {
+        console.error('Gagal konek WebSocket:', err.message);
+      });
+
+      socket.on('antrian_pasiens_update', (data) => {
+        console.log('antrian pasien update diterima:', data);
+        updatePasienRow(data)
+      });
+
+      function updatePasienRow(u) {
+        const row = document.querySelector(`tr[data-id="${u.id}"]`);
+        if (row) {
+          row.querySelector('td:nth-child(2)').textContent = u.name;
+          row.querySelector('td:nth-child(3)').textContent = u.email;
+          row.querySelector('.role').textContent = u.role;
+        } else {
+          const tr = document.createElement('tr');
+          tr.dataset.id = u.id;
+          tr.innerHTML = `
+          <td>${u.nomor_Antrian}</td>
+        `;
+          tbody.appendChild(tr);
+        }
+      }
+    </script>
+  </body>
 </html>

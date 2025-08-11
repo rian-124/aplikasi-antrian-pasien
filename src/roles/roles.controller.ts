@@ -48,9 +48,9 @@ export class RolesController {
     description: 'Menambahkan data peran (role) baru ke dalam sistem.',
   })
   async store(
-    @Body() request: CreateRolesDto,
+    @Body() body: CreateRolesDto,
   ): Promise<WebResponse<RolesResponse>> {
-    const result = await this.rolesServices.createRoles(request);
+    const result = await this.rolesServices.createRoles(body);
     return { data: result };
   }
 
@@ -62,9 +62,9 @@ export class RolesController {
   })
   async updateRoles(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: UpdateRolesDto,
+    @Body() body: UpdateRolesDto,
   ): Promise<WebResponse<Roles>> {
-    const result = await this.rolesServices.updateRoles(id, request);
+    const result = await this.rolesServices.updateRoles(id, body);
     return ResponseHelper.ok('Successfully changed role data', result);
   }
 

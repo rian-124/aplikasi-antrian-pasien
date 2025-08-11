@@ -49,6 +49,11 @@ export class AntrianPasienController {
 
   @Get('/nomor-antrian-pasien')
   @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get all nomor antrian pasien',
+    description:
+      'Mengambil semua data nomor antrian dengan name user, dan jenis registrasinya.',
+  })
   async getNomorAntrian(
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
@@ -84,12 +89,12 @@ export class AntrianPasienController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: UpdateStatusAntrianDto,
+    @Body() body: UpdateStatusAntrianDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<AntrianPasiens>> {
     const result = await this.antrianPasienService.updateStatusAntrian(
       id,
-      request,
+      body,
       req,
     );
     return ResponseHelper.ok('Successfully updated id antrian pasiens', result);

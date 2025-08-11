@@ -23,12 +23,12 @@ export class PasiensService {
   ) {}
 
   async storePasiens(
-    request: CreatePasiensDto,
+    body: CreatePasiensDto,
     req: AuthenticatedRequest,
   ): Promise<Pasiens> {
     const jenis = await this.prismaService.jenisRegistrasis.findUnique({
       where: {
-        jenis: request.jenis,
+        jenis: body.jenis,
       },
     });
 
@@ -68,7 +68,7 @@ export class PasiensService {
       throw new NotFoundException(`Tahap registrasi ${tahap} tidak ditemukan`);
     }
 
-    const prefix = request.jenis === Jenis.UMUM ? 'U' : 'J';
+    const prefix = body.jenis === Jenis.UMUM ? 'U' : 'J';
 
     const lastNomor = await this.prismaService.antrianPasiens.findFirst({
       where: {
@@ -119,7 +119,7 @@ export class PasiensService {
 
   async updatePasiensPenjamins(
     id: number,
-    request: UpdatePasiensDto,
+    body: UpdatePasiensDto,
   ): Promise<Pasiens> {
     const pasiens = await this.prismaService.pasiens.findUnique({
       where: {
@@ -136,7 +136,7 @@ export class PasiensService {
 
     const penjamins = await this.prismaService.penjamins.findUnique({
       where: {
-        id: request.penjamin_id,
+        id: body.penjamin_id,
       },
       include: {
         jenis_registrasi: true,
@@ -158,7 +158,7 @@ export class PasiensService {
         id: id,
       },
       data: {
-        penjamin_id: request.penjamin_id,
+        penjamin_id: body.penjamin_id,
       },
     });
 

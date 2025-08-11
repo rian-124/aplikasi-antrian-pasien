@@ -36,10 +36,10 @@ export class PasiensController {
       'Membuat data pasien baru berdasarkan input dari form, baik untuk jaminan maupun umum.',
   })
   async store(
-    @Body() request: CreatePasiensDto,
+    @Body() body: CreatePasiensDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<Pasiens>> {
-    const result = await this.pasienService.storePasiens(request, req);
+    const result = await this.pasienService.storePasiens(body, req);
 
     return ResponseHelper.ok('Successfully added patient data', result);
   }
@@ -48,9 +48,9 @@ export class PasiensController {
   @HttpCode(200)
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: UpdatePasiensDto,
+    @Body() body: UpdatePasiensDto,
   ): Promise<WebResponse<Pasiens>> {
-    const result = await this.pasienService.updatePasiensPenjamins(id, request);
+    const result = await this.pasienService.updatePasiensPenjamins(id, body);
 
     return ResponseHelper.ok('Successfully update patient data', result);
   }

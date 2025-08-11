@@ -23,12 +23,12 @@ export class UserService {
     private prismaService: PrismaService,
   ) {}
 
-  async register(request: RegisterUserDto): Promise<UserResponseRegister> {
-    this.logger.info(`Register new user: ${request.email}`);
+  async register(body: RegisterUserDto): Promise<UserResponseRegister> {
+    this.logger.info(`Register new user: ${body.email}`);
 
     const totalUserWithSameEmail = await this.prismaService.users.count({
       where: {
-        email: request.email,
+        email: body.email,
       },
     });
 
@@ -36,15 +36,15 @@ export class UserService {
       throw new HttpException('Username already exists', 400);
     }
 
-    request.password = await bcrypt.hash(request.password, 10);
+    body.password = await bcrypt.hash(body.password, 10);
 
     const user = await this.prismaService.users.create({
       data: {
-        email: request.email,
-        name: request.name,
-        password: request.password,
-        outlet_id: request.outlet_id,
-        role_id: request.role_id,
+        email: body.email,
+        name: body.name,
+        password: body.password,
+        outlet_id: body.outlet_id,
+        role_id: body.role_id,
       },
     });
 
@@ -92,10 +92,10 @@ export class UserService {
     return dataUsers;
   }
 
-  async getUserByRoleAdmin(request: string): Promise<Users[]> {
+  async getUserByRoleAdmin(body: string): Promise<Users[]> {
     const adminRole = await this.prismaService.roles.findFirst({
       where: {
-        name: request,
+        name: body,
       },
     });
 
@@ -115,8 +115,8 @@ export class UserService {
     return dataRoleAdmin;
   }
 
-  async updateUser(id: number, request: UpdateUserDto): Promise<Users> {
-    this.logger.info(`Update user : ${request.email}`);
+  async updateUser(id: number, body: UpdateUserDto): Promise<Users> {
+    this.logger.info(`Update user : ${body.email}`);
 
     const existingUser = await this.prismaService.users.findUnique({
       where: {
@@ -130,18 +130,18 @@ export class UserService {
 
     const data: UpdateUserDto = {};
 
-    if (request.name !== undefined) data.name = request.name;
+    if (body.name !== undefined) data.name = body.name;
 
-    if (request.email !== undefined) data.email = request.email;
+    if (body.email !== undefined) data.email = body.email;
 
-    if (request.password !== undefined)
-      data.password = await bcrypt.hash(request.password, 10);
+    if (body.password !== undefined)
+      data.password = await bcrypt.hash(body.password, 10);
 
-    if (request.outlet_id !== undefined) {
-      data.outlet_id = request.outlet_id;
+    if (body.outlet_id !== undefined) {
+      data.outlet_id = body.outlet_id;
     }
 
-    if (request.role_id !== undefined) data.role_id = request.role_id;
+    if (body.role_id !== undefined) data.role_id = body.role_id;
 
     const updateUser = await this.prismaService.users.update({
       where: { id },

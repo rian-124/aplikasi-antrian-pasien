@@ -56,9 +56,9 @@ export class OutletController {
   })
   @ApiResponse({ status: 200, description: 'Berhasil menambahkan outlet.' })
   async storeOutlets(
-    @Body() request: CreateOutletsDto,
+    @Body() body: CreateOutletsDto,
   ): Promise<WebResponse<OutletsResponse>> {
-    await this.outletService.storeOutlets(request);
+    await this.outletService.storeOutlets(body);
 
     return ResponseHelper.ok('Successfully added data outlets');
   }
@@ -72,9 +72,9 @@ export class OutletController {
   @ApiResponse({ status: 200, description: 'Berhasil memperbarui outlet.' })
   async updateOutlets(
     @Param('id', ParseIntPipe) id: number,
-    @Body() request: UpdateOutletsDto,
+    @Body() body: UpdateOutletsDto,
   ): Promise<WebResponse<OutletsResponse>> {
-    await this.outletService.updateOutlets(id, request);
+    await this.outletService.updateOutlets(id, body);
 
     return ResponseHelper.ok('Successfully updates data outlets');
   }

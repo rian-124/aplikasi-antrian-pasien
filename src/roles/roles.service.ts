@@ -27,12 +27,12 @@ export class RolesService {
     return dataRole;
   }
 
-  async createRoles(request: CreateRolesDto): Promise<RolesResponse> {
-    this.logger.info(`Add new roles ${request.name}`);
+  async createRoles(body: CreateRolesDto): Promise<RolesResponse> {
+    this.logger.info(`Add new roles ${body.name}`);
 
     const totalRolesWithSameRoles = await this.prismaService.roles.count({
       where: {
-        name: request.name,
+        name: body.name,
       },
     });
 
@@ -42,7 +42,7 @@ export class RolesService {
 
     const roles = await this.prismaService.roles.create({
       data: {
-        name: request.name,
+        name: body.name,
       },
     });
 
@@ -53,7 +53,7 @@ export class RolesService {
     };
   }
 
-  async updateRoles(id: number, request: UpdateRolesDto): Promise<Roles> {
+  async updateRoles(id: number, body: UpdateRolesDto): Promise<Roles> {
     const rolesData = await this.prismaService.roles.findUnique({
       where: { id },
     });
@@ -66,18 +66,18 @@ export class RolesService {
 
     const totalRolesWithSameRoles = await this.prismaService.roles.count({
       where: {
-        name: request.name,
+        name: body.name,
       },
     });
 
     if (totalRolesWithSameRoles !== 0) {
-      throw new HttpException(`Roles ${request.name} sudah ada`, 400);
+      throw new HttpException(`Roles ${body.name} sudah ada`, 400);
     }
 
     const updateRole = await this.prismaService.roles.update({
       where: { id },
       data: {
-        name: request.name,
+        name: body.name,
       },
     });
 

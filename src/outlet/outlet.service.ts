@@ -18,10 +18,10 @@ export class OutletService {
     return dataAllOutlets;
   }
 
-  async storeOutlets(request: CreateOutletsDto) {
+  async storeOutlets(body: CreateOutletsDto) {
     const dataOutletsWithSameName = await this.prismaService.outlets.count({
       where: {
-        nama_outlet: request.nama_outlet,
+        nama_outlet: body.nama_outlet,
       },
     });
 
@@ -31,7 +31,7 @@ export class OutletService {
 
     const addOutlets = await this.prismaService.outlets.create({
       data: {
-        nama_outlet: request.nama_outlet,
+        nama_outlet: body.nama_outlet,
       },
     });
 
@@ -40,7 +40,7 @@ export class OutletService {
     return addOutlets;
   }
 
-  async updateOutlets(id: number, request: UpdateOutletsDto) {
+  async updateOutlets(id: number, body: UpdateOutletsDto) {
     const dataOutlets = await this.prismaService.outlets.findUnique({
       where: { id },
     });
@@ -53,13 +53,13 @@ export class OutletService {
 
     const dataOutletsWithSameName = await this.prismaService.outlets.count({
       where: {
-        nama_outlet: request.nama_outlet,
+        nama_outlet: body.nama_outlet,
       },
     });
 
     if (dataOutletsWithSameName !== 0) {
       throw new HttpException(
-        `Outlets ${request.nama_outlet} tidak di temukan`,
+        `Outlets ${body.nama_outlet} tidak di temukan`,
         400,
       );
     }
@@ -67,7 +67,7 @@ export class OutletService {
     const updateOutlets = await this.prismaService.outlets.update({
       where: { id },
       data: {
-        nama_outlet: request.nama_outlet,
+        nama_outlet: body.nama_outlet,
       },
     });
 

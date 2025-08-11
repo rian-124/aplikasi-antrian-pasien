@@ -69,9 +69,9 @@ export class PenjaminsController {
   })
   async storePenjamins(
     @Body()
-    request: CreatePenjaminsDto,
+    body: CreatePenjaminsDto,
   ): Promise<WebResponse<Penjamins>> {
-    const result = await this.penjaminsService.createPenjamins(request);
+    const result = await this.penjaminsService.createPenjamins(body);
 
     return ResponseHelper.ok('Successfully added new penjamins', result);
   }
@@ -85,9 +85,9 @@ export class PenjaminsController {
   })
   async updatePenjamins(
     @Param('id') id: number,
-    @Body() request: UpdatePenjaminsDto,
+    @Body() body: UpdatePenjaminsDto,
   ): Promise<WebResponse<Penjamins>> {
-    const result = await this.penjaminsService.updatePenjamins(id, request);
+    const result = await this.penjaminsService.updatePenjamins(id, body);
 
     return ResponseHelper.ok('Successfully update data penjamins', result);
   }
