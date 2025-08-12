@@ -20,6 +20,9 @@ export default function UserTable() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
 
+  const [searchText, setSearchText] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
@@ -35,15 +38,14 @@ export default function UserTable() {
   };
 
   useEffect(() => {
-  const token = AuthService.getToken();
-  console.log('Auth Token:', token);
+    const token = AuthService.getToken();
+    console.log('Auth Token:', token);
     if (!token) {
       toast.error("Authentication required. Please log in.");
       return;
     }
     fetchUsers();
   }, []);
-
 
   const getRoleName = (roleId: number) => {
     return roleId === 1 ? "Admin" : "Table";
@@ -64,16 +66,16 @@ export default function UserTable() {
   };
 
   useEffect(() => {
-  const fetchOutlets = async () => {
-    const outletData = await UserService.fetchOutlets();
-    setOutlets(outletData);
-  };
-  fetchOutlets();
-}, []);
+    const fetchOutlets = async () => {
+      const outletData = await UserService.fetchOutlets();
+      setOutlets(outletData);
+    };
+    fetchOutlets();
+  }, []);
 
   const handleEdit = (user: User) => {
-  setSelectedUser(user);
-  setIsEditModalOpen(true);
+    setSelectedUser(user);
+    setIsEditModalOpen(true);
   };
 
   const handleSaveEdit = async (updatedUser: User) => {
@@ -88,6 +90,19 @@ export default function UserTable() {
     }
   };
 
+  const filteredUsers = users.filter(user => {
+    const searchMatch =
+      user.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.outlet_id?.toString().includes(searchText);
+
+    const roleMatch =
+      roleFilter === "" ||
+      (roleFilter === "Admin" && getRoleName(user.role_id) === "Admin") ||
+      (roleFilter === "Table" && getRoleName(user.role_id) === "Table");
+
+    return searchMatch && roleMatch;
+  });
 
   return (
     <>
@@ -127,16 +142,25 @@ export default function UserTable() {
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
           <input
             type="text"
-            placeholder="Search Email / name / Outlet ..."
+            placeholder="Search Email / Name / Outlet ..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             className="flex-1 px-4 py-2 border border-gray-300 bg-white rounded-md text-sm"
           />
-          <select className="border border-gray-300 bg-white rounded-md px-4 py-2 text-sm">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="border border-gray-300 bg-white rounded-md px-4 py-2 text-sm"
+          >
             <option value="">User Permissions</option>
             <option value="Admin">Admin</option>
-            <option value="Cashier">Table</option>
+            <option value="Table">Table</option>
           </select>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition">
-            Search
+          <button
+            onClick={() => { setSearchText(""); setRoleFilter(""); }}
+            className="bg-gray-500 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-600 transition"
+          >
+            Reset
           </button>
         </div>
 
@@ -166,7 +190,7 @@ export default function UserTable() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user, index) => (
+                {filteredUsers.map((user, index) => (
                   <tr key={user.id} className="border-t border-gray-200">
                     <td className="px-6 py-4">{index + 1}</td>
                     <td className="px-6 py-4">{user.email}</td>

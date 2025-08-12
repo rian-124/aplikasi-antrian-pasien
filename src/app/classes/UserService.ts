@@ -24,13 +24,13 @@ export class UserService {
 
     if (json.status === 200 && Array.isArray(json.data)) {
       return json.data.map((user: any) => {
-        const outletName = user.outlets?.nama_outlet || `Outlet ${user.outlet_id}`;
         return new User(
           user.id,
           user.email,
           user.name,
-          outletName,
-          user.role_id
+          Number(user.outlet_id), // pastikan number
+          user.outlets?.nama_outlet || `Outlet ${user.outlet_id}`,
+          Number(user.role_id)
         );
       });
     }
@@ -105,8 +105,8 @@ export class UserService {
       body: JSON.stringify({
         email: updatedUser.email,
         name: updatedUser.name,
-        outlet_id: updatedUser.outlet_id,
-        role_id: updatedUser.role_id,
+        outlet_id: Number(updatedUser.outlet_id),
+        role_id: Number(updatedUser.role_id),
       }),
     });
 
@@ -124,7 +124,6 @@ export class UserService {
     console.log("✅ Update User Success:", json);
     return json;
   }
-
 
   static async createUser(userData: {
     email: string;

@@ -39,8 +39,8 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
     if (isOpen && userData && outlets.length > 0) {
       setEmail(userData.email);
       setName(userData.name);
-      setOutletId(userData.outlet_id);  
-      setSelectedRoleId(userData.role_id);
+      setOutletId(Number(userData.outlet_id));
+      setSelectedRoleId(Number(userData.role_id));
     }
   }, [userData, isOpen, outlets]);
 
@@ -54,8 +54,9 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
       userData!.id,
       email,
       name,
-      outletId,
-      selectedRoleId
+      Number(outletId),
+      userData!.outlet_name, 
+      Number(selectedRoleId)
     );
 
     onSave(updatedUser);

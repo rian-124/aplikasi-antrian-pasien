@@ -7,6 +7,7 @@ class Patient {
   outlet: string;
   userName: string;
   bintang: number;
+  jenisRegistrasiId: number;
   status: PatientStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +21,7 @@ class Patient {
     outlet: string,
     userName: string,
     bintang: number,
+    jenisRegistrasiId: number,
     status: PatientStatus,
     createdAt: Date,
     updatedAt: Date
@@ -32,6 +34,7 @@ class Patient {
     this.outlet = outlet;
     this.userName = userName;
     this.bintang = bintang;
+    this.jenisRegistrasiId = jenisRegistrasiId;
     this.status = status;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
@@ -42,21 +45,28 @@ class Patient {
       throw new Error("Invalid patient data: data is null or undefined");
     }
 
-    const outletId = data.outlet_id ?? 0;
+    const outletId = data.outlet_id ?? data.outletId ?? 0;
     const outletName = outletMap.get(outletId) ?? "-";
 
     return new Patient(
       data.id ?? 0,
       index + 1,
-      data.nomor_Antrian ?? "-",
-      data.pasien?.nomor_registrasi ?? "-",
+      data.patientNumber 
+        ?? data.nomor_Antrian 
+        ?? data.pasien?.nomor_registrasi 
+        ?? "-",  
+      data.labReg 
+        ?? data.lab_reg 
+        ?? data.pasien?.nomor_registrasi 
+        ?? "-",
       outletId,
       outletName,
-      data.users?.name ?? "-",
+      data.users?.name ?? data.userName ?? "-",
       data.bintang ?? 0,
-      data.status_antrian?.status as PatientStatus ?? "WAITING",
-      new Date(data.created_at ?? Date.now()),
-      new Date(data.updated_at ?? Date.now())
+      data.pasien?.jenis_registrasi_id ?? data.jenisRegistrasiId ?? 0,
+      (data.status_antrian?.status ?? data.status) as PatientStatus ?? "WAITING",
+      new Date(data.created_At ?? data.createdAt ?? data.created_at ?? Date.now()),
+      new Date(data.update_At ?? data.updatedAt ?? data.updated_at ?? Date.now())
     );
   }
 }

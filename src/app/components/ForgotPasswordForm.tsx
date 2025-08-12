@@ -11,10 +11,30 @@ export default function ForgotPasswordForm() {
 
   const [email, setEmail] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted email for password reset:', email);
-    router.push('/forgot-password/reset');
+
+    try {
+      const res = await fetch('http://192.168.50.2:4000/api/users/check-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        console.log('✅ Email ditemukan:', data);
+        localStorage.setItem('resetToken', data.data.token);
+        router.push('/forgot-password/reset');
+      } else {
+        alert(data.message || 'Email tidak ditemukan');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Terjadi kesalahan. Coba lagi.');
+    }
   };
 
   return (
@@ -35,7 +55,8 @@ export default function ForgotPasswordForm() {
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition">
+          className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition"
+        >
           Send
         </button>
       </form>

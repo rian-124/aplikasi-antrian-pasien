@@ -27,7 +27,7 @@ export default function PatientTable({
         <div className="mb-4 px-4 flex gap-2">
           <input
             type="text"
-            placeholder="Cari No. Antrian / Registrasi / Nama"
+            placeholder="No. Antrian / Registrasi / Nama"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
