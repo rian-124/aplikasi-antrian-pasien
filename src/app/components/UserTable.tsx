@@ -10,6 +10,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AuthService } from '../classes/AuthService';
 import EditUserModal from './EditUserModal';
 import { Outlet } from '../classes/UserModel';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 export default function UserTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,8 +32,8 @@ export default function UserTable() {
       const data = await UserService.fetchUsers();
       setUsers(data);
     } catch (err: any) {
-      console.error("Failed to fetch users:", err);
-      setError(err.message || "Failed to load users");
+      console.error("Gagal mengambil data pengguna:", err);
+      setError(err.message || "Gagal memuat data pengguna");
     } finally {
       setLoading(false);
     }
@@ -41,7 +43,7 @@ export default function UserTable() {
     const token = AuthService.getToken();
     console.log('Auth Token:', token);
     if (!token) {
-      toast.error("Authentication required. Please log in.");
+      toast.error("Autentikasi diperlukan. Silakan login terlebih dahulu.");
       return;
     }
     fetchUsers();
@@ -52,17 +54,27 @@ export default function UserTable() {
   };
 
   const handleDelete = async (userId: number) => {
-    const confirmDelete = confirm("Are you sure you want to delete this user?");
-    if (!confirmDelete) return;
-
-    try {
-      await UserService.deleteUser(userId);
-      toast.success("User deleted successfully");
-      fetchUsers();
-    } catch (error: any) {
-      console.error("Delete error:", error);
-      toast.error(error.message || "Failed to delete user");
-    }
+    Swal.fire({
+      title: 'Konfirmasi Hapus',
+      text: 'Apakah Anda yakin ingin menghapus pengguna ini?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await UserService.deleteUser(userId);
+          Swal.fire('Berhasil', 'Pengguna berhasil dihapus.', 'success');
+          fetchUsers();
+        } catch (error: any) {
+          console.error("Error hapus:", error);
+          Swal.fire('Gagal', error.message || 'Gagal menghapus pengguna', 'error');
+        }
+      }
+    });
   };
 
   useEffect(() => {
@@ -81,12 +93,12 @@ export default function UserTable() {
   const handleSaveEdit = async (updatedUser: User) => {
     try {
       await UserService.updateUser(updatedUser);
-      toast.success("User updated successfully");
+      toast.success("Pengguna berhasil diperbarui");
       setIsEditModalOpen(false);
       fetchUsers();
     } catch (err: any) {
-      console.error("Update error:", err);
-      toast.error(err.message || "Failed to update user");
+      console.error("Error update:", err);
+      toast.error(err.message || "Gagal memperbarui pengguna");
     }
   };
 
@@ -129,20 +141,20 @@ export default function UserTable() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div className="flex items-center gap-2 text-base font-semibold text-gray-800">
             <UserPlus2 className="w-6 h-6 mr-2 text-gray-700" />
-            Users List
+            Daftar Pengguna
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition"
           >
-            + Add New User
+            + Tambah Pengguna Baru
           </button>
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
           <input
             type="text"
-            placeholder="Search Email / Name / Outlet ..."
+            placeholder="Cari Email / Nama / Outlet ..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className="flex-1 px-4 py-2 border border-gray-300 bg-white rounded-md text-sm"
@@ -152,7 +164,7 @@ export default function UserTable() {
             onChange={(e) => setRoleFilter(e.target.value)}
             className="border border-gray-300 bg-white rounded-md px-4 py-2 text-sm"
           >
-            <option value="">User Permissions</option>
+            <option value="">Hak Akses</option>
             <option value="Admin">Admin</option>
             <option value="Table">Table</option>
           </select>
@@ -166,7 +178,7 @@ export default function UserTable() {
 
         <div className="overflow-x-auto">
           {loading ? (
-            <p className="text-sm text-gray-600 px-4 py-2">Loading users...</p>
+            <p className="text-sm text-gray-600 px-4 py-2">Memuat data pengguna...</p>
           ) : error ? (
             <p className="text-sm text-red-500 px-4 py-2">{error}</p>
           ) : (
@@ -183,10 +195,10 @@ export default function UserTable() {
                 <tr>
                   <th className="px-6 py-3">No.</th>
                   <th className="px-6 py-3">Email</th>
-                  <th className="px-6 py-3">Name</th>
+                  <th className="px-6 py-3">Nama</th>
                   <th className="px-6 py-3">Outlet</th>
-                  <th className="px-6 py-3">User Permissions</th>
-                  <th className="px-6 py-3">Action</th>
+                  <th className="px-6 py-3">Hak Akses</th>
+                  <th className="px-6 py-3">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -210,7 +222,7 @@ export default function UserTable() {
                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"
                         onClick={() => handleDelete(user.id)}
                       >
-                        Delete
+                        Hapus
                       </button>
                     </td>
                   </tr>

@@ -1,7 +1,8 @@
 "use client";
 
-import { Circle, Star } from "lucide-react";
+import { Circle } from "lucide-react";
 import { Patient } from "../classes/Patient";
+import Swal from "sweetalert2"; // ✅ import sweetalert2
 
 interface QueueDetailProps {
   onComplete: () => void;
@@ -18,6 +19,24 @@ export default function QueueDetail({
   onRecall,
   onCancel,
 }: QueueDetailProps) {
+  const confirmAction = (title: string, text: string, callback: () => void) => {
+    Swal.fire({
+      title,
+      text,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#16a34a",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Lanjutkan",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        callback();
+        Swal.fire("Berhasil!", "Aksi telah dijalankan.", "success");
+      }
+    });
+  };
+
   return (
     <div className="space-y-6 h-flex flex flex-col p-1">
       <div className="bg-white rounded-xl p-6 shadow space-y-6 flex-1 flex flex-col">
@@ -55,7 +74,14 @@ export default function QueueDetail({
               <div className="flex items-center gap-1">
                 <p className="font-semibold mr-2">Calling</p>
                 {Array.from({ length: 2 }, (_, i) => (
-                  <Circle key={i} className={`w-5 h-5 ${i < currentPatient.bintang ? "text-blue-500 fill-blue-500" : "text-gray-300"}`} />
+                  <Circle
+                    key={i}
+                    className={`w-5 h-5 ${
+                      i < currentPatient.bintang
+                        ? "text-blue-500 fill-blue-500"
+                        : "text-gray-300"
+                    }`}
+                  />
                 ))}
               </div>
             </div>
@@ -63,19 +89,37 @@ export default function QueueDetail({
             <div className="flex flex-col gap-4 items-end mt-6 md:mt-0">
               <div className="flex flex-col gap-3 w-32">
                 <button
-                  onClick={onComplete}
+                  onClick={() =>
+                    confirmAction(
+                      "Selesaikan Pasien?",
+                      "Pasien akan ditandai sebagai COMPLETE",
+                      onComplete
+                    )
+                  }
                   className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Complete
                 </button>
                 <button
-                  onClick={onRecall}
+                  onClick={() =>
+                    confirmAction(
+                      "Recall Pasien?",
+                      "Pasien akan dipanggil kembali",
+                      onRecall
+                    )
+                  }
                   className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Recall
                 </button>
                 <button
-                  onClick={onCancel}
+                  onClick={() =>
+                    confirmAction(
+                      "Batalkan Pasien?",
+                      "Pasien akan ditandai sebagai CANCELED",
+                      onCancel
+                    )
+                  }
                   className="bg-rose-500 hover:bg-rose-600 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Cancel
