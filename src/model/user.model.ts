@@ -4,7 +4,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UserRegisterRequest {
   @ApiProperty()
-  email: string;
+  username: string;
   @ApiProperty()
   name: string;
   @ApiProperty()
@@ -16,7 +16,7 @@ export class UserRegisterRequest {
 }
 export class UserUpdateRequest {
   @ApiPropertyOptional()
-  email?: string;
+  username?: string;
   @ApiPropertyOptional()
   name?: string;
   @ApiPropertyOptional()
@@ -37,7 +37,7 @@ export class UserDeleteResponse {
 }
 
 export class UserResponseRegister {
-  email: string;
+  username: string;
 }
 
 export class UserResponseGetAll {
@@ -50,7 +50,7 @@ export class UserResponseLogin {
 
 export class LoginRequest {
   @ApiProperty()
-  email: string;
+  username: string;
   @ApiProperty()
   password: string;
 }

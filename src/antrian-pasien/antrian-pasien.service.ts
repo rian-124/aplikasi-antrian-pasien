@@ -1,6 +1,10 @@
 import { PrismaService } from '../common/prisma.service';
 import { Status } from '../model/pasiens.model';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { WebSocketGateaway } from '../common/websocket.gateaway';
 import { AntrianPasiens } from '@prisma/client';
 import { AuthenticatedRequest } from 'src/model/user.model';
@@ -36,6 +40,7 @@ export class AntrianPasienService {
         status_antrian: true,
         pasien: true,
         users: true,
+        lokets: true,
       },
     });
 
@@ -76,6 +81,7 @@ export class AntrianPasienService {
               },
             },
           },
+          lokets: true,
         },
       });
 
@@ -188,17 +194,25 @@ export class AntrianPasienService {
       throw new NotFoundException(`User id ${users} tidak di temukan`);
     }
 
+    if (users.loket_id === null) {
+      throw new BadRequestException(
+        'Tidak dapat melakukan update status antrian user belum memiliki loket',
+      );
+    }
+
     const updatedAntrian = await this.prismaService.antrianPasiens.update({
       where: { id },
       data: {
         status_antrian_id: statusAntrian.id,
         bintang: incrementBintang,
         user_id: req.user.sub,
+        loket_id: users.loket_id,
       },
       include: {
         pasien: true,
         users: true,
         outlets: true,
+        lokets: true,
       },
     });
 

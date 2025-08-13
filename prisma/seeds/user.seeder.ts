@@ -7,11 +7,18 @@ export class UserSeeder {
   async seed() {
     const rawData = [
       {
-        email: 'arifin123@gmail.com',
+        username: 'arifin123',
         name: 'arifin',
         password: '123456',
         outlet_id: 1,
         role_id: 1,
+      },
+      {
+        username: 'afrian123',
+        name: 'afrian',
+        password: '123456',
+        outlet_id: 2,
+        role_id: 2,
       },
     ];
 

@@ -12,8 +12,8 @@ import {
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { LoginUserDto } from './dtos/login.dto';
 import {
-  CheckEmailDto,
-  CheckEmailResponse,
+  CheckUsernameResponse,
+  CheckUsernameDto,
   JwtEmailUsersPayload,
   ResetPasswordDto,
 } from './dtos/reset-password.dto';
@@ -30,12 +30,12 @@ export class AuthService {
 
   async loginWithCrendentials(body: LoginUserDto): Promise<UserResponseLogin> {
     // info body
-    this.logger.info(`Login user: ${body.email}`);
+    this.logger.info(`Login user: ${body.username}`);
 
     // if user inst valid
     const user = await this.prismaService.users.findUnique({
       where: {
-        email: body.email,
+        username: body.username,
       },
       include: {
         roles: true,
@@ -57,7 +57,7 @@ export class AuthService {
 
     const payload = {
       sub: user.id,
-      email: user.email,
+      username: user.username,
       role: user.roles.name,
       outlet: user.outlets.nama_outlet,
       permission: [`view:${user.roles.name}`],
@@ -74,10 +74,10 @@ export class AuthService {
     return response;
   }
 
-  async checkEmail(body: CheckEmailDto): Promise<CheckEmailResponse> {
+  async checkEmail(body: CheckUsernameDto): Promise<CheckUsernameResponse> {
     const users = await this.prismaService.users.findUnique({
       where: {
-        email: body.email,
+        username: body.username,
       },
     });
 
@@ -87,7 +87,7 @@ export class AuthService {
 
     const payload = {
       sub: users.id,
-      email: users.email,
+      username: users.username,
     };
 
     const token = this.jwtService.sign(payload, { expiresIn: '15m' });

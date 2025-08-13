@@ -46,6 +46,10 @@ export class PasiensController {
 
   @Put(':id')
   @HttpCode(200)
+  @ApiOperation({
+    summary: 'Select options based on patient registration type',
+    description: 'Memilih pilihan registrasi berdasarkan jenis registrasi',
+  })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdatePasiensDto,

@@ -6,8 +6,8 @@ import { WebResponse } from 'src/model/web.model';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dtos/login.dto';
 import {
-  CheckEmailDto,
-  CheckEmailResponse,
+  CheckUsernameDto,
+  CheckUsernameResponse,
   ResetPasswordDto,
 } from './dtos/reset-password.dto';
 import { Users } from '@prisma/client';
@@ -33,8 +33,8 @@ export class AuthController {
   @HttpCode(200)
   async checkEmail(
     @Body()
-    body: CheckEmailDto,
-  ): Promise<WebResponse<CheckEmailResponse>> {
+    body: CheckUsernameDto,
+  ): Promise<WebResponse<CheckUsernameResponse>> {
     const result = await this.authService.checkEmail(body);
 
     return ResponseHelper.ok(

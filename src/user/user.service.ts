@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   Inject,
   Injectable,
@@ -6,13 +7,17 @@ import {
 } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from '../common/prisma.service';
-import { UserResponseRegister } from '../model/user.model';
+import {
+  AuthenticatedRequest,
+  UserResponseRegister,
+} from '../model/user.model';
 import { Logger } from 'winston';
 import * as bcrypt from 'bcrypt';
 import { Users } from '@prisma/client';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateLoketUserDto } from './dtos/updateLoket-user';
 
 @Injectable()
 export class UserService {
@@ -24,11 +29,11 @@ export class UserService {
   ) {}
 
   async register(body: RegisterUserDto): Promise<UserResponseRegister> {
-    this.logger.info(`Register new user: ${body.email}`);
+    this.logger.info(`Register new user: ${body.username}`);
 
     const totalUserWithSameEmail = await this.prismaService.users.count({
       where: {
-        email: body.email,
+        username: body.username,
       },
     });
 
@@ -40,7 +45,7 @@ export class UserService {
 
     const user = await this.prismaService.users.create({
       data: {
-        email: body.email,
+        username: body.username,
         name: body.name,
         password: body.password,
         outlet_id: body.outlet_id,
@@ -51,7 +56,7 @@ export class UserService {
     this.wsGateaway.broadcastToAdmin(user);
 
     return {
-      email: user.email,
+      username: user.username,
     };
   }
 
@@ -77,7 +82,7 @@ export class UserService {
             },
           },
           {
-            email: {
+            username: {
               contains: keyword,
               mode: 'insensitive',
             },
@@ -116,7 +121,7 @@ export class UserService {
   }
 
   async updateUser(id: number, body: UpdateUserDto): Promise<Users> {
-    this.logger.info(`Update user : ${body.email}`);
+    this.logger.info(`Update user : ${body.username}`);
 
     const existingUser = await this.prismaService.users.findUnique({
       where: {
@@ -132,7 +137,7 @@ export class UserService {
 
     if (body.name !== undefined) data.name = body.name;
 
-    if (body.email !== undefined) data.email = body.email;
+    if (body.username !== undefined) data.username = body.username;
 
     if (body.password !== undefined)
       data.password = await bcrypt.hash(body.password, 10);
@@ -151,6 +156,90 @@ export class UserService {
     this.wsGateaway.broadcastToAdmin(updateUser);
 
     return updateUser;
+  }
+
+  async updateUserByLoket(
+    request: AuthenticatedRequest,
+    body: UpdateLoketUserDto,
+  ): Promise<Users> {
+    const users = await this.prismaService.users.findUnique({
+      where: {
+        id: request.user.sub,
+      },
+    });
+
+    if (!users) {
+      throw new NotFoundException(
+        'Tidak dapat menemukan user dengan ID tersebut',
+      );
+    }
+
+    const loket = await this.prismaService.lokets.findUnique({
+      where: {
+        id: body.loket_id,
+      },
+    });
+
+    if (!loket) {
+      throw new NotFoundException(
+        `Tidak dapat menemukan loket dengan ID tersebut`,
+      );
+    }
+
+    const isLoketUsed = await this.prismaService.users.findFirst({
+      where: {
+        loket_id: body.loket_id,
+        id: {
+          not: users.id,
+        },
+      },
+    });
+
+    if (isLoketUsed) {
+      throw new BadRequestException('Loket sudah di gunakan oleh user lain');
+    }
+
+    const userLoketUpdate = await this.prismaService.users.update({
+      where: {
+        id: users.id,
+      },
+      data: {
+        loket_id: body.loket_id,
+      },
+    });
+
+    return userLoketUpdate;
+  }
+
+  async checkoutUserByLoket(request: AuthenticatedRequest): Promise<Users> {
+    const users = await this.prismaService.users.findUnique({
+      where: {
+        id: request.user.sub,
+      },
+    });
+
+    if (!users) {
+      throw new NotFoundException(
+        'Tidak dapat menemukan user dengan ID tersebut',
+      );
+    }
+
+    if (users.loket_id === null) {
+      throw new BadRequestException(
+        'Users belum memiliki locket tidak dapat melakukan checkut',
+      );
+    }
+
+    const checkoutUserByLoket = this.prismaService.users.update({
+      where: {
+        id: users.id,
+      },
+      data: {
+        loket_id: null,
+      },
+    });
+
+    return checkoutUserByLoket;
   }
 
   async deleteUser(id: number) {

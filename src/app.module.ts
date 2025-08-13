@@ -7,6 +7,7 @@ import { AntrianPasienModule } from './antrian-pasien/antrian.pasien.module';
 import { PasiensModule } from './pasiens/pasiens.module';
 import { OutletsModule } from './outlet/outlet.module';
 import { PenjaminsModule } from './penjamins/penjamins.module';
+import { LoketModule } from './loket/loket.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PenjaminsModule } from './penjamins/penjamins.module';
     AntrianPasienModule,
     OutletsModule,
     PenjaminsModule,
+    LoketModule,
   ],
 })
 export class AppModule {}

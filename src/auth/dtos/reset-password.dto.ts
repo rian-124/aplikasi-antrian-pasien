@@ -1,14 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
-import { Request } from 'express';
+import { IsString } from 'class-validator';
 
-export class CheckEmailDto {
+export class CheckUsernameDto {
   @ApiProperty()
-  @IsEmail()
-  email: string;
+  username: string;
 }
 
-export class CheckEmailResponse {
+export class CheckUsernameResponse {
   token?: string | null;
 }
 

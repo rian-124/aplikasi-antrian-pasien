@@ -8,12 +8,18 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { WebResponse } from '../model/web.model';
-import { UserDeleteResponse, UserResponseRegister } from '../model/user.model';
+import {
+  AuthenticatedRequest,
+  UserDeleteResponse,
+  UserResponseRegister,
+} from '../model/user.model';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseHelper } from 'src/common/response.helper';
@@ -22,6 +28,7 @@ import { RegisterUserDto } from './dtos/register-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
+import { UpdateLoketUserDto } from './dtos/updateLoket-user';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -95,6 +102,39 @@ export class UserController {
   ): Promise<WebResponse<Users>> {
     const result = await this.userService.updateUser(id, body);
     return ResponseHelper.ok('successfully changed user data', result);
+  }
+
+  @Put('/loket')
+  @ApiOperation({
+    summary: 'Choose loket for users',
+    description: 'Memilih loket user berdasarkan outlet users.',
+  })
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMIN')
+  async updateUserByLokets(
+    @Req() request: AuthenticatedRequest,
+    @Body() body: UpdateLoketUserDto,
+  ): Promise<WebResponse<Users>> {
+    await this.userService.updateUserByLoket(request, body);
+
+    return ResponseHelper.ok('Successfully update user loket');
+  }
+
+  @Put('/loket/checkout')
+  @ApiOperation({
+    summary: 'Checkout loket user',
+    description: 'Melakukan checkout user outlet jika sudah selesai duty.',
+  })
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMIN', 'view:ADMINUSERS')
+  async checkoutUserByLokets(
+    @Req() request: AuthenticatedRequest,
+  ): Promise<WebResponse<Users>> {
+    await this.userService.checkoutUserByLoket(request);
+
+    return ResponseHelper.ok('Successfully checkout users lokets');
   }
 
   @Delete(':id')
