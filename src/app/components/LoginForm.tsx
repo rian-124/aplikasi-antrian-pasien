@@ -31,23 +31,12 @@ export default function LoginForm() {
     setError(null);
 
     try {
-      const userData = await AuthService.login(formData.email, formData.password);
-
-      const user = {
-        token: userData.token,
-        email: userData.email,
-        role: userData.role,
-        outlet: userData.outlet,
-      };
-
-      localStorage.setItem("user", JSON.stringify(user));
-
+      await AuthService.login(formData.email, formData.password);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message);
     }
   };
-
 
   return (
     <div className="bg-white p-10 rounded-xl shadow-md w-96">

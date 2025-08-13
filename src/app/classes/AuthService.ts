@@ -1,4 +1,5 @@
 import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
 
 interface DecodedToken {
   sub: number;
@@ -29,18 +30,20 @@ export class AuthService {
 
     const token = response.data?.token;
 
-    if (!token || typeof token !== 'string') {
+    if (!token || typeof token !== "string") {
       throw new Error("Invalid token received from backend");
     }
 
-    localStorage.setItem('access_token', token);
+    Cookies.set("access_token", token, { expires: 1 });
+
+    localStorage.setItem("access_token", token);
 
     const decoded: DecodedToken = jwtDecode(token);
 
     const user = {
       token,
       email: decoded.email,
-      role: decoded.role,   
+      role: decoded.role,
       outlet: decoded.outlet,
     };
 
@@ -50,15 +53,17 @@ export class AuthService {
   }
 
   static getToken(): string | null {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('access_token');
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("access_token");
     }
     return null;
   }
 
   static logout() {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('access_token');
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
+      Cookies.remove("access_token");
     }
   }
 

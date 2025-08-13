@@ -2,7 +2,7 @@
 
 import { Circle } from "lucide-react";
 import { Patient } from "../classes/Patient";
-import Swal from "sweetalert2"; // ✅ import sweetalert2
+import Swal from "sweetalert2";
 
 interface QueueDetailProps {
   onComplete: () => void;
