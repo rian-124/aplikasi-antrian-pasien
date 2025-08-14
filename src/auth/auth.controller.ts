@@ -29,16 +29,16 @@ export class AuthController {
     return ResponseHelper.ok('Login successful', result);
   }
 
-  @Post('/check-email')
+  @Post('/check-username')
   @HttpCode(200)
   async checkEmail(
     @Body()
     body: CheckUsernameDto,
   ): Promise<WebResponse<CheckUsernameResponse>> {
-    const result = await this.authService.checkEmail(body);
+    const result = await this.authService.checkUsername(body);
 
     return ResponseHelper.ok(
-      'Email terdaftar silahkan melakukan reset password',
+      'Username terdaftar silahkan melakukan reset password',
       result,
     );
   }

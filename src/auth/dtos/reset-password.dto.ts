@@ -19,7 +19,7 @@ export class ResetPasswordDto {
   newPassword: string;
 }
 
-export class JwtEmailUsersPayload {
+export class JwtUsernameUsersPayload {
   sub: number;
-  email: string;
+  username: string;
 }

@@ -14,7 +14,7 @@ import { LoginUserDto } from './dtos/login.dto';
 import {
   CheckUsernameResponse,
   CheckUsernameDto,
-  JwtEmailUsersPayload,
+  JwtUsernameUsersPayload,
   ResetPasswordDto,
 } from './dtos/reset-password.dto';
 import { Users } from '@prisma/client';
@@ -44,13 +44,13 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new HttpException('email or password is invalid!', 401);
+      throw new HttpException('username or password is invalid!', 401);
     }
 
     const passwordIsValid = await bcrypt.compare(body.password, user?.password);
 
     if (!passwordIsValid) {
-      throw new HttpException('email or password is invalid!', 401);
+      throw new HttpException('username or password is invalid!', 401);
     }
 
     // generate jwt token
@@ -74,7 +74,7 @@ export class AuthService {
     return response;
   }
 
-  async checkEmail(body: CheckUsernameDto): Promise<CheckUsernameResponse> {
+  async checkUsername(body: CheckUsernameDto): Promise<CheckUsernameResponse> {
     const users = await this.prismaService.users.findUnique({
       where: {
         username: body.username,
@@ -82,7 +82,7 @@ export class AuthService {
     });
 
     if (!users) {
-      throw new NotFoundException('Email tidak terdaftar');
+      throw new NotFoundException('Username tidak terdaftar');
     }
 
     const payload = {
@@ -99,7 +99,7 @@ export class AuthService {
   }
 
   async resetPassword(body: ResetPasswordDto): Promise<Users> {
-    const payload: JwtEmailUsersPayload = this.jwtService.verify(body.token);
+    const payload: JwtUsernameUsersPayload = this.jwtService.verify(body.token);
 
     const hashedPassword = await bcrypt.hash(body.newPassword, 10);
 
