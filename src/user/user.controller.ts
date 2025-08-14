@@ -111,7 +111,7 @@ export class UserController {
   })
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @Permissions('view:ADMIN')
+  @Permissions('view:ADMIN', 'view:ADMINUSERS')
   async updateUserByLokets(
     @Req() request: AuthenticatedRequest,
     @Body() body: UpdateLoketUserDto,
