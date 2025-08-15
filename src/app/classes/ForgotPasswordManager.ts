@@ -16,7 +16,12 @@ export class ForgotPasswordManager {
   private field: ForgotPasswordField;
 
   constructor() {
-    this.field = new ForgotPasswordField('Email', 'email', 'email', 'Type email address');
+    this.field = new ForgotPasswordField(
+      'Username',        
+      'username',       
+      'text',           
+      'Enter your username'
+    );
   }
 
   getField(): ForgotPasswordField {

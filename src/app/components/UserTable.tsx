@@ -104,7 +104,7 @@ export default function UserTable() {
 
   const filteredUsers = users.filter(user => {
     const searchMatch =
-      user.email?.toLowerCase().includes(searchText.toLowerCase()) ||
+      user.username?.toLowerCase().includes(searchText.toLowerCase()) ||
       user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
       user.outlet_id?.toString().includes(searchText);
 
@@ -154,7 +154,7 @@ export default function UserTable() {
         <div className="flex flex-col md:flex-row md:items-center gap-3 mb-6">
           <input
             type="text"
-            placeholder="Cari Email / Nama / Outlet ..."
+            placeholder="Cari Username / Nama / Outlet ..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className="flex-1 px-4 py-2 border border-gray-300 bg-white rounded-md text-sm"
@@ -194,7 +194,7 @@ export default function UserTable() {
               <thead className="bg-gray-200 text-gray-700 border-b border-gray-300">
                 <tr>
                   <th className="px-6 py-3">No.</th>
-                  <th className="px-6 py-3">Email</th>
+                  <th className="px-6 py-3">Username</th>
                   <th className="px-6 py-3">Nama</th>
                   <th className="px-6 py-3">Outlet</th>
                   <th className="px-6 py-3">Hak Akses</th>
@@ -205,7 +205,7 @@ export default function UserTable() {
                 {filteredUsers.map((user, index) => (
                   <tr key={user.id} className="border-t border-gray-200">
                     <td className="px-6 py-4">{index + 1}</td>
-                    <td className="px-6 py-4">{user.email}</td>
+                    <td className="px-6 py-4">{user.username}</td>
                     <td className="px-6 py-4">{user.name}</td>
                     <td className="px-6 py-4">{user.outlet_id}</td>
                     <td className="px-6 py-4 text-blue-600 font-medium">

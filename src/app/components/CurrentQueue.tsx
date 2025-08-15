@@ -12,7 +12,7 @@ export default function CurrentQueue({ patient }: { patient: Patient }) {
       </div>
       <div className="border-b border-gray-300 w-full py-4">
         <h2 className="text-gray-700 mb-2 mt-10 font-semibold">Meja</h2>
-        <p className="text-9xl font-extrabold mb-10 text-green-500">{patient.userName}</p>
+        <p className="text-9xl font-extrabold mb-10 text-green-500">{patient.loketId}</p>
       </div>
       <div className="w-full py-4">
         <h2 className="text-gray-700 mb-2 font-semibold mt-10">Jenis</h2>

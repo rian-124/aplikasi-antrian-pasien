@@ -49,6 +49,7 @@ export default function PatientTable({
               <th className="px-6 py-3">No. Pasien</th>
               <th className="px-6 py-3">Lab Reg</th>
               <th className="px-6 py-3">Ruang / Outlet</th>
+              <th className="px-6 py-3">Loket</th>
               <th className="px-6 py-3">Status</th>
             </tr>
           </thead>
@@ -59,6 +60,7 @@ export default function PatientTable({
                 <td className="px-6 py-4">{p.patientNumber}</td>
                 <td className="px-6 py-4">{p.labReg}</td>
                 <td className="px-6 py-4">{p.outlet}</td>
+                <td className="px-6 py-4">{p.loketId}</td>
                 <td className="px-4 py-3">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${

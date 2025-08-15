@@ -39,7 +39,7 @@ export default function Header() {
       const userString = localStorage.getItem('user');
       if (userString) {
         const user = JSON.parse(userString);
-        setUserName(user.name || user.email || 'User');
+        setUserName(user.name || user.username || 'User');
       } else {
         setUserName('Guest');
       }

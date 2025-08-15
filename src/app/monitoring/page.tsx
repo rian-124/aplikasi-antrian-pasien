@@ -160,9 +160,13 @@ export default function MonitoringPage() {
         <QueueList
           items={waitingPatients.map(p => ({
             number: p.patientNumber,
-            table: p.userName,
+            table: p.jenisRegistrasiId, 
             type: p.outlet
           }))}
+          jenisRegistrasiMap={{
+            1: "UMUM",
+            2: "JAMINAN",
+          }}
         />
 
         {currentPatient ? (

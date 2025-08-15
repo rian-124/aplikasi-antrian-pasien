@@ -11,7 +11,7 @@ export default function LoginForm() {
   const formManager = new LoginFormManager();
 
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
     remember: false,
   });
@@ -31,7 +31,7 @@ export default function LoginForm() {
     setError(null);
 
     try {
-      await AuthService.login(formData.email, formData.password);
+      await AuthService.login(formData.username, formData.password);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message);
@@ -41,7 +41,7 @@ export default function LoginForm() {
   return (
     <div className="bg-white p-10 rounded-xl shadow-md w-96">
       <h2 className="text-2xl font-bold text-center mb-1">Login</h2>
-      <p className="text-gray-500 text-center mb-6">Sign in with your email</p>
+      <p className="text-gray-500 text-center mb-6">Sign in with your username</p>
 
       <form onSubmit={handleSubmit}>
         {formManager.getFields().map((field) =>
@@ -50,8 +50,12 @@ export default function LoginForm() {
               <input
                 type={field.type}
                 name={field.name}
-                placeholder={field.placeholder}
-                value={formData[field.name as "email" | "password"]}
+                placeholder={
+                  field.name === "username"
+                    ? "Enter your username"
+                    : field.placeholder
+                }
+                value={formData[field.name as "username" | "password"]}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

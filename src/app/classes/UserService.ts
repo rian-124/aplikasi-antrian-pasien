@@ -26,7 +26,7 @@ export class UserService {
       return json.data.map((user: any) => {
         return new User(
           user.id,
-          user.email,
+          user.username,
           user.name,
           Number(user.outlet_id), // pastikan number
           user.outlets?.nama_outlet || `Outlet ${user.outlet_id}`,
@@ -103,7 +103,7 @@ export class UserService {
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        email: updatedUser.email,
+        username: updatedUser.username,
         name: updatedUser.name,
         outlet_id: Number(updatedUser.outlet_id),
         role_id: Number(updatedUser.role_id),
@@ -121,12 +121,12 @@ export class UserService {
     }
 
     const json = await res.json();
-    console.log("✅ Update User Success:", json);
+    console.log("Update User Success:", json);
     return json;
   }
 
   static async createUser(userData: {
-    email: string;
+    username: string;
     password: string;
     name: string;
     role_id: number;

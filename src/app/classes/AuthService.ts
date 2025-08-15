@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 interface DecodedToken {
   sub: number;
-  email: string;
+  username: string;
   role: string;
   outlet: string;
   permission: string[];
@@ -12,11 +12,17 @@ interface DecodedToken {
 }
 
 export class AuthService {
-  static async login(email: string, password: string) {
+  static async login(username: string, password: string) {
+    // Kirim username apa adanya tanpa tambahan @gmail.com
+    const payload = {
+      username: username.trim(),
+      password: password,
+    };
+
     const res = await fetch("http://192.168.50.2:4000/api/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -35,14 +41,13 @@ export class AuthService {
     }
 
     Cookies.set("access_token", token, { expires: 1 });
-
     localStorage.setItem("access_token", token);
 
     const decoded: DecodedToken = jwtDecode(token);
 
     const user = {
       token,
-      email: decoded.email,
+      username: decoded.username,
       role: decoded.role,
       outlet: decoded.outlet,
     };

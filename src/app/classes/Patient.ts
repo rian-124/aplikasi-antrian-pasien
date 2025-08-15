@@ -1,3 +1,5 @@
+export type PatientStatus = "WAITING" | "CALL" | "COMPLETE" | "CANCELED";
+
 class Patient {
   id: number;
   no: number;
@@ -9,6 +11,7 @@ class Patient {
   bintang: number;
   jenisRegistrasiId: number;
   status: PatientStatus;
+  loketId?: number; 
   createdAt: Date;
   updatedAt: Date;
 
@@ -24,7 +27,8 @@ class Patient {
     jenisRegistrasiId: number,
     status: PatientStatus,
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    loketId?: number
   ) {
     this.id = id;
     this.no = no;
@@ -36,6 +40,7 @@ class Patient {
     this.bintang = bintang;
     this.jenisRegistrasiId = jenisRegistrasiId;
     this.status = status;
+    this.loketId = loketId;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -66,10 +71,10 @@ class Patient {
       data.pasien?.jenis_registrasi_id ?? data.jenisRegistrasiId ?? 0,
       (data.status_antrian?.status ?? data.status) as PatientStatus ?? "WAITING",
       new Date(data.created_At ?? data.createdAt ?? data.created_at ?? Date.now()),
-      new Date(data.update_At ?? data.updatedAt ?? data.updated_at ?? Date.now())
+      new Date(data.update_At ?? data.updatedAt ?? data.updated_at ?? Date.now()),
+      data.loket_id ?? data.loketId 
     );
   }
 }
 
-export type PatientStatus = "WAITING" | "CALL" | "COMPLETE" | "CANCELED";
 export { Patient };

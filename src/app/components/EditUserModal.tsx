@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function EditUserModal({ isOpen, onClose, userData, onSave, outlets }: Props) {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [name, setName] = useState('');
   const [outletId, setOutletId] = useState<number | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -37,7 +37,7 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
 
   useEffect(() => {
     if (isOpen && userData && outlets.length > 0) {
-      setEmail(userData.email);
+      setUsername(userData.username);
       setName(userData.name);
       setOutletId(Number(userData.outlet_id));
       setSelectedRoleId(Number(userData.role_id));
@@ -52,7 +52,7 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
 
     const updatedUser = new User(
       userData!.id,
-      email,
+      username,
       name,
       Number(outletId),
       userData!.outlet_name, 
@@ -70,11 +70,11 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
         <h2 className="text-lg font-semibold mb-4">Edit User</h2>
 
         <InputField
-          label="Email"
-          type="email"
-          value={email}
-          onChange={setEmail}
-          placeholder="Enter email"
+          label="Username"
+          type="text"
+          value={username}
+          onChange={setUsername}
+          placeholder="Enter username"
         />
         <InputField
           label="Name"

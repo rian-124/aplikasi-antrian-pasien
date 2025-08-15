@@ -19,7 +19,11 @@ export default function QueueDetail({
   onRecall,
   onCancel,
 }: QueueDetailProps) {
-  const confirmAction = (title: string, text: string, callback: () => void) => {
+  const confirmAction = (
+    title: string,
+    text: string,
+    callback: () => void
+  ) => {
     Swal.fire({
       title,
       text,
@@ -37,6 +41,24 @@ export default function QueueDetail({
     });
   };
 
+  const handleRecallClick = () => {
+    if (!currentPatient) return;
+    // Jika sudah 2 kali recall, otomatis cancel
+    if (currentPatient.bintang >= 2) {
+      confirmAction(
+        "Batalkan Pasien?",
+        "Pasien sudah dipanggil 2 kali, sekarang akan dibatalkan.",
+        onCancel
+      );
+    } else {
+      confirmAction(
+        "Recall Pasien?",
+        "Pasien akan dipanggil kembali",
+        onRecall
+      );
+    }
+  };
+
   return (
     <div className="space-y-6 h-flex flex flex-col p-1">
       <div className="bg-white rounded-xl p-6 shadow space-y-6 flex-1 flex flex-col">
@@ -44,6 +66,7 @@ export default function QueueDetail({
 
         {currentPatient ? (
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border border-gray-300 rounded-xl p-6">
+            {/* Detail Pasien */}
             <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm text-gray-900">
               <div>
                 <p className="font-semibold">No. Pasien</p>
@@ -86,6 +109,7 @@ export default function QueueDetail({
               </div>
             </div>
 
+            {/* Tombol Aksi */}
             <div className="flex flex-col gap-4 items-end mt-6 md:mt-0">
               <div className="flex flex-col gap-3 w-32">
                 <button
@@ -101,13 +125,7 @@ export default function QueueDetail({
                   Complete
                 </button>
                 <button
-                  onClick={() =>
-                    confirmAction(
-                      "Recall Pasien?",
-                      "Pasien akan dipanggil kembali",
-                      onRecall
-                    )
-                  }
+                  onClick={handleRecallClick}
                   className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Recall
@@ -131,6 +149,7 @@ export default function QueueDetail({
           <p className="text-gray-600">No patient currently being called.</p>
         )}
 
+        {/* Table Pasien */}
         <div className="overflow-x-auto rounded-x">
           <table className="min-w-full text-sm text-left">
             <thead>
@@ -149,7 +168,9 @@ export default function QueueDetail({
                   className="bg-white border-b last:border-b-0 border-gray-300 shadow-sm hover:shadow-md transition rounded-lg"
                 >
                   <td className="px-4 py-3">{i + 1}</td>
-                  <td className="px-4 py-3 font-semibold">{patient.patientNumber}</td>
+                  <td className="px-4 py-3 font-semibold">
+                    {patient.patientNumber}
+                  </td>
                   <td className="px-4 py-3">{patient.labReg}</td>
                   <td className="px-4 py-3">{patient.outlet}</td>
                   <td className="px-4 py-3">

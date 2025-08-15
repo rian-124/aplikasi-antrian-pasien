@@ -5,7 +5,7 @@ export class LoginFormManager {
 
   constructor() {
     this.fields = [
-      new FormField("Email", "email", "email", "Enter your email"),
+      new FormField("Username", "username", "text", "Enter your username"),
       new FormField("Password", "password", "password", "Enter your password"),
     ];
   }

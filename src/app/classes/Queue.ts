@@ -1,5 +1,5 @@
 export interface QueueItem {
     number: string;
-    table: string;
+    table: number;
     type: string;
 }

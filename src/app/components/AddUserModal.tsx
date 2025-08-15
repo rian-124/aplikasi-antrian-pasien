@@ -15,7 +15,7 @@ interface AddUserModalProps {
 export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserModalProps) {
   const [roles, setRoles] = useState<Role[]>([]);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
@@ -60,14 +60,14 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password || !name || !selectedRoleId || !selectedOutletId) {
+    if (!username || !password || !name || !selectedRoleId || !selectedOutletId) {
       toast.error('Please fill all fields');
       return;
     }
 
     try {
       await UserService.createUser({
-        email,
+        username,
         password,
         name,
         role_id: selectedRoleId,
@@ -85,7 +85,7 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
   };
 
   const resetForm = () => {
-    setEmail('');
+    setUsername('');
     setPassword('');
     setName('');
     setSelectedRoleId(null);
@@ -104,11 +104,11 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
           <h2 className="text-lg font-semibold mb-4 text-center">Add New User</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <InputField
-              label="Email"
-              type="email"
-              value={email}
-              onChange={setEmail}
-              placeholder="Enter email"
+              label="Username"
+              type="text"
+              value={username}
+              onChange={setUsername}
+              placeholder="Enter username"
             />
             <InputField
               label="Password"
