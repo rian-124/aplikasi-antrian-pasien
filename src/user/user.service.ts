@@ -17,10 +17,7 @@ import { Users } from '@prisma/client';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import {
-  UpdateLoketUserDto,
-  UpdateLoketUserResponse,
-} from './dtos/updateLoket-user';
+import { UpdateLoketUserDto } from './dtos/updateLoket-user';
 
 @Injectable()
 export class UserService {
@@ -164,7 +161,7 @@ export class UserService {
   async updateUserByLoket(
     request: AuthenticatedRequest,
     body: UpdateLoketUserDto,
-  ): Promise<UpdateLoketUserResponse> {
+  ): Promise<Users> {
     const users = await this.prismaService.users.findUnique({
       where: {
         id: request.user.sub,
@@ -209,16 +206,7 @@ export class UserService {
       data: {
         loket_id: body.loket_id,
       },
-      select: {
-        lokets: {
-          select: {
-            nama_loket: true,
-          },
-        },
-      },
     });
-
-    this.wsGateaway.broadcastToAdmin(userLoketUpdate);
 
     return userLoketUpdate;
   }
@@ -250,8 +238,6 @@ export class UserService {
         loket_id: null,
       },
     });
-
-    this.wsGateaway.broadcastToAdmin(checkoutUserByLoket);
 
     return checkoutUserByLoket;
   }

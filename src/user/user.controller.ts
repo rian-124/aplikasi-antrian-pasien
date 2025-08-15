@@ -28,10 +28,7 @@ import { RegisterUserDto } from './dtos/register-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
-import {
-  UpdateLoketUserDto,
-  UpdateLoketUserResponse,
-} from './dtos/updateLoket-user';
+import { UpdateLoketUserDto } from './dtos/updateLoket-user';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -118,10 +115,10 @@ export class UserController {
   async updateUserByLokets(
     @Req() request: AuthenticatedRequest,
     @Body() body: UpdateLoketUserDto,
-  ): Promise<WebResponse<UpdateLoketUserResponse>> {
-    const result = await this.userService.updateUserByLoket(request, body);
+  ): Promise<WebResponse<Users>> {
+    await this.userService.updateUserByLoket(request, body);
 
-    return ResponseHelper.ok('Successfully update user loket', result);
+    return ResponseHelper.ok('Successfully update user loket');
   }
 
   @Put('/loket/checkout')
