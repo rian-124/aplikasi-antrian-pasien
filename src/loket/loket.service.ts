@@ -21,6 +21,7 @@ export class LoketService {
     const lokets = await this.prismaService.lokets.findMany({
       where: {
         outlet_id: outlet.id,
+        users: null,
       },
     });
 

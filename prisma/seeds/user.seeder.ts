@@ -6,13 +6,13 @@ export class UserSeeder {
 
   async seed() {
     const rawData = [
-      {
-        username: 'arifin123',
-        name: 'arifin',
-        password: '123456',
-        outlet_id: 1,
-        role_id: 1,
-      },
+      // {
+      //   username: 'arifin1234',
+      //   name: 'arifin',
+      //   password: '123456',
+      //   outlet_id: 2,
+      //   role_id: 2,
+      // },
       {
         username: 'afrian123',
         name: 'afrian',

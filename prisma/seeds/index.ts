@@ -27,7 +27,7 @@ export class Seeder {
     await new PenjaminSeeder(this.prisma).seed();
     await new RolesSeeder(this.prisma).seed();
     await new LoketSeeder(this.prisma).seed();
-    // await new UserSeeder(this.prisma).seed();
+    await new UserSeeder(this.prisma).seed();
   }
 
   async close() {

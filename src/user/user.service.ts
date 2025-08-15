@@ -208,6 +208,8 @@ export class UserService {
       },
     });
 
+    this.wsGateaway.broadcastToAdmin(userLoketUpdate);
+
     return userLoketUpdate;
   }
 
@@ -238,6 +240,8 @@ export class UserService {
         loket_id: null,
       },
     });
+
+    this.wsGateaway.broadcastToAdmin(checkoutUserByLoket);
 
     return checkoutUserByLoket;
   }

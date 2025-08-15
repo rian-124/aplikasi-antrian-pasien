@@ -7,43 +7,23 @@ export class LoketSeeder {
     const data = [
       {
         nama_loket: 'LOKET 1',
-        outlet_id: 1,
+        outlet_id: 2,
       },
       {
         nama_loket: 'LOKET 2',
-        outlet_id: 1,
+        outlet_id: 2,
       },
       {
         nama_loket: 'LOKET 2',
-        outlet_id: 1,
+        outlet_id: 2,
       },
       {
         nama_loket: 'LOKET 3',
-        outlet_id: 1,
+        outlet_id: 2,
       },
       {
         nama_loket: 'LOKET 4',
-        outlet_id: 1,
-      },
-      {
-        nama_loket: 'MEJA 1',
-        outlet_id: 1,
-      },
-      {
-        nama_loket: 'MEJA 2',
-        outlet_id: 1,
-      },
-      {
-        nama_loket: 'MEJA 3',
-        outlet_id: 1,
-      },
-      {
-        nama_loket: 'MEJA 4',
-        outlet_id: 1,
-      },
-      {
-        nama_loket: 'MEJA 5',
-        outlet_id: 1,
+        outlet_id: 2,
       },
     ];
 
