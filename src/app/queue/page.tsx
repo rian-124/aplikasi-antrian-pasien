@@ -81,13 +81,20 @@ export default function QueuePage() {
       const fetchedPatients: Patient[] = (patientJson.data || []).map((p: any, i: number) => Patient.fromJSON(p, i, map));
       setPatients(fetchedPatients);
 
-      const serverCalling = fetchedPatients.find((p) => p.status === "CALL" && p.loketId === selectedLoket);
+      const serverCalling = fetchedPatients.find(
+        (p) => p.status === "CALL" && p.loketId === selectedLoket
+      );
+
       if (serverCalling) {
         setCurrentPatient(serverCalling);
         saveCurrentToStorage(serverCalling);
       } else {
         const stored = loadCurrentFromStorage();
-        if (stored?.status === "CALL") clearCurrent();
+        if (stored && stored.loketId === selectedLoket) {
+          setCurrentPatient(stored);
+        } else {
+          clearCurrent();
+        }
       }
     } catch (error) {
       console.error("Failed to fetch patients:", error);
@@ -111,6 +118,7 @@ export default function QueuePage() {
         return;
       }
       setSelectedLoket(loketId);
+      localStorage.setItem("selectedLoket", loketId.toString());
     } catch (error) {
       console.error("Failed to assign loket to user:", error);
     }
@@ -173,6 +181,10 @@ export default function QueuePage() {
 
   useEffect(() => {
     fetchPatients();
+    const savedLoket = localStorage.getItem("selectedLoket");
+    if (savedLoket) {
+      setSelectedLoket(Number(savedLoket));
+    }
 
     const token = localStorage.getItem("access_token");
     if (!token) return;

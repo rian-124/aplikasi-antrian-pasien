@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; 
 import QueueCard from "../components/QueueCard";
 import QueueHeader from "../components/QueueHeader";
+import { ArrowLeft } from 'lucide-react';
 
 export default function AntrianPage() {
   const router = useRouter();
@@ -11,16 +12,8 @@ export default function AntrianPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   const options = [
-    {
-      title: 'UMUM',
-      image: '/icons/umum.svg',
-      jenis: 'UMUM',
-    },
-    {
-      title: 'JAMINAN',
-      image: '/icons/jaminan.svg',
-      jenis: 'JAMINAN',
-    },
+    { title: 'UMUM', image: '/icons/umum.svg', jenis: 'UMUM' },
+    { title: 'JAMINAN', image: '/icons/jaminan.svg', jenis: 'JAMINAN' },
   ];
 
   const handleEnterFullscreen = () => {
@@ -35,7 +28,6 @@ export default function AntrianPage() {
     const handleFullscreenChange = () => {
       setIsFullscreen(document.fullscreenElement !== null);
     };
-
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -60,10 +52,7 @@ export default function AntrianPage() {
         },
         body: JSON.stringify({ jenis })
       });
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
       const json = await res.json();
       const nomorAntrian = json.data.AntrianPasiens[0]?.nomor_Antrian;
@@ -77,6 +66,19 @@ export default function AntrianPage() {
   return (
     <div className="w-full h-screen flex flex-col bg-white relative">
       <QueueHeader />
+
+      {/* Tombol Kembali hanya tampil saat tidak fullscreen */}
+      {!isFullscreen && (
+        <div className="absolute top-[72px] left-4">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-2xl shadow-sm transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="font-medium">Kembali</span>
+          </button>
+        </div>
+      )}
 
       <main className="flex-1 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-semibold mb-4">Laboratorium PK & MK</h1>

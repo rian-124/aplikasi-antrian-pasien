@@ -1,4 +1,3 @@
-// QueueStats.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -32,7 +31,11 @@ export default function QueueStats({
   disableLoket = false,
   disableExit = false,
 }: QueueStatsProps) {
-  const [loket, setLoket] = useState(selectedLoket || "");
+  const [loket, setLoket] = useState("");
+
+  useEffect(() => {
+    setLoket(selectedLoket || localStorage.getItem("selectedLoket") || "");
+  }, [selectedLoket]);
   const [availableLokets, setAvailableLokets] = useState<Loket[]>([]);
 
   useEffect(() => {
@@ -96,7 +99,7 @@ export default function QueueStats({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-4 p-2">
         {statusList.map((status) => (
           <button
             key={status.key}
