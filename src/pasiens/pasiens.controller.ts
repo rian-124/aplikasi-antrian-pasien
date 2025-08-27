@@ -20,6 +20,7 @@ import { UpdatePasiensDto } from './dtos/update-pasiens.dto';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { AuthenticatedRequest } from 'src/model/user.model';
+import { PasiensDocs } from './docs/pasiens.docs';
 
 @Controller('/api/pasiens')
 @ApiBearerAuth('access-token')
@@ -30,31 +31,27 @@ export class PasiensController {
 
   @Post()
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Create new patient queue',
-    description:
-      'Membuat data pasien baru berdasarkan input dari form, baik untuk jaminan maupun umum.',
-  })
-  async store(
+  @ApiOperation(PasiensDocs.store)
+  async storePasiensController(
     @Body() body: CreatePasiensDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<Pasiens>> {
-    const result = await this.pasienService.storePasiens(body, req);
+    const result = await this.pasienService.storePasienService(body, req);
 
     return ResponseHelper.ok('Successfully added patient data', result);
   }
 
   @Put(':id')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Select options based on patient registration type',
-    description: 'Memilih pilihan registrasi berdasarkan jenis registrasi',
-  })
-  async update(
+  @ApiOperation(PasiensDocs.update)
+  async updatePasienByPenjaminService(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdatePasiensDto,
   ): Promise<WebResponse<Pasiens>> {
-    const result = await this.pasienService.updatePasiensPenjamins(id, body);
+    const result = await this.pasienService.updatePasienByPenjaminService(
+      id,
+      body,
+    );
 
     return ResponseHelper.ok('Successfully update patient data', result);
   }

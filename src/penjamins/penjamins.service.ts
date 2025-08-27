@@ -14,13 +14,15 @@ export class PenjaminsService {
     private validationService: ValidationService,
   ) {}
 
-  async getAllPenjamins(): Promise<Penjamins[]> {
+  async getPenjaminsService(): Promise<Penjamins[]> {
     const dataPenjamins = this.prismaService.penjamins.findMany();
 
     return dataPenjamins;
   }
 
-  async getPenjaminsByJenisRegistrasi(body: string): Promise<Penjamins[]> {
+  async getPenjaminsByJenisRegistrasiService(
+    body: string,
+  ): Promise<Penjamins[]> {
     const jenisRegistrasi =
       await this.prismaService.jenisRegistrasis.findUnique({
         where: {
@@ -42,7 +44,7 @@ export class PenjaminsService {
     return getPenjaminsByJenisRegistrasis;
   }
 
-  async updatePenjamins(
+  async updatePenjaminService(
     id: number,
     body: UpdatePenjaminsDto,
   ): Promise<Penjamins> {
@@ -69,7 +71,7 @@ export class PenjaminsService {
     return penjamins;
   }
 
-  async createPenjamins(body: CreatePenjaminsDto): Promise<Penjamins> {
+  async storePenjaminService(body: CreatePenjaminsDto): Promise<Penjamins> {
     const validationRequest: PenjaminsRequest =
       (await this.validationService.validate(
         ValidationRequestPenjamin.PENJAMINS,
@@ -107,7 +109,7 @@ export class PenjaminsService {
     return createPenjamins;
   }
 
-  async deletePenjamins(id: number) {
+  async deletePenjaminService(id: number) {
     const penjamins = await this.prismaService.penjamins.findUnique({
       where: { id },
     });

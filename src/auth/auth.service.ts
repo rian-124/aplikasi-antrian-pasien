@@ -28,7 +28,9 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async loginWithCrendentials(body: LoginUserDto): Promise<UserResponseLogin> {
+  async loginWithCrendentialsService(
+    body: LoginUserDto,
+  ): Promise<UserResponseLogin> {
     // info body
     this.logger.info(`Login user: ${body.username}`);
 
@@ -74,7 +76,9 @@ export class AuthService {
     return response;
   }
 
-  async checkUsername(body: CheckUsernameDto): Promise<CheckUsernameResponse> {
+  async checkUsernameService(
+    body: CheckUsernameDto,
+  ): Promise<CheckUsernameResponse> {
     const users = await this.prismaService.users.findUnique({
       where: {
         username: body.username,
@@ -98,7 +102,7 @@ export class AuthService {
     return response;
   }
 
-  async resetPassword(body: ResetPasswordDto): Promise<Users> {
+  async resetPasswordService(body: ResetPasswordDto): Promise<Users> {
     const payload: JwtUsernameUsersPayload = this.jwtService.verify(body.token);
 
     const hashedPassword = await bcrypt.hash(body.newPassword, 10);

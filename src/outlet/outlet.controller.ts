@@ -26,6 +26,7 @@ import { CreateOutletsDto } from './dtos/create-outlets.dto';
 import { UpdateOutletsDto } from './dtos/update-outlets.dto';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
+import { OutletDocs } from './docs/outlet.docs';
 
 @Controller('/api/outlet')
 @ApiTags('Outlet')
@@ -37,59 +38,47 @@ export class OutletController {
 
   @Get()
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get all outlets',
-    description: 'Mengambil seluruh data outlet yang tersedia.',
-  })
+  @ApiOperation(OutletDocs.getAllOutlets)
   @ApiResponse({ status: 200, description: 'Berhasil mengambil data outlet.' })
-  async getAllOutlets(): Promise<WebResponse<Outlets[]>> {
-    const result = await this.outletService.getAllOutlets();
+  async getOutletsController(): Promise<WebResponse<Outlets[]>> {
+    const result = await this.outletService.getOutletsService();
 
     return ResponseHelper.ok('successfully retrieved outlet data', result);
   }
 
   @Post()
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Create a new outlet',
-    description: 'Menambahkan data outlet baru ke dalam sistem.',
-  })
+  @ApiOperation(OutletDocs.storeOutlets)
   @ApiResponse({ status: 200, description: 'Berhasil menambahkan outlet.' })
-  async storeOutlets(
+  async storeOutletController(
     @Body() body: CreateOutletsDto,
   ): Promise<WebResponse<OutletsResponse>> {
-    await this.outletService.storeOutlets(body);
+    await this.outletService.storeOutletService(body);
 
     return ResponseHelper.ok('Successfully added data outlets');
   }
 
   @Put(':id')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Update outlet by ID',
-    description: 'Memperbarui data outlet berdasarkan ID yang diberikan.',
-  })
+  @ApiOperation(OutletDocs.updateOutlets)
   @ApiResponse({ status: 200, description: 'Berhasil memperbarui outlet.' })
-  async updateOutlets(
+  async updateOutletController(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateOutletsDto,
   ): Promise<WebResponse<OutletsResponse>> {
-    await this.outletService.updateOutlets(id, body);
+    await this.outletService.updateOutletService(id, body);
 
     return ResponseHelper.ok('Successfully updates data outlets');
   }
 
   @Delete(':id')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Delete outlet by ID',
-    description: 'Menghapus outlet berdasarkan ID yang diberikan.',
-  })
+  @ApiOperation(OutletDocs.deleteOutlets)
   @ApiResponse({ status: 200, description: 'Berhasil menghapus outlet.' })
-  async deleteOutlets(
+  async deleteOutletController(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<OutletsResponse>> {
-    await this.outletService.deleteOutlets(id);
+    await this.outletService.deleteOutletService(id);
 
     return ResponseHelper.ok('Success fully deleted data outlets');
   }

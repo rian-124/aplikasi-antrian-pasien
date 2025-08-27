@@ -11,6 +11,7 @@ import {
   ResetPasswordDto,
 } from './dtos/reset-password.dto';
 import { Users } from '@prisma/client';
+import { AuthDocs } from './docs/auth.docs';
 
 @Controller('/api/users')
 @ApiTags('Auth')
@@ -18,24 +19,22 @@ export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('/login')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'User login',
-    description: 'Login user ke dalam sistem dan mendapatkan JWT token.',
-  })
-  async login(
+  @ApiOperation(AuthDocs.login)
+  async loginController(
     @Body() body: LoginUserDto,
   ): Promise<WebResponse<UserResponseLogin>> {
-    const result = await this.authService.loginWithCrendentials(body);
+    const result = await this.authService.loginWithCrendentialsService(body);
     return ResponseHelper.ok('Login successful', result);
   }
 
   @Post('/check-username')
   @HttpCode(200)
-  async checkEmail(
+  @ApiOperation(AuthDocs.checkUsername)
+  async checkEmailController(
     @Body()
     body: CheckUsernameDto,
   ): Promise<WebResponse<CheckUsernameResponse>> {
-    const result = await this.authService.checkUsername(body);
+    const result = await this.authService.checkUsernameService(body);
 
     return ResponseHelper.ok(
       'Username terdaftar silahkan melakukan reset password',
@@ -44,11 +43,12 @@ export class AuthController {
   }
   @Post('/reset-password')
   @HttpCode(200)
-  async resetPassword(
+  @ApiOperation(AuthDocs.resetPassword)
+  async resetPasswordController(
     @Body()
     body: ResetPasswordDto,
   ): Promise<WebResponse<Users>> {
-    await this.authService.resetPassword(body);
+    await this.authService.resetPasswordService(body);
 
     return ResponseHelper.ok(
       'Berhasil melakukan reset password silahkan login',

@@ -28,7 +28,9 @@ export class UserService {
     private prismaService: PrismaService,
   ) {}
 
-  async register(body: RegisterUserDto): Promise<UserResponseRegister> {
+  async registerUserService(
+    body: RegisterUserDto,
+  ): Promise<UserResponseRegister> {
     this.logger.info(`Register new user: ${body.username}`);
 
     const totalUserWithSameEmail = await this.prismaService.users.count({
@@ -60,7 +62,7 @@ export class UserService {
     };
   }
 
-  async getAllUser(): Promise<Users[]> {
+  async getUsersService(): Promise<Users[]> {
     const dataUsers = await this.prismaService.users.findMany({
       include: {
         outlets: true,
@@ -71,7 +73,7 @@ export class UserService {
     return dataUsers;
   }
 
-  async searchUser(keyword: string): Promise<Users[]> {
+  async searchUserService(keyword: string): Promise<Users[]> {
     const dataUsers = await this.prismaService.users.findMany({
       where: {
         OR: [
@@ -97,7 +99,7 @@ export class UserService {
     return dataUsers;
   }
 
-  async getUserByRoleAdmin(body: string): Promise<Users[]> {
+  async getUserByRoleAdminService(body: string): Promise<Users[]> {
     const adminRole = await this.prismaService.roles.findFirst({
       where: {
         name: body,
@@ -120,7 +122,7 @@ export class UserService {
     return dataRoleAdmin;
   }
 
-  async updateUser(id: number, body: UpdateUserDto): Promise<Users> {
+  async updateUserService(id: number, body: UpdateUserDto): Promise<Users> {
     this.logger.info(`Update user : ${body.username}`);
 
     const existingUser = await this.prismaService.users.findUnique({
@@ -158,7 +160,7 @@ export class UserService {
     return updateUser;
   }
 
-  async updateUserByLoket(
+  async updateUserByLoketService(
     request: AuthenticatedRequest,
     body: UpdateLoketUserDto,
   ): Promise<Users> {
@@ -211,7 +213,9 @@ export class UserService {
     return userLoketUpdate;
   }
 
-  async checkoutUserByLoket(request: AuthenticatedRequest): Promise<Users> {
+  async checkoutUserByLoketService(
+    request: AuthenticatedRequest,
+  ): Promise<Users> {
     const users = await this.prismaService.users.findUnique({
       where: {
         id: request.user.sub,
@@ -242,7 +246,7 @@ export class UserService {
     return checkoutUserByLoket;
   }
 
-  async deleteUser(id: number) {
+  async deleteUserService(id: number) {
     const deleteUserById = await this.prismaService.users.findUnique({
       where: { id },
     });

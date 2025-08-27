@@ -21,6 +21,7 @@ import { UpdatePenjaminsDto } from './dtos/update-penjamins.dto';
 import { CreatePenjaminsDto } from './dtos/create-penjamins.dto';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { PenjaminsDocs } from './docs/penjamins.docs';
 
 @Controller('/api/penjamins')
 @ApiBearerAuth('access-token')
@@ -31,28 +32,21 @@ export class PenjaminsController {
 
   @Get()
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get all data penjamins',
-    description: 'Mengambil semua data penjamins',
-  })
-  async getAllPenjamins(): Promise<WebResponse<Penjamins[]>> {
-    const result = await this.penjaminsService.getAllPenjamins();
+  @ApiOperation(PenjaminsDocs.getAll)
+  async getPenjaminsController(): Promise<WebResponse<Penjamins[]>> {
+    const result = await this.penjaminsService.getPenjaminsService();
 
     return ResponseHelper.ok('Successfully retreived penjamins data', result);
   }
 
   @Get('jenis-registrasi')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get penjamins by jenis registrasi',
-    description:
-      'Mengambil data penjamins berdasarkan jenis registrasi tertentu. Parameter query jenis digunakan untuk memfilter hasil.',
-  })
-  async getPenjaminsJenisRegistrasi(
+  @ApiOperation(PenjaminsDocs.getByJenisRegistrasi)
+  async getPenjaminsJenisRegistrasiController(
     @Query('jenis') jenis: string,
   ): Promise<WebResponse<Penjamins[]>> {
     const result =
-      await this.penjaminsService.getPenjaminsByJenisRegistrasi(jenis);
+      await this.penjaminsService.getPenjaminsByJenisRegistrasiService(jenis);
 
     return ResponseHelper.ok(
       'Successfully get penjamins by jenis registrasi',
@@ -62,46 +56,34 @@ export class PenjaminsController {
 
   @Post()
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Create new penjamins',
-    description:
-      'Menambahkan data penjamins baru ke dalam database. Data dikirim melalui body request dengan format sesuai model `PenjaminsCreateDto`.',
-  })
-  async storePenjamins(
+  @ApiOperation(PenjaminsDocs.store)
+  async storePenjaminsController(
     @Body()
     body: CreatePenjaminsDto,
   ): Promise<WebResponse<Penjamins>> {
-    const result = await this.penjaminsService.createPenjamins(body);
+    const result = await this.penjaminsService.storePenjaminService(body);
 
     return ResponseHelper.ok('Successfully added new penjamins', result);
   }
 
   @Put(':id')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Update penjamins',
-    description:
-      'Merubah data penjamins yang ada di dalam database. Data dikirim melalui body request dengn format sesuai Dto `PenjaminsUpdateDto`.',
-  })
-  async updatePenjamins(
+  @ApiOperation(PenjaminsDocs.update)
+  async updatePenjaminsController(
     @Param('id') id: number,
     @Body() body: UpdatePenjaminsDto,
   ): Promise<WebResponse<Penjamins>> {
-    const result = await this.penjaminsService.updatePenjamins(id, body);
+    const result = await this.penjaminsService.updatePenjaminService(id, body);
 
     return ResponseHelper.ok('Successfully update data penjamins', result);
   }
 
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Delete penjamins by ID',
-    description:
-      'Menghapus data penjamins berdasarkan ID. Endpoint ini menggunakan parameter path `id` sebagai acuan untuk menghapus data.',
-  })
-  async deletePenjamins(
+  @ApiOperation(PenjaminsDocs.delete)
+  async deletePenjaminsController(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<Penjamins>> {
-    await this.penjaminsService.deletePenjamins(id);
+    await this.penjaminsService.deletePenjaminService(id);
 
     return ResponseHelper.ok('Penjamins successfully deleted');
   }

@@ -12,6 +12,9 @@ export class StatusAntrian {
         status: 'CALL',
       },
       {
+        status: 'SKIPPED',
+      },
+      {
         status: 'COMPLETE',
       },
       {

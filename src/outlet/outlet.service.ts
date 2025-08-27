@@ -12,13 +12,13 @@ export class OutletService {
     private wsGateaway: WebSocketGateaway,
   ) {}
 
-  async getAllOutlets(): Promise<Outlets[]> {
+  async getOutletsService(): Promise<Outlets[]> {
     const dataAllOutlets = await this.prismaService.outlets.findMany();
 
     return dataAllOutlets;
   }
 
-  async storeOutlets(body: CreateOutletsDto) {
+  async storeOutletService(body: CreateOutletsDto) {
     const dataOutletsWithSameName = await this.prismaService.outlets.count({
       where: {
         nama_outlet: body.nama_outlet,
@@ -40,7 +40,7 @@ export class OutletService {
     return addOutlets;
   }
 
-  async updateOutlets(id: number, body: UpdateOutletsDto) {
+  async updateOutletService(id: number, body: UpdateOutletsDto) {
     const dataOutlets = await this.prismaService.outlets.findUnique({
       where: { id },
     });
@@ -76,7 +76,7 @@ export class OutletService {
     return updateOutlets;
   }
 
-  async deleteOutlets(id: number) {
+  async deleteOutletService(id: number) {
     const dataOutlets = await this.prismaService.outlets.findUnique({
       where: { id },
     });

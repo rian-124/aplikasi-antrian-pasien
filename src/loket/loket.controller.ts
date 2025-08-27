@@ -8,6 +8,7 @@ import { Permissions } from 'src/common/decorators/permission.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { AuthenticatedRequest } from 'src/model/user.model';
+import { LoketDocs } from './docs/loket.docs';
 
 @Controller('/api/lokets')
 @ApiTags('lokets')
@@ -19,14 +20,11 @@ export class LoketController {
 
   @Get()
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'retrieve counter data based on outlet',
-    description: 'Mengambil semua data loket berdarkan outlet user',
-  })
-  async getAllLokets(
+  @ApiOperation(LoketDocs.getAll)
+  async getAllLoketsController(
     @Req() request: AuthenticatedRequest,
   ): Promise<WebResponse<Lokets[]>> {
-    const result = await this.loketService.getAllLokets(request);
+    const result = await this.loketService.getAllLoketsService(request);
 
     return ResponseHelper.ok('Successfully get all outlets', result);
   }

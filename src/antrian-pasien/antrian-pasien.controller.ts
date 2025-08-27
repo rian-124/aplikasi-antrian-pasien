@@ -20,7 +20,11 @@ import { AuthenticatedRequest } from 'src/model/user.model';
 import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
-import { NomorAntrianPasienResponse } from 'src/model/antrianpasien.model';
+import {
+  NomorAntrianPasienResponse,
+  RecapAntrianPasienResponse,
+} from 'src/model/antrianpasien.model';
+import { AntrianPasienDocs } from './docs/antrian-pasien.docs';
 
 @Controller('/api/antrian-pasien')
 @ApiTags('Antrian Pasien')
@@ -32,14 +36,12 @@ export class AntrianPasienController {
 
   @Get()
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get all patient queue status',
-    description: 'Mengambil semua data status antrian pasien secara lengkap.',
-  })
-  async getAll(
+  @ApiOperation(AntrianPasienDocs.getAll)
+  async getAntrianPasiensController(
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<AntrianPasiens[]>> {
-    const result = await this.antrianPasienService.getAllStatusAntrian(req);
+    const result =
+      await this.antrianPasienService.getAntrianPasiensService(req);
 
     return ResponseHelper.ok(
       'Successfully get all data Antrian pasiens',
@@ -47,32 +49,69 @@ export class AntrianPasienController {
     );
   }
 
+  @Get('/recap')
+  @HttpCode(200)
+  @ApiOperation(AntrianPasienDocs.getRecap)
+  async getRecapAntrianPasiensController(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WebResponse<RecapAntrianPasienResponse>> {
+    const result =
+      await this.antrianPasienService.getRecapAntrianPasiensService(req);
+
+    return ResponseHelper.ok(
+      'Successfully get recap data antrian pasiens',
+      result,
+    );
+  }
+
+  @Get('/daily')
+  @HttpCode(200)
+  @ApiOperation(AntrianPasienDocs.getDailyAntrianPasien)
+  async getDailyAntrianPasiensController(
+    @Req() req: AuthenticatedRequest,
+    @Query('date') date?: string,
+  ): Promise<WebResponse<AntrianPasiens[]>> {
+    const result =
+      await this.antrianPasienService.getDailyStatusAntriansService(req, date);
+
+    return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
+  }
+
   @Get('/nomor-antrian-pasien')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get all nomor antrian pasien',
-    description:
-      'Mengambil semua data nomor antrian dengan name user, dan jenis registrasinya.',
-  })
-  async getNomorAntrian(
+  @ApiOperation(AntrianPasienDocs.getNomorAntrian)
+  async getNomorAntriansController(
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
-    const result = await this.antrianPasienService.getNomorAntrian(req);
+    const result =
+      await this.antrianPasienService.getNomorAntrianPasiensService(req);
+
+    return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
+  }
+
+  @Get('/nomor-antrian-pasien/daily')
+  @HttpCode(200)
+  @ApiOperation(AntrianPasienDocs.getDailyNomorAntrian)
+  async getDailyNomorAntriansController(
+    @Req() req: AuthenticatedRequest,
+    @Query('date') date?: string,
+  ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
+    const result = await this.antrianPasienService.getDailyNomorAntriansService(
+      req,
+      date,
+    );
 
     return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
   }
 
   @Get('/search')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Search patient queue by keyword',
-    description:
-      'Mencari data status antrian pasien berdasarkan keyword seperti nomor antrian atau nomor registrasi.',
-  })
-  async search(
+  @ApiOperation(AntrianPasienDocs.search)
+  async searchAntrianPasiensController(
     @Query('keyword') keyword: string,
   ): Promise<WebResponse<AntrianPasiens[]>> {
-    const result = await this.antrianPasienService.searchStatusAntrian(keyword);
+    const result =
+      await this.antrianPasienService.searchStatusAntriansService(keyword);
 
     return ResponseHelper.ok(
       'Successfully get data antrian pasien by keyword',
@@ -82,17 +121,13 @@ export class AntrianPasienController {
 
   @Patch(':id')
   @HttpCode(200)
-  @ApiOperation({
-    summary: 'Update queue status by ID',
-    description:
-      'Mengubah status dari antrian pasien berdasarkan ID. Perubahan status ini mengikuti aturan validasi tertentu seperti bintang dan urutan status.',
-  })
-  async update(
+  @ApiOperation(AntrianPasienDocs.update)
+  async updateAntrianPasienController(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateStatusAntrianDto,
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<AntrianPasiens>> {
-    const result = await this.antrianPasienService.updateStatusAntrian(
+    const result = await this.antrianPasienService.updateStatusAntriansService(
       id,
       body,
       req,

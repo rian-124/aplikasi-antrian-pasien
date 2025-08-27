@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from 'src/model/user.model';
 export class LoketService {
   constructor(private prismaService: PrismaService) {}
 
-  async getAllLokets(request: AuthenticatedRequest): Promise<Lokets[]> {
+  async getAllLoketsService(request: AuthenticatedRequest): Promise<Lokets[]> {
     const outlet = await this.prismaService.outlets.findFirst({
       where: {
         nama_outlet: request.user.outlet,

@@ -22,7 +22,7 @@ export class PasiensService {
     @Inject(WINSTON_MODULE_PROVIDER) private logger: Logger,
   ) {}
 
-  async storePasiens(
+  async storePasienService(
     body: CreatePasiensDto,
     req: AuthenticatedRequest,
   ): Promise<Pasiens> {
@@ -117,7 +117,7 @@ export class PasiensService {
     return pasien;
   }
 
-  async updatePasiensPenjamins(
+  async updatePasienByPenjaminService(
     id: number,
     body: UpdatePasiensDto,
   ): Promise<Pasiens> {

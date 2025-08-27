@@ -52,7 +52,7 @@
 
     <script>
       const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsImVtYWlsIjoiYWRtaW5Vc2Vyc0BnbWFpbC5jb20iLCJyb2xlIjoiQURNSU5VU0VSUyIsIm91dGxldCI6IkdFRFVORyBBIiwicGVybWlzc2lvbiI6WyJ2aWV3OkFETUlOVVNFUlMiXSwiaWF0IjoxNzU0ODg2MDY0LCJleHAiOjE3NTQ4ODk2NjR9.DQHe3CvV79SASGtbQuXHpJslUuSVD4oOI1gpq4GGkYo';
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoiYWZyaWFuMTIzIiwicm9sZSI6IkFETUlOVVNFUlMiLCJvdXRsZXQiOiJHRURVTkcgQSIsInBlcm1pc3Npb24iOlsidmlldzpBRE1JTlVTRVJTIl0sImlhdCI6MTc1NjExMTU2MSwiZXhwIjoxNzU2MTE1MTYxfQ.Ik6a7ijr8pZ1dXeGs11yPR5vfKw9Hu2FVk2qPUsAhLE';
 
       async function loadUsers() {
         try {
@@ -65,7 +65,7 @@
 
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const body = await res.json();
-          renderNomorAntrian(body.data)
+          renderNomorAntrian(body.data);
         } catch (err) {
           console.error('Gagal load users:', err.message);
           if (err.message.includes('401')) {
@@ -75,7 +75,7 @@
         }
       }
 
-      loadUsers()
+      loadUsers();
 
       const tbody = document.getElementById('user-table-body');
       function renderNomorAntrian(users) {
@@ -105,7 +105,7 @@
 
       socket.on('antrian_pasiens_update', (data) => {
         console.log('antrian pasien update diterima:', data);
-        updatePasienRow(data)
+        updatePasienRow(data);
       });
 
       function updatePasienRow(u) {

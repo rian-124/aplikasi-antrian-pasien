@@ -20,11 +20,18 @@ export class PasiensRequestUpdate {
 export enum Status {
   WAITING = 'WAITING',
   CALL = 'CALL',
+  SKIPPED = 'SKIPPED',
   COMPLETE = 'COMPLETE',
   CANCELED = 'CANCELED',
 }
 
-export const STATUS_ORDER = ['WAITING', 'CALL', 'SKIP', 'COMPLETE', 'CANCELED'];
+export const STATUS_ORDER = [
+  'WAITING',
+  'CALL',
+  'SKIPED',
+  'COMPLETE',
+  'CANCELED',
+];
 
 export class UpdateDataAntrian {
   status_antrian_id: number;

@@ -9,16 +9,22 @@ import { WebSocketGateaway } from '../common/websocket.gateaway';
 import { AntrianPasiens } from '@prisma/client';
 import { AuthenticatedRequest } from 'src/model/user.model';
 import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
-import { NomorAntrianPasienResponse } from 'src/model/antrianpasien.model';
+import {
+  NomorAntrianPasienResponse,
+  RecapAntrianPasienResponse,
+} from 'src/model/antrianpasien.model';
+import { getDayRangeWib } from 'src/utils/date.utils';
+import { AntrianPasienRepository } from './antrian-pasien.repository';
 
 @Injectable()
 export class AntrianPasienService {
   constructor(
     private prismaService: PrismaService,
     private wsGateaway: WebSocketGateaway,
+    private antrianRepo: AntrianPasienRepository,
   ) {}
 
-  async getAllStatusAntrian(
+  async getAntrianPasiensService(
     req: AuthenticatedRequest,
   ): Promise<AntrianPasiens[]> {
     const outlet = await this.prismaService.outlets.findUnique({
@@ -28,7 +34,9 @@ export class AntrianPasienService {
     });
 
     if (!outlet) {
-      throw new NotFoundException('Outlet id notfound!');
+      throw new NotFoundException(
+        'Outlet not found, unable to retrieve queue status.',
+      );
     }
 
     const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
@@ -39,7 +47,11 @@ export class AntrianPasienService {
         tahap_antrian: true,
         status_antrian: true,
         pasien: true,
-        users: true,
+        users: {
+          select: {
+            name: true,
+          },
+        },
         lokets: true,
       },
     });
@@ -47,7 +59,38 @@ export class AntrianPasienService {
     return dataStatusAntrian;
   }
 
-  async getNomorAntrian(
+  async getRecapAntrianPasiensService(
+    req: AuthenticatedRequest,
+  ): Promise<RecapAntrianPasienResponse> {
+    const data = await this.antrianRepo.getRecapAntrianPasienRepository(req);
+
+    const perday = data.map((d) => ({
+      user_id: d.user_id,
+      total: Number(d.total),
+      perday: d.perday.toISOString().split('T')[0],
+    }));
+
+    const permonth = data.map((d) => ({
+      user_id: d.user_id,
+      total: Number(d.total),
+      permonth:
+        d.permonth.getFullYear() + '-' + String(d.permonth.getMonth() + 1),
+    }));
+
+    const peryear = data.map((d) => ({
+      user_id: d.user_id,
+      total: Number(d.total),
+      peryear: String(d.peryear.getFullYear()),
+    }));
+
+    return {
+      perday,
+      permonth,
+      peryear,
+    };
+  }
+
+  async getNomorAntrianPasiensService(
     req: AuthenticatedRequest,
   ): Promise<NomorAntrianPasienResponse[]> {
     const outlet = await this.prismaService.outlets.findUnique({
@@ -57,7 +100,9 @@ export class AntrianPasienService {
     });
 
     if (!outlet) {
-      throw new NotFoundException('Outlet tidak di temukan dalam payload');
+      throw new NotFoundException(
+        'Outlet not found, unable to retrieve queue status.',
+      );
     }
 
     const dataNomorAntrianPasien =
@@ -88,7 +133,101 @@ export class AntrianPasienService {
     return dataNomorAntrianPasien;
   }
 
-  async searchStatusAntrian(keyword: string): Promise<AntrianPasiens[]> {
+  async getDailyNomorAntriansService(
+    req: AuthenticatedRequest,
+    date?: string,
+  ): Promise<NomorAntrianPasienResponse[]> {
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        nama_outlet: req.user.outlet,
+      },
+    });
+
+    if (!outlet) {
+      throw new NotFoundException(
+        'Outlet not found, unable to retrieve queue status.',
+      );
+    }
+
+    const { startOfDay, endOfDay } = getDayRangeWib(date);
+
+    const dataNomorAntrianPasien =
+      await this.prismaService.antrianPasiens.findMany({
+        where: {
+          outlet_id: outlet.id,
+          created_At: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+        },
+        select: {
+          nomor_Antrian: true,
+          users: {
+            select: {
+              name: true,
+            },
+          },
+          pasien: {
+            select: {
+              jenis_registrasis: {
+                select: {
+                  jenis: true,
+                },
+              },
+            },
+          },
+          lokets: true,
+        },
+      });
+
+    return dataNomorAntrianPasien;
+  }
+
+  async getDailyStatusAntriansService(
+    req: AuthenticatedRequest,
+    date?: string,
+  ): Promise<AntrianPasiens[]> {
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        nama_outlet: req.user.outlet,
+      },
+    });
+
+    if (!outlet) {
+      throw new NotFoundException(
+        'Outlet not found, unable to retrieve queue status.',
+      );
+    }
+
+    const { startOfDay, endOfDay } = getDayRangeWib(date);
+
+    const result = await this.prismaService.antrianPasiens.findMany({
+      where: {
+        outlet_id: outlet.id,
+        created_At: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      include: {
+        tahap_antrian: true,
+        status_antrian: true,
+        pasien: true,
+        users: {
+          select: {
+            name: true,
+          },
+        },
+        lokets: true,
+      },
+    });
+
+    return result;
+  }
+
+  async searchStatusAntriansService(
+    keyword: string,
+  ): Promise<AntrianPasiens[]> {
     const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
       where: {
         OR: [
@@ -125,7 +264,7 @@ export class AntrianPasienService {
     return dataStatusAntrian;
   }
 
-  async updateStatusAntrian(
+  async updateStatusAntriansService(
     id: number,
     body: UpdateStatusAntrianDto,
     req: AuthenticatedRequest,
@@ -156,6 +295,8 @@ export class AntrianPasienService {
     const currentStatus = antrianPasien.status_antrian.status as Status;
     let nextStatus = body.status;
 
+    this.validateStatusChangeService(currentStatus, nextStatus);
+
     if (nextStatus === Status.CALL && antrianPasien.bintang >= 3) {
       nextStatus = Status.CANCELED;
       const newStatusAntrian =
@@ -176,15 +317,6 @@ export class AntrianPasienService {
       nextStatus === Status.CALL
         ? antrianPasien.bintang + 1
         : antrianPasien.bintang;
-
-    if (
-      currentStatus === Status.WAITING &&
-      (nextStatus === Status.CANCELED || nextStatus === Status.COMPLETE)
-    ) {
-      throw new Error(
-        `Tidak dapat mengubah dari WAITING ke ${nextStatus}. Harus CALL terlebih dahulu.`,
-      );
-    }
 
     const users = await this.prismaService.users.findUnique({
       where: { id: req.user.sub },
@@ -210,7 +342,11 @@ export class AntrianPasienService {
       },
       include: {
         pasien: true,
-        users: true,
+        users: {
+          select: {
+            name: true,
+          },
+        },
         outlets: true,
         lokets: true,
       },
@@ -219,5 +355,33 @@ export class AntrianPasienService {
     this.wsGateaway.broadcastToAdminUsers(updatedAntrian);
 
     return updatedAntrian;
+  }
+
+  private validateStatusChangeService(
+    currentStatus: Status,
+    nextStatus: Status,
+  ) {
+    if (
+      currentStatus === Status.WAITING &&
+      (nextStatus === Status.CANCELED ||
+        nextStatus === Status.SKIPPED ||
+        nextStatus === Status.COMPLETE)
+    ) {
+      throw new BadRequestException(
+        `Tidak dapat mengubah dari WAITING ke ${nextStatus}. Harus CALL terlebih dahulu.`,
+      );
+    }
+
+    if (
+      (currentStatus === Status.CANCELED ||
+        currentStatus === Status.COMPLETE) &&
+      (nextStatus === Status.CALL ||
+        nextStatus === Status.WAITING ||
+        nextStatus === Status.SKIPPED)
+    ) {
+      throw new BadRequestException(
+        `Tidak dapat mengubah dari ${currentStatus} ke ${nextStatus}, karena status sudah final.`,
+      );
+    }
   }
 }

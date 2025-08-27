@@ -29,6 +29,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import { UpdateLoketUserDto } from './dtos/updateLoket-user';
+import { UserDocs } from './docs/user.docs';
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -37,31 +38,24 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all users',
-    description: 'Mengambil seluruh data user yang terdaftar di sistem.',
-  })
+  @ApiOperation(UserDocs.getAllUsers)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN')
   async getAllUsers(): Promise<WebResponse<Users[]>> {
-    const result = await this.userService.getAllUser();
+    const result = await this.userService.getUsersService();
     return ResponseHelper.ok('successfully retrieved user data', result);
   }
 
   @Get('/search')
-  @ApiOperation({
-    summary: 'Search user by keyword',
-    description:
-      'Cari user berdasarkan nama, email, atau nomor registrasi yang sesuai dengan kata kunci.',
-  })
+  @ApiOperation(UserDocs.searchUser)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN')
   async searchUser(
     @Query('keyword') keyword: string,
   ): Promise<WebResponse<Users[]>> {
-    const result = await this.userService.searchUser(keyword);
+    const result = await this.userService.searchUserService(keyword);
 
     return ResponseHelper.ok(
       'successfully retrieved user data based on keyword',
@@ -70,18 +64,14 @@ export class UserController {
   }
 
   @Get('/role')
-  @ApiOperation({
-    summary: 'Get users by role',
-    description:
-      'Mengambil user berdasarkan peran atau jabatan tertentu seperti admin atau kasir.',
-  })
+  @ApiOperation(UserDocs.getUsersByRole)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN')
   async getUsersByrole(
     @Query('role') role: string,
   ): Promise<WebResponse<Users[]>> {
-    const result = await this.userService.getUserByRoleAdmin(role);
+    const result = await this.userService.getUserByRoleAdminService(role);
     return ResponseHelper.ok(
       'successfully retrieved user data based on role',
       result,
@@ -89,10 +79,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  @ApiOperation({
-    summary: 'Update user data',
-    description: 'Melakukan pembaruan terhadap data user berdasarkan ID-nya.',
-  })
+  @ApiOperation(UserDocs.updateUser)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN')
@@ -100,15 +87,12 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateUserDto,
   ): Promise<WebResponse<Users>> {
-    const result = await this.userService.updateUser(id, body);
+    const result = await this.userService.updateUserService(id, body);
     return ResponseHelper.ok('successfully changed user data', result);
   }
 
   @Put('/loket')
-  @ApiOperation({
-    summary: 'Choose loket for users',
-    description: 'Memilih loket user berdasarkan outlet users.',
-  })
+  @ApiOperation(UserDocs.updateUserByLokets)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN', 'view:ADMINUSERS')
@@ -116,56 +100,45 @@ export class UserController {
     @Req() request: AuthenticatedRequest,
     @Body() body: UpdateLoketUserDto,
   ): Promise<WebResponse<Users>> {
-    await this.userService.updateUserByLoket(request, body);
+    await this.userService.updateUserByLoketService(request, body);
 
     return ResponseHelper.ok('Successfully update user loket');
   }
 
   @Put('/loket/checkout')
-  @ApiOperation({
-    summary: 'Checkout loket user',
-    description: 'Melakukan checkout user outlet jika sudah selesai duty.',
-  })
+  @ApiOperation(UserDocs.checkoutUserByLokets)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN', 'view:ADMINUSERS')
   async checkoutUserByLokets(
     @Req() request: AuthenticatedRequest,
   ): Promise<WebResponse<Users>> {
-    await this.userService.checkoutUserByLoket(request);
+    await this.userService.checkoutUserByLoketService(request);
 
     return ResponseHelper.ok('Successfully checkout users lokets');
   }
 
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Delete user',
-    description:
-      'Menghapus user berdasarkan ID. Hanya dapat dilakukan oleh admin.',
-  })
+  @ApiOperation(UserDocs.deleteUser)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @Permissions('view:ADMIN')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<UserDeleteResponse>> {
-    await this.userService.deleteUser(id);
+    await this.userService.deleteUserService(id);
     return ResponseHelper.ok('User successfully deleted');
   }
 
   @Post()
-  @ApiOperation({
-    summary: 'Register new user',
-    description:
-      'Mendaftarkan user baru ke sistem. Hanya bisa dilakukan oleh admin.',
-  })
+  @ApiOperation(UserDocs.register)
   @HttpCode(200)
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @Permissions('view:ADMIN')
   async register(
     @Body() body: RegisterUserDto,
   ): Promise<WebResponse<UserResponseRegister>> {
-    const result = await this.userService.register(body);
+    const result = await this.userService.registerUserService(body);
     return ResponseHelper.ok('successfully created an account', result);
   }
 }
