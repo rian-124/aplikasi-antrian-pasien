@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ForgotPasswordManager } from '../classes/ForgotPasswordManager';
+import { ForgotPasswordManager } from '@/app/classes/ForgotPasswordManager';
 import { useRouter } from 'next/navigation';
 
 export default function ForgotPasswordForm() {

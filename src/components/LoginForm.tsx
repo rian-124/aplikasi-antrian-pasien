@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AuthService } from "../classes/AuthService";
-import { LoginFormManager } from "../classes/LoginFormManager";
+import { AuthService } from "@/app/classes/AuthService";
+import { LoginFormManager } from "@/app/classes/LoginFormManager";
 
 export default function LoginForm() {
   const router = useRouter();

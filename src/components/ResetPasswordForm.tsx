@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { ResetPasswordManager } from "../classes/ResetPasswordManager";
+import { ResetPasswordManager } from "@/app/classes/ResetPasswordManager";
 import { useRouter } from 'next/navigation';
 
 export default function ResetPasswordForm() {

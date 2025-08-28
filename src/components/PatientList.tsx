@@ -1,7 +1,7 @@
 "use client";
 import { ArrowRight, Circle } from "lucide-react";
 import { useState } from "react";
-import { Patient } from "../classes/Patient";
+import { Patient } from "@/app/classes/Patient";
 
 interface PatientListProps {
   patients: Patient[];

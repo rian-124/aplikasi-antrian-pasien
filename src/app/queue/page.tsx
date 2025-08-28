@@ -3,11 +3,11 @@
 
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
-import PatientList from "../components/PatientList";
-import QueueDetail from "../components/QueueDetail";
-import QueueStats from "../components/QueueStats";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import PatientList from "@/components/PatientList";
+import QueueDetail from "@/components/QueueDetail";
+import QueueStats from "@/components/QueueStats";
 import { Patient } from "../classes/Patient";
 
 export default function QueuePage() {
@@ -25,10 +25,16 @@ export default function QueuePage() {
 
   const saveCurrentToStorage = (patient: Patient) =>
     localStorage.setItem("currentPatient", JSON.stringify(patient));
-  const loadCurrentFromStorage = () =>
-    localStorage.getItem("currentPatient")
-      ? (JSON.parse(localStorage.getItem("currentPatient")!) as Patient)
-      : null;
+  const loadCurrentFromStorage = () => {
+    const stored = localStorage.getItem("currentPatient");
+    if (stored) {
+      const patient = JSON.parse(stored) as Patient;
+      patient.createdAt = new Date(patient.createdAt);
+      patient.updatedAt = new Date(patient.updatedAt);
+      return patient;
+    }
+    return null;
+  };
   const clearCurrent = () => {
     setCurrentPatient(null);
     localStorage.removeItem("currentPatient");

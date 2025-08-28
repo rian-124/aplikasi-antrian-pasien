@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { AuthService } from '../classes/AuthService';
+import { AuthService } from '@/app/classes/AuthService'; 
 
 export default function Header() {
   const pathname = usePathname();

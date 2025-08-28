@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { User } from '../classes/User';
-import { UserService } from '../classes/UserService';
+import { User } from '@/app/classes/User';
+import { UserService } from '@/app/classes/UserService';
 import AddUserModal from './AddUserModal';
 import { UserPlus2 } from "lucide-react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthService } from '../classes/AuthService';
+import { AuthService } from '@/app/classes/AuthService';
 import EditUserModal from './EditUserModal';
-import { Outlet } from '../classes/UserModel';
+import { Outlet } from '@/app/classes/UserModel';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 

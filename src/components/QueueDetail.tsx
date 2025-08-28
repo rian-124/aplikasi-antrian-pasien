@@ -1,7 +1,7 @@
 "use client";
 
 import { Circle } from "lucide-react";
-import { Patient } from "../classes/Patient";
+import { Patient } from "@/app/classes/Patient";
 import Swal from "sweetalert2";
 
 interface QueueDetailProps {

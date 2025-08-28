@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import UserTable from '../components/UserTable';
-import Sidebar from '../components/Sidebar'; 
-import Header from '../components/Header';
+import UserTable from '@/components/UserTable';
+import Sidebar from '@/components/Sidebar'; 
+import Header from '@/components/Header';
 
 export default function UsersPage() {
   const [collapsed, setCollapsed] = useState(false);

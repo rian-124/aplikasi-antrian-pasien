@@ -1,6 +1,6 @@
 'use client';
 
-import { Patient } from "../classes/Patient";
+import { Patient } from "@/app/classes/Patient";
 import { ArrowRight, Circle } from "lucide-react";
 
 interface PatientCardProps {

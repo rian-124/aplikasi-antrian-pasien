@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; 
-import QueueCard from "../components/QueueCard";
-import QueueHeader from "../components/QueueHeader";
+import QueueCard from "@/components/QueueCard";
+import QueueHeader from "@/components/QueueHeader";
 import { ArrowLeft } from 'lucide-react';
 
 export default function AntrianPage() {

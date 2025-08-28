@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from '../classes/User';
-import { Outlet, Role } from '../classes/UserModel';
-import { UserService } from '../classes/UserService';
+import { User } from '@/app/classes/User';
+import { Outlet, Role } from '@/app/classes/UserModel';
+import { UserService } from '@/app/classes/UserService';
 
 interface Props {
   isOpen: boolean;

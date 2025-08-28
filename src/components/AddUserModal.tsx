@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { UserService } from '../classes/UserService';
-import { Role, Outlet } from '../classes/UserModel';
+import { UserService } from '@/app/classes/UserService';
+import { Role, Outlet } from '@/app/classes/UserModel';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Patient } from "../classes/Patient";
+import { Patient } from "@/app/classes/Patient";
 import PatientCard from "./PatientCard";
 
 export default function QueuePatient() {

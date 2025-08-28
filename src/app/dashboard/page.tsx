@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { Stat } from "../classes/Stat";
 import { Patient } from "../classes/Patient";
-import Sidebar from "../components/Sidebar";
-import StatCard from "../components/StatCard";
-import PatientTable from "../components/PatientTable";
-import Header from "../components/Header";
+import Sidebar from "@/components/Sidebar";
+import StatCard from "@/components/StatCard";
+import PatientTable from "@/components/PatientTable";
+import Header from "@/components/Header";
 
 export default function DashboardPage() {
   const [collapsed, setCollapsed] = useState(false);
@@ -98,7 +98,6 @@ export default function DashboardPage() {
     socket.on("antrian_pasiens_update", (data: any) => {
       if (!data || !Array.isArray(data)) return;
 
-      // gunakan outletMap global
       const updatedPatients: Patient[] = data.map((p: any, index: number) =>
         Patient.fromJSON(p, index, outletMap)
       );
