@@ -37,6 +37,9 @@
     </table>
 
     <h1>Daftar Users</h1>
+      <button onclick="playVoice('Nomor antrian 25, silakan menuju loket.')">
+  Panggil Antrian
+</button>
 
     <table>
       <thead>
@@ -51,6 +54,17 @@
     </table>
 
     <script>
+      function playVoice(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID'; // bahasa Indonesia
+        utterance.rate = 1; // kecepatan (0.5 - 2)
+        utterance.pitch = 1; // nada suara (0 - 2)
+        speechSynthesis.speak(utterance);
+      }
+    </script>
+
+    <!-- test WebSocket -->
+    <!-- <script>
       const token =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoiYWZyaWFuMTIzIiwicm9sZSI6IkFETUlOVVNFUlMiLCJvdXRsZXQiOiJHRURVTkcgQSIsInBlcm1pc3Npb24iOlsidmlldzpBRE1JTlVTRVJTIl0sImlhdCI6MTc1NjExMTU2MSwiZXhwIjoxNzU2MTE1MTYxfQ.Ik6a7ijr8pZ1dXeGs11yPR5vfKw9Hu2FVk2qPUsAhLE';
 
@@ -123,6 +137,6 @@
           tbody.appendChild(tr);
         }
       }
-    </script>
+    </script> -->
   </body>
 </html>

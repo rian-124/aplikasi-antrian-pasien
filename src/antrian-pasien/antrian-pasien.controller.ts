@@ -33,7 +33,6 @@ import { AntrianPasienDocs } from './docs/antrian-pasien.docs';
 @Permissions('view:ADMINUSERS', 'view:ADMIN')
 export class AntrianPasienController {
   constructor(private antrianPasienService: AntrianPasienService) {}
-
   @Get()
   @HttpCode(200)
   @ApiOperation(AntrianPasienDocs.getAll)
@@ -69,10 +68,9 @@ export class AntrianPasienController {
   @ApiOperation(AntrianPasienDocs.getDailyAntrianPasien)
   async getDailyAntrianPasiensController(
     @Req() req: AuthenticatedRequest,
-    @Query('date') date?: string,
   ): Promise<WebResponse<AntrianPasiens[]>> {
     const result =
-      await this.antrianPasienService.getDailyStatusAntriansService(req, date);
+      await this.antrianPasienService.getDailyStatusAntriansService(req);
 
     return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
   }
@@ -94,12 +92,9 @@ export class AntrianPasienController {
   @ApiOperation(AntrianPasienDocs.getDailyNomorAntrian)
   async getDailyNomorAntriansController(
     @Req() req: AuthenticatedRequest,
-    @Query('date') date?: string,
   ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
-    const result = await this.antrianPasienService.getDailyNomorAntriansService(
-      req,
-      date,
-    );
+    const result =
+      await this.antrianPasienService.getDailyNomorAntriansService(req);
 
     return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
   }

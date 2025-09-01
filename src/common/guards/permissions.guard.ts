@@ -27,9 +27,6 @@ export class PermissionsGuard implements CanActivate {
     const user = request.user as JwtUser;
 
     const userPermissions = user?.permission || [];
-    console.log('User permissions:', userPermissions);
-    console.log('Required permissions:', requiredPermissions);
-
     const hasPermission = requiredPermissions.some((permission) =>
       userPermissions.includes(permission),
     );

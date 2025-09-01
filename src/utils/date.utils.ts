@@ -5,8 +5,8 @@ import * as timezone from 'dayjs/plugin/timezone';
 dayJs.extend(utc);
 dayJs.extend(timezone);
 
-export function getDayRangeWib(date?: string) {
-  const targetDate = date ? dayJs(date) : dayJs();
+export function getDayRangeWib() {
+  const targetDate = dayJs();
 
   const startOfDay = targetDate.tz('Asia/Jakarta').startOf('minute').toDate();
   const endOfDay = targetDate.tz('Asia/Jakarta').endOf('minute').toDate();

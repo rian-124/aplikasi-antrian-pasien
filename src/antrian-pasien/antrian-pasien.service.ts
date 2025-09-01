@@ -135,7 +135,6 @@ export class AntrianPasienService {
 
   async getDailyNomorAntriansService(
     req: AuthenticatedRequest,
-    date?: string,
   ): Promise<NomorAntrianPasienResponse[]> {
     const outlet = await this.prismaService.outlets.findUnique({
       where: {
@@ -149,7 +148,7 @@ export class AntrianPasienService {
       );
     }
 
-    const { startOfDay, endOfDay } = getDayRangeWib(date);
+    const { startOfDay, endOfDay } = getDayRangeWib();
 
     const dataNomorAntrianPasien =
       await this.prismaService.antrianPasiens.findMany({
@@ -185,7 +184,6 @@ export class AntrianPasienService {
 
   async getDailyStatusAntriansService(
     req: AuthenticatedRequest,
-    date?: string,
   ): Promise<AntrianPasiens[]> {
     const outlet = await this.prismaService.outlets.findUnique({
       where: {
@@ -199,7 +197,7 @@ export class AntrianPasienService {
       );
     }
 
-    const { startOfDay, endOfDay } = getDayRangeWib(date);
+    const { startOfDay, endOfDay } = getDayRangeWib();
 
     const result = await this.prismaService.antrianPasiens.findMany({
       where: {
