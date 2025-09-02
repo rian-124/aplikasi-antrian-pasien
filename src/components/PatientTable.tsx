@@ -1,4 +1,4 @@
-import { Patient } from "@/app/classes/Patient";
+import { Patient } from "@/classes/Patient";
 
 interface Props {
   data: Patient[];

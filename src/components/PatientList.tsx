@@ -1,10 +1,10 @@
 "use client";
 import { ArrowRight, Circle } from "lucide-react";
 import { useState } from "react";
-import { Patient } from "@/app/classes/Patient";
+import { Patient } from "@/classes/Patient";
 
 interface PatientListProps {
-  patients: Patient[];
+  patients: (Patient & { isRecalled?: boolean })[];
   onCallPatient: (patient: Patient) => void;
   currentPatient: Patient | null;
   disableCall: boolean;
@@ -62,7 +62,7 @@ export default function PatientList({
 
             <p className="text-sm text-gray-600 mt-1">Lab Reg: {patient.labReg}</p>
 
-            {!currentPatient && patient.id === firstWaitingPatientId && (
+            {!currentPatient && (patient.id === firstWaitingPatientId || (patient.isRecalled && patient.status === 'WAITING')) && (
               <div className="flex justify-end mt-3">
                 <button
                   onClick={() => onCallPatient(patient)}

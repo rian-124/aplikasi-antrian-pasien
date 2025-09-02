@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { ResetPasswordManager } from "@/app/classes/ResetPasswordManager";
+import { ResetPasswordManager } from "@/classes/ResetPasswordManager";
 import { useRouter } from 'next/navigation';
 
 export default function ResetPasswordForm() {
@@ -35,7 +35,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 
   try {
-    const res = await fetch('http://192.168.50.2:4000/api/users/reset-password', {
+    const res = await fetch('http://192.168.50.9:3000/api/users/reset-password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

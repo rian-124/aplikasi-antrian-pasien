@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ForgotPasswordManager } from '@/app/classes/ForgotPasswordManager';
+import { ForgotPasswordManager } from '@/classes/ForgotPasswordManager';
 import { useRouter } from 'next/navigation';
 
 export default function ForgotPasswordForm() {
@@ -15,7 +15,7 @@ export default function ForgotPasswordForm() {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://192.168.50.2:4000/api/users/check-username', {
+      const res = await fetch('http://192.168.50.9:3000/api/users/check-username', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

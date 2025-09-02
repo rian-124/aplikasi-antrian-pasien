@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { User } from '@/app/classes/User';
-import { UserService } from '@/app/classes/UserService';
+import { User } from '@/classes/User';
+import { UserService } from '@/classes/UserService';
 import AddUserModal from './AddUserModal';
 import { UserPlus2 } from "lucide-react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthService } from '@/app/classes/AuthService';
+import { AuthService } from '@/classes/AuthService';
 import EditUserModal from './EditUserModal';
-import { Outlet } from '@/app/classes/UserModel';
+import { Outlet } from '@/classes/UserModel';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -21,6 +21,7 @@ export default function UserTable() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
+  const [allLokets, setAllLokets] = useState<{id: number, nama_loket: string}[]>([]);
 
   const [searchText, setSearchText] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -29,8 +30,15 @@ export default function UserTable() {
     setLoading(true);
     setError(null);
     try {
-      const data = await UserService.fetchUsers();
-      setUsers(data);
+      const token = AuthService.getToken();
+      const res = await fetch("http://192.168.50.9:3000/api/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const json = await res.json();
+      setUsers(json.data || []);
     } catch (err: any) {
       console.error("Gagal mengambil data pengguna:", err);
       setError(err.message || "Gagal memuat data pengguna");
@@ -41,7 +49,6 @@ export default function UserTable() {
 
   useEffect(() => {
     const token = AuthService.getToken();
-    console.log('Auth Token:', token);
     if (!token) {
       toast.error("Autentikasi diperlukan. Silakan login terlebih dahulu.");
       return;
@@ -115,6 +122,20 @@ export default function UserTable() {
 
     return searchMatch && roleMatch;
   });
+
+  useEffect(() => {
+    const fetchLokets = async () => {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch("http://192.168.50.9:3000/api/lokets", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const json = await res.json();
+      setAllLokets(json.data || []);
+    };
+    fetchLokets();
+  }, []);
 
   return (
     <>
@@ -197,6 +218,7 @@ export default function UserTable() {
                   <th className="px-6 py-3">Username</th>
                   <th className="px-6 py-3">Nama</th>
                   <th className="px-6 py-3">Outlet</th>
+                  <th className="px-6 py-3">Loket</th> 
                   <th className="px-6 py-3">Hak Akses</th>
                   <th className="px-6 py-3">Aksi</th>
                 </tr>
@@ -208,6 +230,9 @@ export default function UserTable() {
                     <td className="px-6 py-4">{user.username}</td>
                     <td className="px-6 py-4">{user.name}</td>
                     <td className="px-6 py-4">{user.outlet_id}</td>
+                    <td className="px-6 py-4">
+                      {user.lokets?.nama_loket || <span className="text-gray-400 italic">-</span>}
+                    </td>
                     <td className="px-6 py-4 text-blue-600 font-medium">
                       {getRoleName(user.role_id)}
                     </td>

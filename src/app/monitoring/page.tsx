@@ -5,7 +5,7 @@ import { io, Socket } from 'socket.io-client';
 import QueueHeader from '@/components/QueueHeader';
 import QueueList from '@/components/QueueList';
 import CurrentQueue from '@/components/CurrentQueue';
-import { Patient } from '@/app/classes/Patient';
+import { Patient } from '@/classes/Patient';
 import { CardStack, Card } from '@/components/ui/card-stack';
 
 export default function MonitoringPage() {
@@ -25,8 +25,8 @@ export default function MonitoringPage() {
         if (!token) throw new Error("No access token");
 
         const [patientRes, outletRes] = await Promise.all([
-          fetch("http://192.168.50.2:4000/api/antrian-pasien", { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch("http://192.168.50.2:4000/api/outlet", { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch("http://192.168.50.9:3000/api/antrian-pasien", { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch("http://192.168.50.9:3000/api/outlet", { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
 
         if (!patientRes.ok || !outletRes.ok) throw new Error("Error fetching patients or outlets");
@@ -51,7 +51,7 @@ export default function MonitoringPage() {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    const socket: Socket = io("http://192.168.50.2:4000", { auth: { token } });
+    const socket: Socket = io("http://192.168.50.9:3000", { auth: { token } });
 
     socket.on('connect', () => console.log('WebSocket connected:', socket.id));
     socket.on('disconnect', () => console.warn('WebSocket disconnected'));

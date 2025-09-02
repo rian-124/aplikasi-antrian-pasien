@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { UserService } from '@/app/classes/UserService';
-import { Role, Outlet } from '@/app/classes/UserModel';
+import { UserService } from '@/classes/UserService';
+import { Role, Outlet } from '@/classes/UserModel';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useEffect, useRef, useState } from "react";
 
 interface AddUserModalProps {
   isOpen: boolean;
@@ -20,6 +20,9 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
   const [name, setName] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedOutletId, setSelectedOutletId] = useState<number | null>(null);
+  const [loketId, setLoketId] = useState<number | null>(null);
+  const [outletId, setOutletId] = useState<number | null>(null);
+  const [lokets, setLokets] = useState<any[]>([]);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +44,18 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
 
     fetchData();
   }, [isOpen]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    fetch("http://192.168.50.9:3000/api/lokets", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setLokets(Array.isArray(data.data) ? data.data : []));
+  }, []);
+
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -66,13 +81,18 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
     }
 
     try {
-      await UserService.createUser({
+      const role_id = selectedRoleId;
+      const outlet_id = selectedOutletId;
+      const newUser = {
         username,
-        password,
         name,
-        role_id: selectedRoleId,
-        outlet_id: selectedOutletId,
-      });
+        password,
+        role_id,
+        outlet_id,
+        loket_id: loketId, // tambahkan field ini
+      };
+
+      await UserService.createUser(newUser);
 
       toast.success('User created successfully');
       resetForm();
@@ -90,9 +110,14 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
     setName('');
     setSelectedRoleId(null);
     setSelectedOutletId(null);
+    setLoketId(null);
   };
 
   if (!isOpen) return null;
+
+  const filteredLokets = selectedOutletId
+    ? lokets.filter((loket) => loket.outlet_id === selectedOutletId)
+    : [];
 
   return (
     <>
@@ -129,6 +154,12 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
               value={selectedOutletId}
               onChange={setSelectedOutletId}
               options={outlets.map((o) => ({ id: o.id, name: o.nama_outlet }))}
+            />
+            <SelectField
+              label="Loket"
+              value={loketId}
+              onChange={setLoketId}
+              options={filteredLokets.map((loket) => ({ id: loket.id, name: loket.nama_loket }))}
             />
             <SelectField
               label="User Role"

@@ -1,6 +1,6 @@
 'use client'
 
-import { Patient } from "@/app/classes/Patient";
+import { Patient } from "@/classes/Patient";
 
 export default function CurrentQueue({ patient }: { patient: Patient }) {
   return (

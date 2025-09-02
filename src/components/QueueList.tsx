@@ -1,6 +1,6 @@
 'use client'
 
-import { QueueItem } from "@/app/classes/Queue";
+import { QueueItem } from "@/classes/Queue";
 
 interface QueueListProps {
   items: QueueItem[];

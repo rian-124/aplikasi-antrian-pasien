@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from '@/app/classes/User';
-import { Outlet, Role } from '@/app/classes/UserModel';
-import { UserService } from '@/app/classes/UserService';
+import { User } from '@/classes/User';
+import { Outlet, Role } from '@/classes/UserModel';
+import { UserService } from '@/classes/UserService';
 
 interface Props {
   isOpen: boolean;
@@ -19,6 +19,8 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
   const [outletId, setOutletId] = useState<number | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
+  const [lokets, setLokets] = useState<any[]>([]);
+  const [loketId, setLoketId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,8 +43,18 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
       setName(userData.name);
       setOutletId(Number(userData.outlet_id));
       setSelectedRoleId(Number(userData.role_id));
+      setLoketId(userData.loket_id ? Number(userData.loket_id) : null); 
     }
   }, [userData, isOpen, outlets]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    fetch("http://192.168.50.9:3000/api/lokets", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setLokets(Array.isArray(data.data) ? data.data : []));
+  }, []);
 
   const handleSave = () => {
     if (outletId === null || selectedRoleId === null) {
@@ -56,11 +68,16 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
       name,
       Number(outletId),
       userData!.outlet_name, 
-      Number(selectedRoleId)
+      Number(selectedRoleId),
+      loketId 
     );
 
     onSave(updatedUser);
   };
+
+  const filteredLokets = outletId
+    ? lokets.filter((loket) => loket.outlet_id === outletId)
+    : [];
 
   if (!isOpen || !userData) return null;
 
@@ -94,6 +111,12 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
           value={selectedRoleId}
           onChange={setSelectedRoleId}
           options={roles.map(r => ({ id: r.id, name: r.name }))}
+        />
+        <SelectField
+          label="Loket"
+          value={loketId}
+          onChange={setLoketId}
+          options={filteredLokets.map((loket) => ({ id: loket.id, name: loket.nama_loket }))}
         />
 
         <div className="flex justify-end gap-2 mt-4">

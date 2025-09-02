@@ -2,14 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
-import { Stat } from "../classes/Stat";
-import { Patient } from "../classes/Patient";
+import { Stat } from "@/classes/Stat";
+import { Patient } from "@/classes/Patient";
 import Sidebar from "@/components/Sidebar";
 import StatCard from "@/components/StatCard";
 import PatientTable from "@/components/PatientTable";
 import Header from "@/components/Header";
+import { useRouter } from "next/navigation";
+import { ChartAreaInteractive } from "@/components/ChartAreaInteractive";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const toggleSidebar = () => setCollapsed(!collapsed);
 
@@ -54,10 +57,10 @@ export default function DashboardPage() {
       if (!token) throw new Error("No access token");
 
       const [patientRes, outletRes] = await Promise.all([
-        fetch("http://192.168.50.2:4000/api/antrian-pasien", {
+        fetch("http://192.168.50.9:3000/api/antrian-pasien/daily", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://192.168.50.2:4000/api/outlet", {
+        fetch("http://192.168.50.9:3000/api/outlet", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -83,12 +86,14 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      router.push("/login"); // Redirect ke halaman login jika tidak ada token
+      return;
+    }
     fetchPatients();
 
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
-    const socket: Socket = io("http://192.168.50.2:4000", { auth: { token } });
+    const socket: Socket = io("http://192.168.50.9:3000", { auth: { token } });
 
     socket.on("connect", () => {
       console.log("WebSocket connected:", socket.id);
@@ -135,6 +140,7 @@ export default function DashboardPage() {
       <Sidebar collapsed={collapsed} toggle={toggleSidebar} />
       <div className="flex-1 p-2 bg-gray-50 min-h-screen">
         <Header />
+        <ChartAreaInteractive />
         <div className="grid grid-cols-2 p-2 pt-4 md:grid-cols-4 gap-4 mb-6">
           {stats.map((s, i) => (
             <StatCard

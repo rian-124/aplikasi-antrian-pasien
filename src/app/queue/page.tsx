@@ -8,7 +8,7 @@ import Header from "@/components/Header";
 import PatientList from "@/components/PatientList";
 import QueueDetail from "@/components/QueueDetail";
 import QueueStats from "@/components/QueueStats";
-import { Patient } from "../classes/Patient";
+import { Patient } from "@/classes/Patient";
 
 export default function QueuePage() {
   const [collapsed, setCollapsed] = useState(false);
@@ -63,9 +63,9 @@ export default function QueuePage() {
       if (!token) throw new Error("No access token");
 
       const [patientRes, outletRes, loketRes] = await Promise.all([
-        fetch("http://192.168.50.2:4000/api/antrian-pasien", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("http://192.168.50.2:4000/api/outlet", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("http://192.168.50.2:4000/api/lokets", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("http://192.168.50.9:3000/api/antrian-pasien", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("http://192.168.50.9:3000/api/outlet", { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("http://192.168.50.9:3000/api/lokets", { headers: { Authorization: `Bearer ${token}` } }),
       ]);
 
       if (!patientRes.ok || !outletRes.ok || !loketRes.ok) throw new Error("Failed fetching data from API");
@@ -113,7 +113,7 @@ export default function QueuePage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
     try {
-      const res = await fetch(`http://192.168.50.2:4000/api/users/loket`, {
+      const res = await fetch(`http://192.168.50.9:3000/api/users/loket`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ loket_id: loketId }),
@@ -134,7 +134,7 @@ export default function QueuePage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
     try {
-      const res = await fetch("http://192.168.50.2:4000/api/users/loket/checkout", {
+      const res = await fetch("http://192.168.50.9:3000/api/users/loket/checkout", {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ loket_id: 0 }),
@@ -162,7 +162,7 @@ export default function QueuePage() {
     if (!selectedLoket) return alert("Silakan pilih loket terlebih dahulu.");
 
     try {
-      const res = await fetch(`http://192.168.50.2:4000/api/antrian-pasien/${patient.id}`, {
+      const res = await fetch(`http://192.168.50.9:3000/api/antrian-pasien/${patient.id}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ status: "CALL", loket_id: selectedLoket }),
@@ -195,7 +195,7 @@ export default function QueuePage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const ws = io("http://192.168.50.2:4000", { auth: { token } });
+    const ws = io("http://192.168.50.9:3000", { auth: { token } });
     setSocket(ws);
 
     ws.on("connect", () => {
@@ -237,7 +237,11 @@ export default function QueuePage() {
       if (a.status === "CALL" && b.status !== "CALL") return -1;
       if (a.status !== "CALL" && b.status === "CALL") return 1;
       return a.no - b.no;
-    });
+    })
+    .map((p) => ({
+      ...p,
+      isRecalled: getRecallCount(p.id) > 0,
+    }));
 
   const stats = {
     TOTAL: patients.length,
@@ -269,7 +273,7 @@ export default function QueuePage() {
                   const token = localStorage.getItem("access_token");
                   if (!token) return;
                   try {
-                    const res = await fetch(`http://192.168.50.2:4000/api/antrian-pasien/${currentPatient.id}`, {
+                    const res = await fetch(`http://192.168.50.9:3000/api/antrian-pasien/${currentPatient.id}`, {
                       method: "PATCH",
                       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
                       body: JSON.stringify({ status: "COMPLETE" }),
@@ -294,7 +298,7 @@ export default function QueuePage() {
 
                   try {
                     if (recallCount >= 2) {
-                      const cancelRes = await fetch(`http://192.168.50.2:4000/api/antrian-pasien/${currentPatient.id}`, {
+                      const cancelRes = await fetch(`http://192.168.50.9:3000/api/antrian-pasien/${currentPatient.id}`, {
                         method: "PATCH",
                         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
                         body: JSON.stringify({ status: "CANCELED" }),
@@ -310,7 +314,7 @@ export default function QueuePage() {
                       return;
                     }
 
-                    const res = await fetch(`http://192.168.50.2:4000/api/antrian-pasien/${currentPatient.id}`, {
+                    const res = await fetch(`http://192.168.50.9:3000/api/antrian-pasien/${currentPatient.id}`, {
                       method: "PATCH",
                       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
                       body: JSON.stringify({ status: "WAITING" }),
@@ -332,7 +336,7 @@ export default function QueuePage() {
                   const token = localStorage.getItem("access_token");
                   if (!token) return;
                   try {
-                    const res = await fetch(`http://192.168.50.2:4000/api/antrian-pasien/${currentPatient.id}`, {
+                    const res = await fetch(`http://192.168.50.9:3000/api/antrian-pasien/${currentPatient.id}`, {
                       method: "PATCH",
                       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
                       body: JSON.stringify({ status: "CANCELED" }),

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { Patient } from "@/app/classes/Patient";
+import { Patient } from "@/classes/Patient";
 import PatientCard from "./PatientCard";
 
 export default function QueuePatient() {
@@ -31,14 +31,21 @@ export default function QueuePatient() {
     statuses.forEach((status) => {
       for (let i = 0; i < 3; i++) {
         grouped[status].push(
-          new Patient(
-            globalId, // id unik
-            i + 1, // nomor urut di status tersebut
-            `U-${globalId.toString().padStart(3, '0')}`,
-            `LAB-${1000 + globalId}`,
-            'IPRJ',
-            status
-          )
+          new Patient({
+            id: globalId,
+            no: i + 1,
+            patientNumber: `U-${globalId.toString().padStart(3, '0')}`,
+            labReg: `LAB-${1000 + globalId}`,
+            outletId: 1,
+            outlet: 'IPRJ',
+            userName: `User${globalId}`,
+            bintang: 0,
+            jenisRegistrasiId: 1,
+            status: status === "CALLED" ? "CALL" : status === "COMPLETED" ? "COMPLETE" : status === "CANCELLED" ? "CANCELED" : "WAITING",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            loketId: undefined,
+          })
         );
         globalId++;
       }
@@ -52,6 +59,10 @@ export default function QueuePatient() {
     CALLED: 'Called',
     COMPLETED: 'Completed',
     CANCELLED: 'Cancelled',
+  };
+
+  const handleCall = (patient: Patient) => {
+    console.log("Calling patient:", patient);
   };
 
   return (
@@ -79,7 +90,11 @@ export default function QueuePatient() {
             <h3 className="font-bold text-lg mb-2">{statusTitles[status as keyof typeof statusTitles]}</h3>
             <div className="space-y-4">
               {patients.map((patient) => (
-                <PatientCard key={patient.id} patient={patient} />
+                <PatientCard
+                  key={patient.id}
+                  patient={patient}
+                  onCall={() => handleCall(patient)} // atau fungsi sesuai kebutuhan Anda
+                />
               ))}
             </div>
           </div>

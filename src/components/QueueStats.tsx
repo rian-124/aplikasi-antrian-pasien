@@ -34,7 +34,7 @@ export default function QueueStats({
   const [loket, setLoket] = useState("");
 
   useEffect(() => {
-    setLoket(selectedLoket || localStorage.getItem("selectedLoket") || "");
+    setLoket(selectedLoket || "");
   }, [selectedLoket]);
   const [availableLokets, setAvailableLokets] = useState<Loket[]>([]);
 
@@ -42,24 +42,13 @@ export default function QueueStats({
     setAvailableLokets(lokets);
   }, [lokets]);
 
-  useEffect(() => {
-    if (lokets.length === 0) return;
-    const saved = localStorage.getItem("selectedLoket");
-    if (saved && lokets.some((l) => l.id.toString() === saved)) {
-      setLoket(saved);
-      onLoketChange(saved);
-    }
-  }, [lokets, onLoketChange]);
-
   const handleLoketChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setLoket(value);
-    localStorage.setItem("selectedLoket", value);
     onLoketChange(value);
   };
 
   const handleExit = () => {
-    localStorage.removeItem("selectedLoket");
     setLoket("");
     onExit();
   };
@@ -84,7 +73,7 @@ export default function QueueStats({
             <option value="">Pilih Loket</option>
             {availableLokets.map((l) => (
               <option key={l.id} value={l.id.toString()}>
-                {l.nama_loket} {l.in_use && l.id.toString() === loket ? "(Anda)" : ""}
+                {l.nama_loket} {l.id.toString() === loket ? "(Anda)" : l.in_use ? "(Digunakan)" : ""}
               </option>
             ))}
           </select>

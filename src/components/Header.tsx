@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { AuthService } from '@/app/classes/AuthService'; 
+import { AuthService } from '@/classes/AuthService'; 
 
 export default function Header() {
   const pathname = usePathname();
@@ -60,7 +60,7 @@ export default function Header() {
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-3 bg-white rounded-xl shadow mb-3">
+    <div className="flex items-center justify-between px-6 py-3 bg-white rounded-xl shadow mb-3 m-2">
       <h2 className="text-xl font-semibold text-black">{title}</h2>
 
       <div className="flex items-center gap-4">
