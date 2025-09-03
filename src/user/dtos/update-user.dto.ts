@@ -25,5 +25,10 @@ export class UpdateUserDto {
   @ApiProperty()
   @IsOptional()
   @IsInt()
+  loket_id?: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsInt()
   role_id?: number;
 }

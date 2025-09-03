@@ -21,5 +21,9 @@ export class RegisterUserDto {
 
   @ApiProperty()
   @IsInt()
+  loket_id: number;
+
+  @ApiProperty()
+  @IsInt()
   role_id: number;
 }

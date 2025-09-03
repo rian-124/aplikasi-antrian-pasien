@@ -13,9 +13,9 @@ export class AntrianPasienRepository {
     return this.prisma.$queryRaw<RecapAntrianPasiensRawDto[]>`
             SELECT user_id,
             COUNT(pasien_id) AS total,
-            DATE_TRUNC('day', "created_At") AS perday,
-            DATE_TRUNC('month', "created_At") AS permonth,
-            DATE_TRUNC('year', "created_At") AS peryear
+            DATE_TRUNC('day', "update_At") AS perday,
+            DATE_TRUNC('month', "update_At") AS permonth,
+            DATE_TRUNC('year', "update_At") AS peryear
             FROM antrian_pasiens
             WHERE user_id = ${req.user.sub}
             GROUP BY user_id, perday, permonth, peryear

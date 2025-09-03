@@ -6,23 +6,27 @@ export class LoketSeeder {
   async seed() {
     const data = [
       {
-        nama_loket: 'LOKET 1',
+        nama_loket: 'LOKET 5',
         outlet_id: 2,
       },
       {
-        nama_loket: 'LOKET 2',
+        nama_loket: 'LOKET 6',
         outlet_id: 2,
       },
       {
-        nama_loket: 'LOKET 2',
+        nama_loket: 'LOKET 7',
         outlet_id: 2,
       },
       {
-        nama_loket: 'LOKET 3',
+        nama_loket: 'LOKET 8',
         outlet_id: 2,
       },
       {
-        nama_loket: 'LOKET 4',
+        nama_loket: 'LOKET 9',
+        outlet_id: 2,
+      },
+      {
+        nama_loket: 'LOKET 10',
         outlet_id: 2,
       },
     ];

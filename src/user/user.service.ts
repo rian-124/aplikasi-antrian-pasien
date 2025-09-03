@@ -43,6 +43,28 @@ export class UserService {
       throw new HttpException('Username already exists', 400);
     }
 
+    const loket = await this.prismaService.lokets.findUnique({
+      where: {
+        id: body.loket_id,
+      },
+    });
+
+    if (!loket) {
+      throw new NotFoundException(
+        `Tidak dapat menemukan loket dengan ID tersebut`,
+      );
+    }
+
+    const isLoketUsed = await this.prismaService.users.findFirst({
+      where: {
+        loket_id: loket.id,
+      },
+    });
+
+    if (isLoketUsed) {
+      throw new BadRequestException('Loket sudah di gunakan oleh user lain');
+    }
+
     body.password = await bcrypt.hash(body.password, 10);
 
     const user = await this.prismaService.users.create({
@@ -51,6 +73,7 @@ export class UserService {
         name: body.name,
         password: body.password,
         outlet_id: body.outlet_id,
+        loket_id: body.loket_id,
         role_id: body.role_id,
       },
     });
@@ -64,8 +87,12 @@ export class UserService {
 
   async getUsersService(): Promise<Users[]> {
     const dataUsers = await this.prismaService.users.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         outlets: true,
+        lokets: true,
         roles: true,
       },
     });
@@ -135,7 +162,32 @@ export class UserService {
       throw new NotFoundException(`User ${existingUser} not found`);
     }
 
-    const data: UpdateUserDto = {};
+    if (body.loket_id !== undefined) {
+      const loket = await this.prismaService.lokets.findUnique({
+        where: {
+          id: body.loket_id,
+        },
+      });
+
+      if (!loket) {
+        throw new NotFoundException(
+          `Tidak dapat menemukan loket dengan ID tersebut`,
+        );
+      }
+
+      const isLoketUsed = await this.prismaService.users.findFirst({
+        where: {
+          loket_id: loket.id,
+          NOT: { id },
+        },
+      });
+
+      if (isLoketUsed) {
+        throw new BadRequestException('Loket sudah di gunakan oleh user lain');
+      }
+    }
+
+    const data: Partial<UpdateUserDto> = {};
 
     if (body.name !== undefined) data.name = body.name;
 
@@ -148,7 +200,14 @@ export class UserService {
       data.outlet_id = body.outlet_id;
     }
 
+    if (body.loket_id !== undefined) {
+      data.loket_id = body.loket_id;
+    }
+
     if (body.role_id !== undefined) data.role_id = body.role_id;
+
+    this.logger.debug(`Body: ${JSON.stringify(body)}`);
+    this.logger.debug(`Data update: ${JSON.stringify(data)}`);
 
     const updateUser = await this.prismaService.users.update({
       where: { id },
@@ -210,6 +269,8 @@ export class UserService {
       },
     });
 
+    this.wsGateaway.broadcastToAdmin(userLoketUpdate);
+
     return userLoketUpdate;
   }
 
@@ -230,7 +291,7 @@ export class UserService {
 
     if (users.loket_id === null) {
       throw new BadRequestException(
-        'Users belum memiliki locket tidak dapat melakukan checkut',
+        'Users belum memiliki locket tidak dapat melakukan checkout',
       );
     }
 
@@ -242,6 +303,8 @@ export class UserService {
         loket_id: null,
       },
     });
+
+    this.wsGateaway.broadcastToAdmin(checkoutUserByLoket);
 
     return checkoutUserByLoket;
   }

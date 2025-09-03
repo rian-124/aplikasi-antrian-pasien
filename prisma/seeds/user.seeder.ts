@@ -13,12 +13,19 @@ export class UserSeeder {
       //   outlet_id: 2,
       //   role_id: 2,
       // },
+      // {
+      //   username: 'afrian123',
+      //   name: 'afrian',
+      //   password: '123456',
+      //   outlet_id: 2,
+      //   role_id: 2,
+      // },
       {
-        username: 'afrian123',
-        name: 'afrian',
+        username: 'admin123',
+        name: 'admin123',
         password: '123456',
         outlet_id: 2,
-        role_id: 2,
+        role_id: 1,
       },
     ];
 
