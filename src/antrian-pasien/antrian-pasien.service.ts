@@ -43,6 +43,9 @@ export class AntrianPasienService {
       where: {
         outlet_id: outlet.id,
       },
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         tahap_antrian: true,
         status_antrian: true,
@@ -110,6 +113,9 @@ export class AntrianPasienService {
         where: {
           outlet_id: outlet.id,
         },
+        orderBy: {
+          id: 'desc',
+        },
         select: {
           nomor_Antrian: true,
           users: {
@@ -159,6 +165,9 @@ export class AntrianPasienService {
             lte: endOfDay,
           },
         },
+        orderBy: {
+          id: 'desc',
+        },
         select: {
           nomor_Antrian: true,
           users: {
@@ -206,6 +215,9 @@ export class AntrianPasienService {
           gte: startOfDay,
           lte: endOfDay,
         },
+      },
+      orderBy: {
+        id: 'desc',
       },
       include: {
         tahap_antrian: true,
