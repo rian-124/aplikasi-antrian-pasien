@@ -23,7 +23,7 @@ import {
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ResponseHelper } from 'src/common/response.helper';
-import { Users } from '@prisma/client';
+import { Lokets, Users } from '@prisma/client';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
@@ -99,10 +99,13 @@ export class UserController {
   async updateUserByLokets(
     @Req() request: AuthenticatedRequest,
     @Body() body: UpdateLoketUserDto,
-  ): Promise<WebResponse<Users>> {
-    await this.userService.updateUserByLoketService(request, body);
+  ): Promise<WebResponse<Lokets>> {
+    const result = await this.userService.updateUserByLoketService(
+      request,
+      body,
+    );
 
-    return ResponseHelper.ok('Successfully update user loket');
+    return ResponseHelper.ok('Successfully update user loket', result);
   }
 
   @Put('/loket/checkout')
@@ -113,9 +116,9 @@ export class UserController {
   async checkoutUserByLokets(
     @Req() request: AuthenticatedRequest,
   ): Promise<WebResponse<Users>> {
-    await this.userService.checkoutUserByLoketService(request);
+    const result = await this.userService.checkoutUserByLoketService(request);
 
-    return ResponseHelper.ok('Successfully checkout users lokets');
+    return ResponseHelper.ok('Successfully checkout users lokets', result);
   }
 
   @Delete(':id')

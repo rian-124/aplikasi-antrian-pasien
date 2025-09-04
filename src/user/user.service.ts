@@ -13,7 +13,7 @@ import {
 } from '../model/user.model';
 import { Logger } from 'winston';
 import * as bcrypt from 'bcrypt';
-import { Users } from '@prisma/client';
+import { Lokets, Users } from '@prisma/client';
 import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 import { RegisterUserDto } from './dtos/register-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -222,7 +222,7 @@ export class UserService {
   async updateUserByLoketService(
     request: AuthenticatedRequest,
     body: UpdateLoketUserDto,
-  ): Promise<Users> {
+  ): Promise<Lokets> {
     const users = await this.prismaService.users.findUnique({
       where: {
         id: request.user.sub,
@@ -260,18 +260,21 @@ export class UserService {
       throw new BadRequestException('Loket sudah di gunakan oleh user lain');
     }
 
-    const userLoketUpdate = await this.prismaService.users.update({
+    await this.prismaService.users.update({
       where: {
         id: users.id,
       },
       data: {
         loket_id: body.loket_id,
       },
+      include: {
+        lokets: true,
+      },
     });
 
-    this.wsGateaway.broadcastToAdmin(userLoketUpdate);
+    this.wsGateaway.broadcastToAdmin(loket);
 
-    return userLoketUpdate;
+    return loket;
   }
 
   async checkoutUserByLoketService(

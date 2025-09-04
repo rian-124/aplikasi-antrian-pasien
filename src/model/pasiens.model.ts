@@ -20,6 +20,7 @@ export class PasiensRequestUpdate {
 export enum Status {
   WAITING = 'WAITING',
   CALL = 'CALL',
+  RECALL = 'RECALL',
   SKIPPED = 'SKIPPED',
   COMPLETE = 'COMPLETE',
   CANCELED = 'CANCELED',
@@ -28,6 +29,7 @@ export enum Status {
 export const STATUS_ORDER = [
   'WAITING',
   'CALL',
+  'RECALL',
   'SKIPED',
   'COMPLETE',
   'CANCELED',

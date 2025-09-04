@@ -295,7 +295,7 @@ export class AntrianPasienService {
 
     this.validateStatusChangeService(currentStatus, nextStatus);
 
-    if (nextStatus === Status.CALL && antrianPasien.bintang >= 3) {
+    if (nextStatus === Status.RECALL && antrianPasien.bintang >= 3) {
       nextStatus = Status.CANCELED;
       const newStatusAntrian =
         await this.prismaService.statusAntrians.findUnique({
@@ -312,7 +312,7 @@ export class AntrianPasienService {
     }
 
     const incrementBintang =
-      nextStatus === Status.CALL
+      nextStatus === Status.RECALL || nextStatus === Status.SKIPPED
         ? antrianPasien.bintang + 1
         : antrianPasien.bintang;
 
@@ -362,6 +362,7 @@ export class AntrianPasienService {
     if (
       currentStatus === Status.WAITING &&
       (nextStatus === Status.CANCELED ||
+        nextStatus === Status.RECALL ||
         nextStatus === Status.SKIPPED ||
         nextStatus === Status.COMPLETE)
     ) {
@@ -374,8 +375,11 @@ export class AntrianPasienService {
       (currentStatus === Status.CANCELED ||
         currentStatus === Status.COMPLETE) &&
       (nextStatus === Status.CALL ||
+        nextStatus === Status.RECALL ||
         nextStatus === Status.WAITING ||
-        nextStatus === Status.SKIPPED)
+        nextStatus === Status.SKIPPED ||
+        nextStatus === Status.COMPLETE ||
+        nextStatus === Status.CANCELED)
     ) {
       throw new BadRequestException(
         `Tidak dapat mengubah dari ${currentStatus} ke ${nextStatus}, karena status sudah final.`,
