@@ -73,7 +73,12 @@ export default function QueueStats({
             <option value="">Pilih Loket</option>
             {availableLokets.map((l) => (
               <option key={l.id} value={l.id.toString()}>
-                {l.nama_loket} {l.id.toString() === loket ? "(Anda)" : l.in_use ? "(Digunakan)" : ""}
+                {l.nama_loket}
+                {l.id.toString() === loket
+                  ? " (Sedang digunakan)"
+                  : l.in_use
+                  ? " (Digunakan)"
+                  : ""}
               </option>
             ))}
           </select>

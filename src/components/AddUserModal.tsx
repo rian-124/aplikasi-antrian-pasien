@@ -47,7 +47,7 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    fetch("http://192.168.50.9:3000/api/lokets", {
+    fetch("http://172.20.10.4:4000/api/lokets", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

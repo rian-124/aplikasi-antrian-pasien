@@ -1,10 +1,10 @@
-export type PatientStatus = "WAITING" | "CALL" | "COMPLETE" | "CANCELED";
+export type PatientStatus = "WAITING" | "CALL" | "COMPLETE" | "CANCELED" | "SKIPPED";
 
 export class Patient {
   id: number;
   no: number;
-  patientNumber: string;
-  labReg: string;
+  patientNumber: string;  
+  labReg: string;          
   outletId: number;
   outlet: string;
   userName: string;
@@ -50,29 +50,23 @@ export class Patient {
       throw new Error("Invalid patient data: data is null or undefined");
     }
 
-    const outletId = data.outlet_id ?? data.outletId ?? 0;
+    const outletId = data.outlet_id ?? 0;
     const outletName = outletMap.get(outletId) ?? "-";
 
     return new Patient({
       id: data.id ?? 0,
       no: index + 1,
-      patientNumber: data.patientNumber 
-        ?? data.nomor_Antrian 
-        ?? data.pasien?.nomor_registrasi 
-        ?? "-",  
-      labReg: data.labReg 
-        ?? data.lab_reg 
-        ?? data.pasien?.nomor_registrasi 
-        ?? "-",
+      patientNumber: data.nomor_Antrian ?? "-", 
+      labReg: data.pasien?.nomor_registrasi ?? "-", 
       outletId,
       outlet: outletName,
-      userName: data.users?.name ?? data.userName ?? "-",
+      userName: data.users?.name ?? "-",
       bintang: data.bintang ?? 0,
-      jenisRegistrasiId: data.pasien?.jenis_registrasi_id ?? data.jenisRegistrasiId ?? 0,
-      status: (data.status_antrian?.status ?? data.status) as PatientStatus ?? "WAITING",
-      createdAt: new Date(data.created_At ?? data.createdAt ?? data.created_at ?? Date.now()),
-      updatedAt: new Date(data.update_At ?? data.updatedAt ?? data.updated_at ?? Date.now()),
-      loketId: data.loket_id ?? data.loketId 
+      jenisRegistrasiId: data.pasien?.jenis_registrasi_id ?? 0,
+      status: (data.status_antrian?.status ?? "WAITING") as PatientStatus,
+      createdAt: new Date(data.created_At ?? Date.now()),
+      updatedAt: new Date(data.update_At ?? Date.now()),
+      loketId: data.loket_id ?? undefined,
     });
   }
 }

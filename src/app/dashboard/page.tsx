@@ -57,10 +57,10 @@ export default function DashboardPage() {
       if (!token) throw new Error("No access token");
 
       const [patientRes, outletRes] = await Promise.all([
-        fetch("http://192.168.50.9:3000/api/antrian-pasien/daily", {
+        fetch("http://172.20.10.4:4000/api/antrian-pasien/daily", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://192.168.50.9:3000/api/outlet", {
+        fetch("http://172.20.10.4:4000/api/outlet", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -93,7 +93,7 @@ export default function DashboardPage() {
     }
     fetchPatients();
 
-    const socket: Socket = io("http://192.168.50.9:3000", { auth: { token } });
+    const socket: Socket = io("http://172.20.10.4:4000", { auth: { token } });
 
     socket.on("connect", () => {
       console.log("WebSocket connected:", socket.id);

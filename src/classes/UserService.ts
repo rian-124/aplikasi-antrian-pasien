@@ -9,7 +9,7 @@ export class UserService {
       throw new Error("No auth token found");
     }
 
-    const res = await fetch("http://192.168.50.9:3000/api/users", {
+    const res = await fetch("http://172.20.10.4:4000/api/users", {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -28,7 +28,7 @@ export class UserService {
           user.id,
           user.username,
           user.name,
-          Number(user.outlet_id), // pastikan number
+          Number(user.outlet_id), 
           user.outlets?.nama_outlet || `Outlet ${user.outlet_id}`,
           Number(user.role_id)
         );
@@ -39,7 +39,7 @@ export class UserService {
   }
 
   static async deleteUser(userId: number) {
-    const res = await fetch(`http://192.168.50.9:3000/api/users/${userId}`, {
+    const res = await fetch(`http://172.20.10.4:4000/api/users/${userId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${AuthService.getToken()}`,
@@ -54,7 +54,7 @@ export class UserService {
   static async fetchRoles() {
     const token = AuthService.getToken();
 
-    const res = await fetch('http://192.168.50.9:3000/api/roles', {
+    const res = await fetch('http://172.20.10.4:4000/api/roles', {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -74,7 +74,7 @@ export class UserService {
     const token = AuthService.getToken();
     console.log("✅ Token for fetchOutlets:", token);
     
-    const res = await fetch('http://192.168.50.9:3000/api/outlet', {
+    const res = await fetch('http://172.20.10.4:4000/api/outlet', {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -96,7 +96,7 @@ export class UserService {
   static async updateUser(updatedUser: User) {
     const token = AuthService.getToken();
 
-    const res = await fetch(`http://192.168.50.9:3000/api/users/${updatedUser.id}`, {
+    const res = await fetch(`http://172.20.10.4:4000/api/users/${updatedUser.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -107,6 +107,7 @@ export class UserService {
         name: updatedUser.name,
         outlet_id: Number(updatedUser.outlet_id),
         role_id: Number(updatedUser.role_id),
+        loket_id: updatedUser.loket_id !== undefined ? Number(updatedUser.loket_id) : null,
       }),
     });
 
@@ -133,7 +134,7 @@ export class UserService {
     outlet_id: number;
   }) {
     const token = AuthService.getToken();
-    const res = await fetch('http://192.168.50.9:3000/api/users', {
+    const res = await fetch('http://172.20.10.4:4000/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
