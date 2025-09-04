@@ -44,7 +44,7 @@ export class AntrianPasienService {
         outlet_id: outlet.id,
       },
       orderBy: {
-        id: 'desc',
+        id: 'asc',
       },
       include: {
         tahap_antrian: true,
@@ -114,7 +114,7 @@ export class AntrianPasienService {
           outlet_id: outlet.id,
         },
         orderBy: {
-          id: 'desc',
+          id: 'asc',
         },
         select: {
           nomor_Antrian: true,
@@ -166,7 +166,7 @@ export class AntrianPasienService {
           },
         },
         orderBy: {
-          id: 'desc',
+          id: 'asc',
         },
         select: {
           nomor_Antrian: true,
