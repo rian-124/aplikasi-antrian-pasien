@@ -295,7 +295,10 @@ export class AntrianPasienService {
 
     this.validateStatusChangeService(currentStatus, nextStatus);
 
-    if (nextStatus === Status.RECALL && antrianPasien.bintang >= 3) {
+    if (
+      (nextStatus === Status.RECALL && antrianPasien.bintang >= 3) ||
+      (nextStatus === Status.SKIPPED && antrianPasien.bintang >= 3)
+    ) {
       nextStatus = Status.CANCELED;
       const newStatusAntrian =
         await this.prismaService.statusAntrians.findUnique({
