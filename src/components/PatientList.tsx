@@ -28,16 +28,16 @@ export default function PatientList({
     );
   });
 
-  const firstWaitingPatientId = filteredPatients.find(
-    (p) => p.status === "WAITING"
-  )?.id;
+  const firstWaitingPatient = filteredPatients.find((p) => p.status === "WAITING");
+  const firstSkippedPatient = !firstWaitingPatient
+    ? filteredPatients.find((p) => p.status === "SKIPPED")
+    : null;
 
-  const displayPatients = filteredPatients
+  const displayPatients = patients
     .filter(
       (p) =>
         p.status === "WAITING" ||
-        p.status === "SKIPPED" ||
-        (p.status === "CALL" && p.loketId === Number(selectedLoket))
+        p.status === "SKIPPED"
     )
     .sort((a, b) => {
       if (a.status === "SKIPPED" && b.status !== "SKIPPED") return 1;
@@ -97,24 +97,25 @@ export default function PatientList({
               Lab Reg: {patient.labReg}
             </p>
 
-            {!currentPatient && (
-              patient.id === firstWaitingPatientId ||
-              patient.status === "SKIPPED" ||
-              (patient.isRecalled && patient.status === "WAITING")
-            ) && (
-              <div className="flex justify-end mt-3">
-                <button
-                  disabled={disableCall}
-                  onClick={() => onCallPatient(patient)}
-                  className={`border rounded-md p-1 text-gray-600 hover:bg-gray-100 flex items-center ${
-                  disableCall ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  aria-label="Panggil"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            )}
+            {!currentPatient &&
+              (
+                (firstWaitingPatient && patient.id === firstWaitingPatient.id) ||
+                (!firstWaitingPatient && firstSkippedPatient && patient.id === firstSkippedPatient.id)
+              ) && (
+                <div className="flex justify-end mt-3">
+                  <button
+                    disabled={disableCall}
+                    onClick={() => onCallPatient(patient)}
+                    className={`border rounded-md p-1 text-gray-600 hover:bg-gray-100 flex items-center ${
+                      disableCall ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    aria-label="Panggil"
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              )
+            }
           </div>
         ))}
       </div>

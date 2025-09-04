@@ -15,7 +15,9 @@ export default function QueuePage() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   const [selectedLoket, setSelectedLoket] = useState<string>("");
-  const [lokets, setLokets] = useState<{ id: number; nama_loket: string; in_use?: boolean }[]>([]);
+  const [lokets, setLokets] = useState<
+    { id: number; nama_loket: string; in_use?: boolean }[]
+  >([]);
   const [outletMap, setOutletMap] = useState<Map<number, string>>(new Map());
   const [activeFilter, setActiveFilter] = useState("TOTAL");
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -41,6 +43,7 @@ export default function QueuePage() {
     localStorage.removeItem("currentPatient");
   };
 
+  // === 📌 Recall Count Helpers ===
   const getRecallCount = (patientId: number) => {
     const recallData = JSON.parse(localStorage.getItem("recallCounts") || "{}");
     return recallData[patientId] || 0;
@@ -86,7 +89,9 @@ export default function QueuePage() {
       ]);
 
       const map = new Map<number, string>();
-      (outletJson.data || []).forEach((o: any) => map.set(o.id, o.nama_outlet));
+      (outletJson.data || []).forEach((o: any) =>
+        map.set(o.id, o.nama_outlet)
+      );
       setOutletMap(map);
 
       setLokets(
@@ -97,8 +102,8 @@ export default function QueuePage() {
         }))
       );
 
-      const fetchedPatients: Patient[] = (patientJson.data || []).map((p: any, i: number) =>
-        Patient.fromJSON(p, i, map)
+      const fetchedPatients: Patient[] = (patientJson.data || []).map(
+        (p: any, i: number) => Patient.fromJSON(p, i, map)
       );
       setPatients(fetchedPatients);
 
@@ -142,10 +147,10 @@ export default function QueuePage() {
     setSocket(ws);
 
     ws.on("connect", () => {
-      console.log("✅ WS connected:", ws.id);
+      console.log("WS connected:", ws.id);
       ws.emit("join_room", { role: "ADMIN" });
       ws.emit("join_room", { role: "ADMINUSERS" });
-      fetchPatients(); 
+      fetchPatients();
     });
 
     ws.on("disconnect", (reason) => {
@@ -159,20 +164,40 @@ export default function QueuePage() {
 
   useEffect(() => {
     if (!socket) return;
-
-    const handleUpdate = (data: any) => {
-      if (!data) return;
-
-      if (Array.isArray(data)) {
-        setPatients(data.map((p: any, i: number) => Patient.fromJSON(p, i, outletMap)));
-      }
-    };
-
     socket.on("antrian_pasiens_update", (data: any) => {
-      console.log("WS data:", data);
+      if (Array.isArray(data)) {
+        setPatients(
+          data.map((p: any, i: number) => Patient.fromJSON(p, i, outletMap))
+        );
+      } else if (data && typeof data === "object") {
+        setPatients((prev) => {
+          const idx = prev.findIndex((p) => p.id === data.id);
+          if (idx === -1)
+            return [...prev, Patient.fromJSON(data, prev.length, outletMap)];
+          const copy = [...prev];
+          copy[idx] = Patient.fromJSON(data, idx, outletMap);
+          return copy;
+        });
+      }
+
+      // ❌ Jika current patient berubah jadi CANCELED → hapus
+      if (
+        currentPatient &&
+        ((Array.isArray(data) &&
+          data.some(
+            (p: any) =>
+              p.id === currentPatient.id &&
+              p.status_antrian?.status === "CANCELED"
+          )) ||
+          (!Array.isArray(data) &&
+            data.id === currentPatient.id &&
+            data.status_antrian?.status === "CANCELED"))
+      ) {
+        setCurrentPatient(null);
+      }
     });
     return () => {
-      socket.off("antrian_pasiens_update", handleUpdate);
+      socket.off("antrian_pasiens_update");
     };
   }, [socket, currentPatient, outletMap]);
 
@@ -187,11 +212,20 @@ export default function QueuePage() {
     if (!selectedLoket) return alert("Silakan pilih loket terlebih dahulu.");
 
     try {
-      const res = await fetch(`http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "CALL", loket_id: Number(selectedLoket) }),
-      });
+      const res = await fetch(
+        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: "CALL",
+            loket_id: Number(selectedLoket),
+          }),
+        }
+      );
 
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
@@ -199,10 +233,16 @@ export default function QueuePage() {
         return;
       }
 
-      const updatedPatient = { ...patient, status: "CALL", loketId: Number(selectedLoket) } as Patient;
+      const updatedPatient = {
+        ...patient,
+        status: "CALL",
+        loketId: Number(selectedLoket),
+      } as Patient;
       setCurrentPatient(updatedPatient);
       saveCurrentToStorage(updatedPatient);
-      setPatients((prev) => prev.map((p) => (p.id === patient.id ? updatedPatient : p)));
+      setPatients((prev) =>
+        prev.map((p) => (p.id === patient.id ? updatedPatient : p))
+      );
     } catch (error) {
       console.error("Failed to call patient:", error);
     }
@@ -213,15 +253,25 @@ export default function QueuePage() {
     if (!token) return;
 
     try {
-      const res = await fetch(`http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "COMPLETE" }),
-      });
+      const res = await fetch(
+        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "COMPLETE" }),
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to complete patient");
 
-      setPatients((prev) => prev.map((p) => (p.id === patient.id ? { ...p, status: "COMPLETE" } : p)));
+      setPatients((prev) =>
+        prev.map((p) =>
+          p.id === patient.id ? { ...p, status: "COMPLETE" } : p
+        )
+      );
       clearCurrent();
     } catch (error) {
       console.error("Failed to complete patient:", error);
@@ -233,15 +283,25 @@ export default function QueuePage() {
     if (!token) return;
 
     try {
-      const res = await fetch(`http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "CANCELED" }),
-      });
+      const res = await fetch(
+        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "CANCELED" }),
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to cancel patient");
 
-      setPatients((prev) => prev.map((p) => (p.id === patient.id ? { ...p, status: "CANCELED" } : p)));
+      setPatients((prev) =>
+        prev.map((p) =>
+          p.id === patient.id ? { ...p, status: "CANCELED" } : p
+        )
+      );
       clearCurrent();
     } catch (error) {
       console.error("Failed to cancel patient:", error);
@@ -254,17 +314,58 @@ export default function QueuePage() {
 
     try {
       const recallCount = getRecallCount(patient.id) + 1;
+
+      if (recallCount >= 3) {
+        const res = await fetch(
+          `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ status: "CANCELED" }),
+          }
+        );
+
+        if (!res.ok)
+          throw new Error("Failed to cancel patient after 3 recalls");
+
+        setPatients((prev) =>
+          prev.map((p) =>
+            p.id === patient.id ? { ...p, status: "CANCELED" } : p
+          )
+        );
+        resetRecallCount(patient.id);
+        clearCurrent();
+        return;
+      }
+
+      // Tambah recall count (bintang/star)
       setRecallCount(patient.id, recallCount);
 
-      const res = await fetch(`http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "WAITING", isRecalled: true }),
-      });
+      // PATCH status tetap CALL, bintang bertambah
+      const res = await fetch(
+        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "CALL" }),
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to recall patient");
 
-      setPatients((prev) => prev.map((p) => (p.id === patient.id ? { ...p, status: "WAITING" } : p)));
+      setPatients((prev) =>
+        prev.map((p) =>
+          p.id === patient.id
+            ? { ...p, status: "CALL", bintang: recallCount }
+            : p
+        )
+      );
       clearCurrent();
     } catch (error) {
       console.error("Failed to recall patient:", error);
@@ -280,7 +381,9 @@ export default function QueuePage() {
       (p) =>
         (p.status === "WAITING" ||
           p.status === "SKIPPED" ||
-          (p.status === "CALL" && p.loketId === Number(selectedLoket)))
+          (p.status === "CALL" && p.loketId === Number(selectedLoket))) &&
+        (p.status as string !== "COMPLETE") &&
+        (p.status as string !== "CANCELED")
     )
     .sort((a, b) => {
       if (a.status === "CALL" && b.status !== "CALL") return -1;

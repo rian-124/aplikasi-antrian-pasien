@@ -10,105 +10,161 @@ interface QueueDetailProps {
   onCancel: (patient: Patient) => void | Promise<void>;
   patients: Patient[];
   currentPatient: Patient | null;
-  clearCurrent: () => void;      
-  fetchPatients: () => void;     
+  clearCurrent: () => void;
+  fetchPatients: () => void;
 }
 
 export default function QueueDetail({
   patients,
   currentPatient,
-  onComplete,
-  onRecall,
-  onCancel,
   clearCurrent,
   fetchPatients,
 }: QueueDetailProps) {
-  const confirmAction = (
-    title: string,
-    text: string,
-    callback: () => void
-  ) => {
-    Swal.fire({
-      title,
-      text,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#16a34a",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Ya, Lanjutkan",
-      cancelButtonText: "Batal",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        callback();
-        Swal.fire("Berhasil!", "Aksi telah dijalankan.", "success");
-      }
-    });
+  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+
+  const handleCompleteClick = async () => {
+    if (!currentPatient || !token) return;
+    try {
+      const res = await fetch(
+        `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "COMPLETE" }),
+        }
+      );
+      if (!res.ok) throw new Error("Gagal menyelesaikan pasien");
+      fetchPatients();
+      clearCurrent(); 
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCancelClick = async () => {
+    if (!currentPatient || !token) return;
+    try {
+      const res = await fetch(
+        `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "CANCELED" }),
+        }
+      );
+      if (!res.ok) throw new Error("Gagal membatalkan pasien");
+      fetchPatients();
+      clearCurrent();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleRecallClick = async () => {
-    if (!currentPatient) return;
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
+    if (!currentPatient || !token) return;
 
-    if (currentPatient.bintang >= 2) {
-      confirmAction(
-        "Batalkan Pasien?",
-        "Pasien sudah dipanggil 3 kali, sekarang akan dibatalkan.",
-        async () => {
-          try {
-            const res = await fetch(
-              `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
-              {
-                method: "PATCH",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ status: "CANCELED" }),
-              }
-            );
-            if (!res.ok) {
-              const err = await res.json().catch(() => null);
-              alert(err?.errors?.message || "Gagal membatalkan pasien");
-              return;
-            }
-            clearCurrent();
-            fetchPatients();
-          } catch (err) {
-            console.error(err);
+    const nextBintang = currentPatient.bintang + 1;
+
+    if (nextBintang >= 4) {
+      try {
+        const res = await fetch(
+          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ status: "CANCELED", bintang: nextBintang }),
           }
-        }
-      );
+        );
+        if (!res.ok) throw new Error("Gagal membatalkan pasien");
+        fetchPatients();
+        clearCurrent();
+      } catch (err) {
+        console.error(err);
+      }
     } else {
-      confirmAction(
-        "Recall Pasien?",
-        "Pasien akan dipanggil kembali (circle bertambah)",
-        async () => {
-          try {
-            const res = await fetch(
-              `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
-              {
-                method: "PATCH",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ status: "CALL" }),
-              }
-            );
-            if (!res.ok) {
-              const err = await res.json().catch(() => null);
-              alert(err?.errors?.message || "Gagal recall pasien");
-              return;
-            }
-            fetchPatients();
-          } catch (err) {
-            console.error(err);
+      try {
+        const res = await fetch(
+          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: "CALL",
+              bintang: nextBintang,
+            }),
           }
-        }
-      );
+        );
+        if (!res.ok) throw new Error("Gagal recall pasien");
+        fetchPatients(); 
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
+
+
+  const handleSkipClick = async () => {
+    if (!currentPatient || !token) return;
+
+    const nextBintang = currentPatient.bintang + 1;
+
+    if (nextBintang >= 3) {
+      try {
+        const res = await fetch(
+          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ status: "CANCELED", bintang: nextBintang }),
+          }
+        );
+        if (!res.ok) throw new Error("Gagal membatalkan pasien");
+        fetchPatients();
+        clearCurrent();
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      try {
+        const res = await fetch(
+          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: "SKIPPED",
+              bintang: nextBintang,
+            }),
+          }
+        );
+        if (!res.ok) throw new Error("Gagal skip pasien");
+        fetchPatients();
+        clearCurrent(); 
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+
 
   return (
     <div className="space-y-6 h-flex flex flex-col p-1">
@@ -151,64 +207,38 @@ export default function QueueDetail({
                   <Circle
                     key={i}
                     className={`w-5 h-5 ${
-                      i < currentPatient.bintang
+                      i + 1 <= currentPatient.bintang
                         ? "text-blue-500 fill-blue-500"
                         : "text-gray-300"
                     }`}
                   />
                 ))}
+
               </div>
             </div>
 
-            {/* Tombol Aksi */}
             <div className="flex flex-col gap-4 items-end mt-6 md:mt-0">
               <div className="flex flex-col gap-3 w-32">
                 <button
-                  onClick={() => onComplete(currentPatient)}
+                  onClick={handleCompleteClick}
                   className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Complete
                 </button>
                 <button
-                  onClick={() => onRecall(currentPatient)}
+                  onClick={handleRecallClick}
                   className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Recall
                 </button>
                 <button
-                  onClick={() => onCancel(currentPatient)}
+                  onClick={handleCancelClick}
                   className="bg-rose-500 hover:bg-rose-600 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={async () => {
-                    if (!currentPatient) return;
-                    const token = localStorage.getItem("access_token");
-                    if (!token) return;
-                    try {
-                      const res = await fetch(
-                        `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
-                        {
-                          method: "PATCH",
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({ status: "SKIPPED" }),
-                        }
-                      );
-                      if (!res.ok) {
-                        const err = await res.json().catch(() => null);
-                        alert(err?.errors?.message || "Gagal skip pasien");
-                        return;
-                      }
-                      fetchPatients();
-                      clearCurrent();
-                    } catch (err) {
-                      console.error(err);
-                    }
-                  }}
+                  onClick={handleSkipClick}
                   className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md font-semibold text-sm"
                 >
                   Skip
@@ -220,7 +250,7 @@ export default function QueueDetail({
           <p className="text-gray-600">No patient currently being called.</p>
         )}
 
-        {/* Table Pasien */}
+        {/* List pasien */}
         <div className="overflow-x-auto rounded-x">
           <table className="min-w-full text-sm text-left">
             <thead>
@@ -233,34 +263,38 @@ export default function QueueDetail({
               </tr>
             </thead>
             <tbody className="text-gray-800">
-              {patients.map((patient, i) => (
-                <tr
-                  key={i}
-                  className="bg-white border-b last:border-b-0 border-gray-300 shadow-sm hover:shadow-md transition rounded-lg"
-                >
-                  <td className="px-4 py-3">{i + 1}</td>
-                  <td className="px-4 py-3 font-semibold">
-                    {patient.patientNumber}
-                  </td>
-                  <td className="px-4 py-3">{patient.labReg}</td>
-                  <td className="px-4 py-3">{patient.outlet}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        patient.status === "COMPLETE"
-                          ? "bg-green-100 text-green-700"
-                          : patient.status === "CANCELED"
-                          ? "bg-red-100 text-red-700"
-                          : patient.status === "WAITING"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-700"
-                      }`}
-                    >
-                      {patient.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {patients
+                .filter(
+                  (patient) =>
+                    patient.status !== "COMPLETE" &&
+                    patient.status !== "CANCELED"
+                )
+                .map((patient, i) => (
+                  <tr
+                    key={i}
+                    className="bg-white border-b last:border-b-0 border-gray-300 shadow-sm hover:shadow-md transition rounded-lg"
+                  >
+                    <td className="px-4 py-3">{i + 1}</td>
+                    <td className="px-4 py-3 font-semibold">
+                      {patient.patientNumber}
+                    </td>
+                    <td className="px-4 py-3">{patient.labReg}</td>
+                    <td className="px-4 py-3">{patient.outlet}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          patient.status === "WAITING"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : patient.status === "SKIPPED"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {patient.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

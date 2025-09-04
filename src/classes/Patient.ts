@@ -64,8 +64,8 @@ export class Patient {
       bintang: data.bintang ?? 0,
       jenisRegistrasiId: data.pasien?.jenis_registrasi_id ?? 0,
       status: (data.status_antrian?.status ?? "WAITING") as PatientStatus,
-      createdAt: new Date(data.created_At ?? Date.now()),
-      updatedAt: new Date(data.update_At ?? Date.now()),
+      createdAt: new Date(data.createdAt ?? data.created_At ?? Date.now()), 
+      updatedAt: new Date(data.updatedAt ?? data.update_At ?? Date.now()),
       loketId: data.loket_id ?? undefined,
     });
   }
