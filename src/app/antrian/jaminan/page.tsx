@@ -28,9 +28,21 @@ export default function JaminanPage() {
     fetchPenjamins();
   }, []);
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(null);
+        if (message.includes("berhasil dibuat")) {
+          router.push("/antrian");
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, router]);
+
   const fetchPenjamins = async () => {
     try {
-      const res = await fetch('http://172.20.10.4:4000/api/penjamins/jenis-registrasi?jenis=JAMINAN', {
+      const res = await fetch('http://172.20.10.2:4000/api/penjamins/jenis-registrasi?jenis=JAMINAN', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
@@ -51,7 +63,7 @@ export default function JaminanPage() {
   const createAntrian = async (penjamin_id: number) => {
     setLoading(true);
     try {
-      const res = await fetch('http://172.20.10.4:4000/api/pasiens', {
+      const res = await fetch('http://172.20.10.2:4000/api/pasiens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

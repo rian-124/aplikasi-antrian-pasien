@@ -44,7 +44,7 @@ export default function AntrianPage() {
 
   const createAntrian = async (jenis: string) => {
     try {
-      const res = await fetch('http://172.20.10.4:4000/api/pasiens', {
+      const res = await fetch('http://172.20.10.2:4000/api/pasiens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,11 +63,17 @@ export default function AntrianPage() {
     }
   };
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   return (
     <div className="w-full h-screen flex flex-col bg-white relative">
       <QueueHeader />
 
-      {/* Tombol Kembali hanya tampil saat tidak fullscreen */}
       {!isFullscreen && (
         <div className="absolute top-[72px] left-4">
           <button

@@ -1,4 +1,5 @@
 "use client";
+
 import { ArrowRight, Circle } from "lucide-react";
 import { useState } from "react";
 import { Patient } from "@/classes/Patient";
@@ -28,25 +29,17 @@ export default function PatientList({
     );
   });
 
-  const firstWaitingPatient = filteredPatients.find((p) => p.status === "WAITING");
-  const firstSkippedPatient = !firstWaitingPatient
-    ? filteredPatients.find((p) => p.status === "SKIPPED")
-    : null;
+  const firstWaitingPatientId = filteredPatients.find(
+    (p) => p.status === "WAITING"
+  )?.id;
 
-  const displayPatients = patients
-    .filter(
-      (p) =>
-        p.status === "WAITING" ||
-        p.status === "SKIPPED"
-    )
+  const displayPatients = filteredPatients
+    .filter((p) => ["WAITING", "SKIPPED"].includes(p.status))
     .sort((a, b) => {
       if (a.status === "SKIPPED" && b.status !== "SKIPPED") return 1;
       if (a.status !== "SKIPPED" && b.status === "SKIPPED") return -1;
       return a.no - b.no;
     });
-
-  console.log("Patients from props:", patients);
-  console.log("Display Patients:", displayPatients);
 
   return (
     <div className="h-full flex flex-col">
@@ -98,10 +91,9 @@ export default function PatientList({
             </p>
 
             {!currentPatient &&
-              (
-                (firstWaitingPatient && patient.id === firstWaitingPatient.id) ||
-                (!firstWaitingPatient && firstSkippedPatient && patient.id === firstSkippedPatient.id)
-              ) && (
+              (patient.id === firstWaitingPatientId ||
+                patient.status === "SKIPPED" ||
+                (patient.isRecalled && patient.status === "WAITING")) && (
                 <div className="flex justify-end mt-3">
                   <button
                     disabled={disableCall}
@@ -114,8 +106,7 @@ export default function PatientList({
                     <ArrowRight className="w-5 h-5" />
                   </button>
                 </div>
-              )
-            }
+              )}
           </div>
         ))}
       </div>

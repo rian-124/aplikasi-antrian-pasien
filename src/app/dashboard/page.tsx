@@ -21,6 +21,12 @@ export default function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState<string>("TOTAL");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [outletMap, setOutletMap] = useState<Map<number, string>>(new Map());
+  const [recapData, setRecapData] = useState<{ perday: any[]; permonth: any[]; peryear: any[] }>({
+    perday: [],
+    permonth: [],
+    peryear: [],
+  });
+  const [dataSource, setDataSource] = useState<"all" | "daily">("daily");
 
   const handleSearch = () => {
     console.log("Searching for:", searchTerm);
@@ -51,16 +57,19 @@ export default function DashboardPage() {
     ]);
   };
 
-  const fetchPatients = async () => {
+  const fetchPatients = async (source: "all" | "daily" = dataSource) => {
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No access token");
 
+      const apiUrl =
+        source === "all"
+          ? "http://172.20.10.2:4000/api/antrian-pasien"
+          : "http://172.20.10.2:4000/api/antrian-pasien/daily";
+
       const [patientRes, outletRes] = await Promise.all([
-        fetch("http://172.20.10.4:4000/api/antrian-pasien/daily", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://172.20.10.4:4000/api/outlet", {
+        fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch("http://172.20.10.2:4000/api/outlet", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -85,15 +94,31 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchRecap = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) throw new Error("No access token");
+      const res = await fetch("http://172.20.10.2:4000/api/antrian-pasien/recap", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Error fetching recap");
+      const json = await res.json();
+      setRecapData(json.data);
+    } catch (error) {
+      console.error("Failed to fetch recap:", error);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token) {
-      router.push("/login"); // Redirect ke halaman login jika tidak ada token
+      router.push("/login");
       return;
     }
     fetchPatients();
+    fetchRecap();
 
-    const socket: Socket = io("http://172.20.10.4:4000", { auth: { token } });
+    const socket: Socket = io("http://172.20.10.2:4000", { auth: { token } });
 
     socket.on("connect", () => {
       console.log("WebSocket connected:", socket.id);
@@ -118,6 +143,10 @@ export default function DashboardPage() {
     };
   }, [outletMap]);
 
+  useEffect(() => {
+    fetchPatients(dataSource);
+  }, [dataSource]);
+
   const filteredPatients = patients
     .filter((p) => {
       if (activeFilter === "TOTAL") return true;
@@ -140,7 +169,7 @@ export default function DashboardPage() {
       <Sidebar collapsed={collapsed} toggle={toggleSidebar} />
       <div className="flex-1 p-2 bg-gray-50 min-h-screen">
         <Header />
-        <ChartAreaInteractive />
+        <ChartAreaInteractive recapData={recapData} />
         <div className="grid grid-cols-2 p-2 pt-4 md:grid-cols-4 gap-4 mb-6">
           {stats.map((s, i) => (
             <StatCard
@@ -159,6 +188,8 @@ export default function DashboardPage() {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           handleSearch={handleSearch}
+          dataSource={dataSource}
+          setDataSource={setDataSource}
         />
       </div>
     </div>

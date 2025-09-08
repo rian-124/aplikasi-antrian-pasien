@@ -26,7 +26,7 @@ export default function QueueDetail({
     if (!currentPatient || !token) return;
     try {
       const res = await fetch(
-        `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+        `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
         {
           method: "PATCH",
           headers: {
@@ -48,7 +48,7 @@ export default function QueueDetail({
     if (!currentPatient || !token) return;
     try {
       const res = await fetch(
-        `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+        `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
         {
           method: "PATCH",
           headers: {
@@ -74,7 +74,7 @@ export default function QueueDetail({
     if (nextBintang >= 4) {
       try {
         const res = await fetch(
-          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
           {
             method: "PATCH",
             headers: {
@@ -93,7 +93,7 @@ export default function QueueDetail({
     } else {
       try {
         const res = await fetch(
-          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
           {
             method: "PATCH",
             headers: {
@@ -123,7 +123,7 @@ export default function QueueDetail({
     if (nextBintang >= 3) {
       try {
         const res = await fetch(
-          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
           {
             method: "PATCH",
             headers: {
@@ -142,7 +142,7 @@ export default function QueueDetail({
     } else {
       try {
         const res = await fetch(
-          `http://172.20.10.4:4000/api/antrian-pasien/${currentPatient.id}`,
+          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
           {
             method: "PATCH",
             headers: {
@@ -170,36 +170,12 @@ export default function QueueDetail({
     <div className="space-y-6 h-flex flex flex-col p-1">
       <div className="bg-white rounded-xl p-6 shadow space-y-6 flex-1 flex flex-col">
         <h2 className="text-3xl font-bold text-black">Queue Calling Patient</h2>
-
         {currentPatient ? (
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center border border-gray-300 rounded-xl p-6">
-            {/* Detail Pasien */}
             <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-sm text-gray-900">
               <div>
                 <p className="font-semibold">No. Pasien</p>
                 <p className="text-gray-600">{currentPatient.patientNumber}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Outlet</p>
-                <p className="text-gray-600">{currentPatient.outlet}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Lab Register</p>
-                <p className="text-gray-600">{currentPatient.labReg}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Register</p>
-                <p className="text-gray-600">
-                  {currentPatient.createdAt.toLocaleDateString("id-ID", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <div>
-                <p className="font-semibold">Name</p>
-                <p className="text-gray-600">{currentPatient.userName}</p>
               </div>
               <div className="flex items-center gap-1">
                 <p className="font-semibold mr-2">Calling</p>
@@ -213,8 +189,23 @@ export default function QueueDetail({
                     }`}
                   />
                 ))}
-
               </div>
+              <div>
+                <p className="font-semibold">Register</p>
+                <p className="text-gray-600">
+                  {currentPatient.createdAt.toLocaleDateString("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+              <div></div>
+              <div>
+                <p className="font-semibold">Lab Register</p>
+                <p className="text-gray-600">{currentPatient.labReg}</p>
+              </div>
+              <div></div>
             </div>
 
             <div className="flex flex-col gap-4 items-end mt-6 md:mt-0">

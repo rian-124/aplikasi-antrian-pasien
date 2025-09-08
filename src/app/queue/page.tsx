@@ -43,7 +43,7 @@ export default function QueuePage() {
     localStorage.removeItem("currentPatient");
   };
 
-  // === 📌 Recall Count Helpers ===
+  // === Recall Count Helpers ===
   const getRecallCount = (patientId: number) => {
     const recallData = JSON.parse(localStorage.getItem("recallCounts") || "{}");
     return recallData[patientId] || 0;
@@ -59,6 +59,7 @@ export default function QueuePage() {
     localStorage.setItem("recallCounts", JSON.stringify(recallData));
   };
 
+  // === Fetch initial data ===
   const fetchPatients = async () => {
     if (loading) return;
     setLoading(true);
@@ -67,20 +68,16 @@ export default function QueuePage() {
       if (!token) throw new Error("No access token");
 
       const [patientRes, outletRes, loketRes] = await Promise.all([
-        fetch("http://172.20.10.4:4000/api/antrian-pasien", {
+        fetch("http://172.20.10.2:4000/api/antrian-pasien", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://172.20.10.4:4000/api/outlet", {
+        fetch("http://172.20.10.2:4000/api/outlet", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://172.20.10.4:4000/api/lokets", {
+        fetch("http://172.20.10.2:4000/api/lokets", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
-
-      if (!patientRes.ok || !outletRes.ok || !loketRes.ok) {
-        throw new Error("Failed fetching data from API");
-      }
 
       const [patientJson, outletJson, loketJson] = await Promise.all([
         patientRes.json(),
@@ -103,14 +100,13 @@ export default function QueuePage() {
       );
 
       const fetchedPatients: Patient[] = (patientJson.data || []).map(
-        (p: any, i: number) => Patient.fromJSON(p, i, map)
+        (p: any, i: number) => Patient.fromJSON(p, i + 1, map)
       );
       setPatients(fetchedPatients);
 
       const serverCalling = fetchedPatients.find(
         (p) => p.status === "CALL" && p.loketId === Number(selectedLoket)
       );
-
       if (serverCalling) {
         setCurrentPatient(serverCalling);
         saveCurrentToStorage(serverCalling);
@@ -129,20 +125,18 @@ export default function QueuePage() {
     }
   };
 
+  // === Init WS ===
   useEffect(() => {
     fetchPatients();
-
     const savedLoket = localStorage.getItem("selectedLoket");
     if (savedLoket) setSelectedLoket(savedLoket);
 
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const ws = io("http://172.20.10.4:4000", {
+    const ws = io("http://172.20.10.2:4000", {
       auth: { token },
       reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
     });
     setSocket(ws);
 
@@ -150,7 +144,6 @@ export default function QueuePage() {
       console.log("WS connected:", ws.id);
       ws.emit("join_room", { role: "ADMIN" });
       ws.emit("join_room", { role: "ADMINUSERS" });
-      fetchPatients();
     });
 
     ws.on("disconnect", (reason) => {
@@ -162,58 +155,71 @@ export default function QueuePage() {
     };
   }, []);
 
+  // === Real-time update via WS ===
   useEffect(() => {
     if (!socket) return;
-    socket.on("antrian_pasiens_update", (data: any) => {
-      if (Array.isArray(data)) {
-        setPatients(
-          data.map((p: any, i: number) => Patient.fromJSON(p, i, outletMap))
-        );
-      } else if (data && typeof data === "object") {
-        setPatients((prev) => {
-          const idx = prev.findIndex((p) => p.id === data.id);
-          if (idx === -1)
-            return [...prev, Patient.fromJSON(data, prev.length, outletMap)];
-          const copy = [...prev];
-          copy[idx] = Patient.fromJSON(data, idx, outletMap);
-          return copy;
-        });
-      }
 
-      // ❌ Jika current patient berubah jadi CANCELED → hapus
+    socket.on("antrian_pasiens_update", (data: any) => {
+      setPatients((prev) => {
+        let updatedPatients = [...prev];
+
+        if (Array.isArray(data)) {
+          updatedPatients = data.map((p: any, i: number) =>
+            Patient.fromJSON(p, i + 1, outletMap)
+          );
+        } else if (data && typeof data === "object") {
+          const idx = prev.findIndex((p) => p.id === data.id);
+          const mapped = Patient.fromJSON(
+            data,
+            idx === -1 ? prev.length + 1 : idx + 1,
+            outletMap
+          );
+
+          if (idx === -1) {
+            updatedPatients = [...prev, mapped];
+          } else {
+            const copy = [...prev];
+            copy[idx] = mapped;
+            updatedPatients = copy;
+          }
+        }
+
+        return updatedPatients.sort((a, b) => a.no - b.no);
+      });
+
       if (
         currentPatient &&
         ((Array.isArray(data) &&
           data.some(
             (p: any) =>
               p.id === currentPatient.id &&
-              p.status_antrian?.status === "CANCELED"
+              ["CANCELED", "COMPLETE"].includes(p.status_antrian?.status)
           )) ||
           (!Array.isArray(data) &&
             data.id === currentPatient.id &&
-            data.status_antrian?.status === "CANCELED"))
+            ["CANCELED", "COMPLETE"].includes(data.status_antrian?.status)))
       ) {
-        setCurrentPatient(null);
+        clearCurrent();
       }
     });
+
     return () => {
       socket.off("antrian_pasiens_update");
     };
   }, [socket, currentPatient, outletMap]);
 
+  // === Handlers ===
   const handleCallPatient = async (patient: Patient) => {
     if (patient.status !== "WAITING" && patient.status !== "SKIPPED") {
-      alert("Hanya pasien dengan status WAITING / SKIPPED yang bisa dipanggil.");
+      alert("Hanya pasien WAITING / SKIPPED yang bisa dipanggil.");
       return;
     }
-
     const token = localStorage.getItem("access_token");
-    if (!token) return;
-    if (!selectedLoket) return alert("Silakan pilih loket terlebih dahulu.");
+    if (!token || !selectedLoket) return;
 
     try {
-      const res = await fetch(
-        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
+      await fetch(
+        `http://172.20.10.2:4000/api/antrian-pasien/${patient.id}`,
         {
           method: "PATCH",
           headers: {
@@ -227,149 +233,48 @@ export default function QueuePage() {
         }
       );
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => null);
-        alert(errData?.errors?.message || "Gagal memanggil pasien");
-        return;
-      }
-
-      const updatedPatient = {
-        ...patient,
-        status: "CALL",
-        loketId: Number(selectedLoket),
-      } as Patient;
-      setCurrentPatient(updatedPatient);
-      saveCurrentToStorage(updatedPatient);
+      const updated = { ...patient, status: "CALL", loketId: Number(selectedLoket) } as Patient;
+      setCurrentPatient(updated);
+      saveCurrentToStorage(updated);
       setPatients((prev) =>
-        prev.map((p) => (p.id === patient.id ? updatedPatient : p))
+        prev.map((p) => (p.id === patient.id ? updated : p))
       );
     } catch (error) {
       console.error("Failed to call patient:", error);
     }
   };
 
-  const handleCompletePatient = async (patient: Patient) => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
-    try {
-      const res = await fetch(
-        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: "COMPLETE" }),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to complete patient");
-
-      setPatients((prev) =>
-        prev.map((p) =>
-          p.id === patient.id ? { ...p, status: "COMPLETE" } : p
-        )
-      );
-      clearCurrent();
-    } catch (error) {
-      console.error("Failed to complete patient:", error);
-    }
+  const handleCompletePatient = (patient: Patient) => {
+    setPatients((prev) =>
+      prev.map((p) => (p.id === patient.id ? { ...p, status: "COMPLETE" } : p))
+    );
+    clearCurrent();
   };
 
-  const handleCancelPatient = async (patient: Patient) => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
-    try {
-      const res = await fetch(
-        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: "CANCELED" }),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to cancel patient");
-
-      setPatients((prev) =>
-        prev.map((p) =>
-          p.id === patient.id ? { ...p, status: "CANCELED" } : p
-        )
-      );
-      clearCurrent();
-    } catch (error) {
-      console.error("Failed to cancel patient:", error);
-    }
+  const handleCancelPatient = (patient: Patient) => {
+    setPatients((prev) =>
+      prev.map((p) => (p.id === patient.id ? { ...p, status: "CANCELED" } : p))
+    );
+    clearCurrent();
   };
 
-  const handleRecallPatient = async (patient: Patient) => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
-    try {
-      const recallCount = getRecallCount(patient.id) + 1;
-
-      if (recallCount >= 3) {
-        const res = await fetch(
-          `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status: "CANCELED" }),
-          }
-        );
-
-        if (!res.ok)
-          throw new Error("Failed to cancel patient after 3 recalls");
-
-        setPatients((prev) =>
-          prev.map((p) =>
-            p.id === patient.id ? { ...p, status: "CANCELED" } : p
-          )
-        );
-        resetRecallCount(patient.id);
-        clearCurrent();
-        return;
-      }
-
-      // Tambah recall count (bintang/star)
-      setRecallCount(patient.id, recallCount);
-
-      // PATCH status tetap CALL, bintang bertambah
-      const res = await fetch(
-        `http://172.20.10.4:4000/api/antrian-pasien/${patient.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: "CALL" }),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to recall patient");
-
+  const handleRecallPatient = (patient: Patient) => {
+    const recallCount = getRecallCount(patient.id) + 1;
+    if (recallCount >= 3) {
       setPatients((prev) =>
-        prev.map((p) =>
-          p.id === patient.id
-            ? { ...p, status: "CALL", bintang: recallCount }
-            : p
-        )
+        prev.map((p) => (p.id === patient.id ? { ...p, status: "CANCELED" } : p))
       );
+      resetRecallCount(patient.id);
       clearCurrent();
-    } catch (error) {
-      console.error("Failed to recall patient:", error);
+      return;
     }
+    setRecallCount(patient.id, recallCount);
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patient.id ? { ...p, status: "CALL", bintang: recallCount } : p
+      )
+    );
+    clearCurrent();
   };
 
   const filteredPatients = patients.filter(
@@ -379,11 +284,8 @@ export default function QueuePage() {
   const displayPatients = patients
     .filter(
       (p) =>
-        (p.status === "WAITING" ||
-          p.status === "SKIPPED" ||
-          (p.status === "CALL" && p.loketId === Number(selectedLoket))) &&
-        (p.status as string !== "COMPLETE") &&
-        (p.status as string !== "CANCELED")
+        ["WAITING", "SKIPPED"].includes(p.status) ||
+        (p.status === "CALL" && p.loketId === Number(selectedLoket))
     )
     .sort((a, b) => {
       if (a.status === "CALL" && b.status !== "CALL") return -1;

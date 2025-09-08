@@ -1,4 +1,11 @@
 import { Patient } from "@/classes/Patient";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 interface Props {
   data: Patient[];
@@ -11,11 +18,15 @@ export default function PatientTable({
   searchTerm,
   setSearchTerm,
   handleSearch,
+  dataSource,
+  setDataSource,
 }: {
   data: Patient[];
   searchTerm: string;
   setSearchTerm: (value: string) => void;
   handleSearch: () => void;
+  dataSource: "all" | "daily";
+  setDataSource: (value: "all" | "daily") => void;
 }) {
   return (
     <div className="rounded-xl p-4 mt-6">
@@ -24,7 +35,23 @@ export default function PatientTable({
           <img src="/icons/patient.svg" alt="Patient Icon" className="w-5" />
           Patient List
         </div>
-        <div className="mb-4 px-4 flex gap-2">
+        <div className="mb-4 px-4 flex gap-2 items-center">
+          <Select value={dataSource} onValueChange={setDataSource}>
+            <SelectTrigger
+              className="w-[160px] rounded-lg"
+              aria-label="Select a value"
+            >
+              <SelectValue placeholder="Pilih Data" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="daily" className="rounded-lg">
+          Rekapan Per Hari
+              </SelectItem>
+              <SelectItem value="all" className="rounded-lg">
+          Keseluruhan
+              </SelectItem>
+            </SelectContent>
+          </Select>
           <input
             type="text"
             placeholder="No. Antrian / Registrasi / Nama"
@@ -62,20 +89,20 @@ export default function PatientTable({
                 <td className="px-6 py-4">{p.outlet}</td>
                 <td className="px-6 py-4">{p.loketId}</td>
                 <td className="px-4 py-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        p.status === "COMPLETE"
-                          ? "bg-green-100 text-green-700"
-                          : p.status === "CANCELED"
-                          ? "bg-red-100 text-red-700"
-                          : p.status === "WAITING"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-700"
-                      }`}
-                    >
-                      {p.status}
-                    </span>
-                  </td>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      p.status === "COMPLETE"
+                        ? "bg-green-100 text-green-700"
+                        : p.status === "CANCELED"
+                        ? "bg-red-100 text-red-700"
+                        : p.status === "WAITING"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {p.status}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
