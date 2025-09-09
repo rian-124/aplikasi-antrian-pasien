@@ -47,8 +47,7 @@ export default function QueueDetail({
         const message = errorData?.message || `HTTP error! status: ${res.status}`;
         throw new Error(message);
       }
-      
-      // alert(successMessage); // Optional: uncomment for success feedback
+
       fetchPatients();
       return true;
     } catch (err: any) {
@@ -77,7 +76,7 @@ export default function QueueDetail({
     const success = await handleApiCall(
       `antrian-pasien/${currentPatient.id}`,
       "PATCH",
-      { status: "CANCELED" },
+      { status: "CANCELED", bintang: currentPatient.bintang },
       "Antrian pasien telah dibatalkan.",
       "Gagal membatalkan pasien"
     );

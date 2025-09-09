@@ -137,10 +137,13 @@ export default function QueuePage() {
       return;
     }
     const token = localStorage.getItem("access_token");
-    if (!token || !selectedLoket) return;
+    if (!token || !selectedLoket) {
+      alert("Token atau loket belum dipilih.");
+      return;
+    }
 
     try {
-      await fetch(
+      const res = await fetch(
         `http://192.168.1.19:4000/api/antrian-pasien/${patient.id}`,
         {
           method: "PATCH",
@@ -154,6 +157,11 @@ export default function QueuePage() {
           }),
         }
       );
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Backend error:", errorText);
+        throw new Error("Gagal memanggil pasien");
+      }
 
       const updated = { ...patient, status: "CALL", loketId: Number(selectedLoket) } as Patient;
       setCurrentPatient(updated);

@@ -65,17 +65,17 @@ export class Patient {
 
     return new Patient({
       id: data.id ?? 0,
-      no: index,
+      no: index + 1,
       patientNumber: data.nomor_Antrian ?? "-",
       labReg: data.pasien?.nomor_registrasi ?? "-",
-      outletId: outletId,
+      outletId,
       outlet: outletName,
-      userName: data.pasien?.nama ?? "-",
+      userName: data.users?.name ?? "-",
       bintang: data.bintang ?? 0,
-      jenisRegistrasiId: data.jenis_registrasi_id ?? 0,
-      status: (data.status as PatientStatus) ?? "WAITING",
-      createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
-      updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
+      jenisRegistrasiId: data.pasien?.jenis_registrasi_id ?? 0,
+      status: (data.status_antrian?.status ?? "WAITING") as PatientStatus,
+      createdAt: new Date(data.createdAt ?? data.created_At ?? Date.now()),
+      updatedAt: new Date(data.updatedAt ?? data.update_At ?? Date.now()),
       loketId: data.loket_id ?? undefined,
     });
   }
