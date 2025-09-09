@@ -31,7 +31,7 @@ export default function UserTable() {
     setError(null);
     try {
       const token = AuthService.getToken();
-      const res = await fetch("http://172.20.10.2:4000/api/users", {
+      const res = await fetch("http://192.168.1.19:4000/api/users", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -126,7 +126,7 @@ export default function UserTable() {
   useEffect(() => {
     const fetchLokets = async () => {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://172.20.10.2:4000/api/lokets", {
+      const res = await fetch("http://192.168.1.19:4000/api/lokets", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

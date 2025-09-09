@@ -2,7 +2,6 @@
 
 import { Circle } from "lucide-react";
 import { Patient } from "@/classes/Patient";
-import Swal from "sweetalert2";
 
 interface QueueDetailProps {
   onComplete: (patient: Patient) => void | Promise<void>;
@@ -20,151 +19,129 @@ export default function QueueDetail({
   clearCurrent,
   fetchPatients,
 }: QueueDetailProps) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+  const handleApiCall = async (
+    endpoint: string,
+    method: "PATCH" | "POST" | "PUT" | "DELETE",
+    body: object,
+    successMessage: string,
+    errorMessage: string
+  ) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      alert("Error: Anda tidak login. Silakan login terlebih dahulu.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://192.168.1.19:4000/api/${endpoint}`, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null); // Catch if response is not json
+        const message = errorData?.message || `HTTP error! status: ${res.status}`;
+        throw new Error(message);
+      }
+      
+      // alert(successMessage); // Optional: uncomment for success feedback
+      fetchPatients();
+      return true;
+    } catch (err: any) {
+      console.error(err);
+      alert(`${errorMessage}: ${err.message}`);
+      return false;
+    }
+  };
 
   const handleCompleteClick = async () => {
-    if (!currentPatient || !token) return;
-    try {
-      const res = await fetch(
-        `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: "COMPLETE" }),
-        }
-      );
-      if (!res.ok) throw new Error("Gagal menyelesaikan pasien");
-      fetchPatients();
-      clearCurrent(); 
-    } catch (err) {
-      console.error(err);
+    if (!currentPatient) return;
+    const success = await handleApiCall(
+      `antrian-pasien/${currentPatient.id}`,
+      "PATCH",
+      { status: "COMPLETE" },
+      "Pasien telah diselesaikan.",
+      "Gagal menyelesaikan pasien"
+    );
+    if (success) {
+      clearCurrent();
     }
   };
 
   const handleCancelClick = async () => {
-    if (!currentPatient || !token) return;
-    try {
-      const res = await fetch(
-        `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: "CANCELED" }),
-        }
-      );
-      if (!res.ok) throw new Error("Gagal membatalkan pasien");
-      fetchPatients();
+    if (!currentPatient) return;
+    const success = await handleApiCall(
+      `antrian-pasien/${currentPatient.id}`,
+      "PATCH",
+      { status: "CANCELED" },
+      "Antrian pasien telah dibatalkan.",
+      "Gagal membatalkan pasien"
+    );
+    if (success) {
       clearCurrent();
-    } catch (err) {
-      console.error(err);
     }
   };
 
   const handleRecallClick = async () => {
-    if (!currentPatient || !token) return;
+    if (!currentPatient) return;
+    if (!["CALL", "RECALL"].includes(currentPatient.status)) {
+      alert("Recall hanya bisa dilakukan setelah pasien dipanggil (CALL).");
+      return;
+    }
 
     const nextBintang = currentPatient.bintang + 1;
+    let endpoint = `antrian-pasien/${currentPatient.id}`;
+    let body: { status: "RECALL" | "CANCELED"; bintang: number };
+    let success;
 
-    if (nextBintang >= 4) {
-      try {
-        const res = await fetch(
-          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status: "CANCELED", bintang: nextBintang }),
-          }
-        );
-        if (!res.ok) throw new Error("Gagal membatalkan pasien");
-        fetchPatients();
-        clearCurrent();
-      } catch (err) {
-        console.error(err);
-      }
+    if (nextBintang >= 2) {
+      body = { status: "CANCELED", bintang: nextBintang };
+      success = await handleApiCall(
+        endpoint, "PATCH", body,
+        "Pasien dibatalkan setelah 2x recall.",
+        "Gagal membatalkan pasien"
+      );
+      if (success) clearCurrent();
     } else {
-      try {
-        const res = await fetch(
-          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              status: "CALL",
-              bintang: nextBintang,
-            }),
-          }
-        );
-        if (!res.ok) throw new Error("Gagal recall pasien");
-        fetchPatients(); 
-      } catch (err) {
-        console.error(err);
-      }
+      body = { status: "RECALL", bintang: nextBintang };
+      success = await handleApiCall(
+        endpoint, "PATCH", body,
+        "Pasien berhasil di-recall.",
+        "Gagal me-recall pasien"
+      );
+      // Don't clear current on recall
     }
   };
-
 
   const handleSkipClick = async () => {
-    if (!currentPatient || !token) return;
-
+    if (!currentPatient) return;
     const nextBintang = currentPatient.bintang + 1;
+    let endpoint = `antrian-pasien/${currentPatient.id}`;
+    let body: { status: "SKIPPED" | "CANCELED"; bintang: number };
+    let success;
 
     if (nextBintang >= 3) {
-      try {
-        const res = await fetch(
-          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status: "CANCELED", bintang: nextBintang }),
-          }
+        body = { status: "CANCELED", bintang: nextBintang };
+        success = await handleApiCall(
+            endpoint, "PATCH", body,
+            "Pasien dibatalkan setelah 3x skip.",
+            "Gagal membatalkan pasien"
         );
-        if (!res.ok) throw new Error("Gagal membatalkan pasien");
-        fetchPatients();
-        clearCurrent();
-      } catch (err) {
-        console.error(err);
-      }
+        if (success) clearCurrent();
     } else {
-      try {
-        const res = await fetch(
-          `http://172.20.10.2:4000/api/antrian-pasien/${currentPatient.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              status: "SKIPPED",
-              bintang: nextBintang,
-            }),
-          }
+        body = { status: "SKIPPED", bintang: nextBintang };
+        success = await handleApiCall(
+            endpoint, "PATCH", body,
+            "Pasien berhasil di-skip.",
+            "Gagal men-skip pasien"
         );
-        if (!res.ok) throw new Error("Gagal skip pasien");
-        fetchPatients();
-        clearCurrent(); 
-      } catch (err) {
-        console.error(err);
-      }
+        if (success) clearCurrent();
     }
   };
-
-
 
   return (
     <div className="space-y-6 h-flex flex flex-col p-1">
@@ -183,7 +160,7 @@ export default function QueueDetail({
                   <Circle
                     key={i}
                     className={`w-5 h-5 ${
-                      i + 1 <= currentPatient.bintang
+                      i < currentPatient.bintang
                         ? "text-blue-500 fill-blue-500"
                         : "text-gray-300"
                     }`}
@@ -193,7 +170,7 @@ export default function QueueDetail({
               <div>
                 <p className="font-semibold">Register</p>
                 <p className="text-gray-600">
-                  {currentPatient.createdAt.toLocaleDateString("id-ID", {
+                  {new Date(currentPatient.createdAt).toLocaleDateString("id-ID", {
                     day: "2-digit",
                     month: "long",
                     year: "numeric",
@@ -278,6 +255,8 @@ export default function QueueDetail({
                             ? "bg-yellow-100 text-yellow-800"
                             : patient.status === "SKIPPED"
                             ? "bg-blue-100 text-blue-700"
+                            : patient.status === "RECALL"
+                            ? "bg-purple-100 text-purple-700"
                             : "bg-gray-100 text-gray-700"
                         }`}
                       >

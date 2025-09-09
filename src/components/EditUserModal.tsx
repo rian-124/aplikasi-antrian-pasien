@@ -49,7 +49,7 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    fetch("http://172.20.10.2:4000/api/lokets", {
+    fetch("http://192.168.1.19:4000/api/lokets", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

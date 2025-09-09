@@ -1,10 +1,16 @@
-export type PatientStatus = "WAITING" | "CALL" | "COMPLETE" | "CANCELED" | "SKIPPED";
+export type PatientStatus =
+  | "WAITING"
+  | "CALL"
+  | "COMPLETE"
+  | "CANCELED"
+  | "SKIPPED"
+  | "RECALL";
 
 export class Patient {
   id: number;
   no: number;
-  patientNumber: string;  
-  labReg: string;          
+  patientNumber: string;
+  labReg: string;
   outletId: number;
   outlet: string;
   userName: string;
@@ -45,7 +51,11 @@ export class Patient {
     this.loketId = params.loketId;
   }
 
-  static fromJSON(data: any, index: number, outletMap: Map<number, string>): Patient {
+  static fromJSON(
+    data: any,
+    index: number,
+    outletMap: Map<number, string>
+  ): Patient {
     if (!data) {
       throw new Error("Invalid patient data: data is null or undefined");
     }
@@ -55,17 +65,17 @@ export class Patient {
 
     return new Patient({
       id: data.id ?? 0,
-      no: index + 1,
-      patientNumber: data.nomor_Antrian ?? "-", 
-      labReg: data.pasien?.nomor_registrasi ?? "-", 
-      outletId,
+      no: index,
+      patientNumber: data.nomor_Antrian ?? "-",
+      labReg: data.pasien?.nomor_registrasi ?? "-",
+      outletId: outletId,
       outlet: outletName,
-      userName: data.users?.name ?? "-",
+      userName: data.pasien?.nama ?? "-",
       bintang: data.bintang ?? 0,
-      jenisRegistrasiId: data.pasien?.jenis_registrasi_id ?? 0,
-      status: (data.status_antrian?.status ?? "WAITING") as PatientStatus,
-      createdAt: new Date(data.createdAt ?? data.created_At ?? Date.now()), 
-      updatedAt: new Date(data.updatedAt ?? data.update_At ?? Date.now()),
+      jenisRegistrasiId: data.jenis_registrasi_id ?? 0,
+      status: (data.status as PatientStatus) ?? "WAITING",
+      createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+      updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(),
       loketId: data.loket_id ?? undefined,
     });
   }

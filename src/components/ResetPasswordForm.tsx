@@ -35,7 +35,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 
   try {
-    const res = await fetch('http://172.20.10.2:4000/api/users/reset-password', {
+    const res = await fetch('http://192.168.1.19:4000/api/users/reset-password', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

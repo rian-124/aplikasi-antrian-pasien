@@ -1,5 +1,4 @@
 "use client";
-
 import { ArrowRight, Circle } from "lucide-react";
 import { useState } from "react";
 import { Patient } from "@/classes/Patient";
@@ -34,12 +33,19 @@ export default function PatientList({
   )?.id;
 
   const displayPatients = filteredPatients
-    .filter((p) => ["WAITING", "SKIPPED"].includes(p.status))
+    .filter(
+      (p) =>
+        p.status === "WAITING" ||
+        p.status === "SKIPPED"
+    )
     .sort((a, b) => {
       if (a.status === "SKIPPED" && b.status !== "SKIPPED") return 1;
       if (a.status !== "SKIPPED" && b.status === "SKIPPED") return -1;
       return a.no - b.no;
     });
+
+  console.log("Patients from props:", patients);
+  console.log("Display Patients:", displayPatients);
 
   return (
     <div className="h-full flex flex-col">
