@@ -91,7 +91,7 @@ export class PasiensService {
       nextNumber = parseInt(numericPart, 10) + 1;
     }
 
-    const formattedNomor = prefix + String(nextNumber).padStart(5, '0');
+    const formattedNomor = prefix + String(nextNumber).padStart(3, '0');
 
     const pasien = await this.prismaService.pasiens.create({
       data: {

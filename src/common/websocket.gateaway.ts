@@ -20,6 +20,7 @@ export class WebSocketGateaway {
 
   handleConnection(client: Socket) {
     try {
+      console.log('Handshake:', client.handshake.auth);
       const token = client.handshake.auth.token as string;
 
       const payload = this.jwtService.verify<JwtPayload>(token);
@@ -43,7 +44,7 @@ export class WebSocketGateaway {
         client.emit('joined: ', 'Joined room : ADMIN');
       } else if (data.role === 'ADMINUSERS') {
         await client.join('ADMINUSERS');
-        client.emit('Joined: ', 'Joined room: USERSADMIN');
+        client.emit('joined: ', 'Joined room: USERSADMIN');
       }
     } catch (error) {
       console.error(`Failed to join room ${error}`);

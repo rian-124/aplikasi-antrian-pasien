@@ -37,7 +37,9 @@
     </table>
 
     <h1>Daftar Users</h1>
-    <button onclick="playVoice('Nomor antrian', '25')">Panggil Antrian</button>
+      <button onclick="playVoice('Nomor antrian 25, silakan menuju loket.')">
+  Panggil Antrian
+</button>
 
     <table>
       <thead>
@@ -52,28 +54,19 @@
     </table>
 
     <script>
-      function playVoice(text, number, pauseMs = 500) {
-        const utter1 = new SpeechSynthesisUtterance(text);
-        utter1.lang = 'id-ID';
-
-        const utter2 = new SpeechSynthesisUtterance(number.toString());
-        utter2.lang = 'id-ID';
-        utter2.rate = 1
-
-        utter1.onend = () => {
-          setTimeout(() => {
-            speechSynthesis.speak(utter2);
-          }, pauseMs);
-        };
-
-        speechSynthesis.speak(utter1);
+      function playVoice(text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID'; // bahasa Indonesia
+        utterance.rate = 1; // kecepatan (0.5 - 2)
+        utterance.pitch = 1; // nada suara (0 - 2)
+        speechSynthesis.speak(utterance);
       }
     </script>
 
     <!-- test WebSocket -->
     <script>
       const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsInVzZXJuYW1lIjoiYWZyaWFuMTIzIiwicm9sZSI6IkFETUlOVVNFUlMiLCJvdXRsZXQiOiJHRURVTkcgQSIsInBlcm1pc3Npb24iOlsidmlldzpBRE1JTlVTRVJTIl0sImlhdCI6MTc1NzM5ODI3NywiZXhwIjoxNzU3NDAxODc3fQ.SwT50M1fh3K4LJqk2GXAchxGdc_7ZyttqSTB1kLflOQ';
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjgsInVzZXJuYW1lIjoiaGFkZXoxIiwicm9sZSI6IkFETUlOVVNFUlMiLCJvdXRsZXQiOiJHRURVTkcgQSIsInBlcm1pc3Npb24iOlsidmlldzpBRE1JTlVTRVJTIl0sImlhdCI6MTc1NzM5ODM0OCwiZXhwIjoxNzU3NDAxOTQ4fQ.E72MZX-02IZGU2mXZq629N34LHTNh8SwHCTN7CZwZqE';
 
       async function loadUsers() {
         try {
@@ -100,10 +93,12 @@
 
       const tbody = document.getElementById('user-table-body');
       function renderNomorAntrian(users) {
-        const filtered = users.filter((u) => u.status_antrian_id === 1);
+
+        const filtered = users.filter(u => u.status_antrian_id === 1);
 
         tbody.innerHTML = '';
         users.forEach((u) => {
+
           const tr = document.createElement('tr');
           tr.dataset.id = u.id;
           tr.innerHTML = `
@@ -134,26 +129,24 @@
       });
 
       function updatePasienRow(u) {
-        const row = document.querySelector(`tr[data-id="${u.id}"]`);
-        if (row) {
-          row.querySelector('td:nth-child(1)').textContent = u.nomor_Antrian;
-          row.querySelector('td:nth-child(2)').textContent = u.bintang;
-          row.querySelector('td:nth-child(3)').textContent =
-            u.status_antrian_id;
-          row.querySelector('td:nth-child(4)').textContent =
-            u.users?.name || '-';
-        } else {
-          const tr = document.createElement('tr');
-          tr.dataset.id = u.id;
-          tr.innerHTML = `
+  const row = document.querySelector(`tr[data-id="${u.id}"]`);
+  if (row) {
+    row.querySelector('td:nth-child(1)').textContent = u.nomor_Antrian;
+    row.querySelector('td:nth-child(2)').textContent = u.bintang;
+    row.querySelector('td:nth-child(3)').textContent = u.status_antrian_id;
+    row.querySelector('td:nth-child(4)').textContent = u.users?.name || '-';
+  } else {
+    const tr = document.createElement('tr');
+    tr.dataset.id = u.id;
+    tr.innerHTML = `
       <td>${u.nomor_Antrian}</td>
       <td>${u.bintang}</td>
       <td>${u.status_antrian_id}</td>
       <td>${u.users?.name || '-'}</td>
     `;
-          tbody.appendChild(tr);
-        }
-      }
+    tbody.appendChild(tr);
+  }
+}
     </script>
   </body>
 </html>
