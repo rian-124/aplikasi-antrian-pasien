@@ -42,7 +42,7 @@ export default function JaminanPage() {
 
   const fetchPenjamins = async () => {
     try {
-      const res = await fetch('http://192.168.1.19:4000/api/penjamins/jenis-registrasi?jenis=JAMINAN', {
+      const res = await fetch('http://192.168.50.24:4000/api/penjamins/jenis-registrasi?jenis=JAMINAN', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         }
@@ -63,7 +63,7 @@ export default function JaminanPage() {
   const createAntrian = async (penjamin_id: number) => {
     setLoading(true);
     try {
-      const res = await fetch('http://192.168.1.19:4000/api/pasiens', {
+      const res = await fetch('http://192.168.50.24:4000/api/pasiens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

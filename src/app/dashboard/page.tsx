@@ -64,12 +64,12 @@ export default function DashboardPage() {
 
       const apiUrl =
         source === "all"
-          ? "http://192.168.1.19:4000/api/antrian-pasien"
-          : "http://192.168.1.19:4000/api/antrian-pasien/daily";
+          ? "http://192.168.50.24:4000/api/antrian-pasien"
+          : "http://192.168.50.24:4000/api/antrian-pasien/daily";
 
       const [patientRes, outletRes] = await Promise.all([
         fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("http://192.168.1.19:4000/api/outlet", {
+        fetch("http://192.168.50.24:4000/api/outlet", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -98,7 +98,7 @@ export default function DashboardPage() {
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No access token");
-      const res = await fetch("http://192.168.1.19:4000/api/antrian-pasien/recap", {
+      const res = await fetch("http://192.168.50.24:4000/api/antrian-pasien/recap", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Error fetching recap");
@@ -118,7 +118,7 @@ export default function DashboardPage() {
     fetchPatients();
     fetchRecap();
 
-    const socket: Socket = io("http://192.168.1.19:4000", { auth: { token } });
+    const socket: Socket = io("http://192.168.50.24:4000", { auth: { token } });
 
     socket.on("connect", () => {
       console.log("WebSocket connected:", socket.id);

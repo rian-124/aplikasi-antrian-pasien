@@ -19,7 +19,7 @@ export class AuthService {
       password: password,
     };
 
-    const res = await fetch("http://192.168.1.19:4000/api/users/login", {
+    const res = await fetch("http://192.168.50.24:4000/api/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

@@ -33,7 +33,7 @@ export default function QueueDetail({
     }
 
     try {
-      const res = await fetch(`http://192.168.1.19:4000/api/${endpoint}`, {
+      const res = await fetch(`http://192.168.50.24:4000/api/${endpoint}`, {
         method,
         headers: {
           Authorization: `Bearer ${token}`,

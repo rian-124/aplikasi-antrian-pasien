@@ -44,7 +44,7 @@ export default function AntrianPage() {
 
   const createAntrian = async (jenis: string) => {
     try {
-      const res = await fetch('http://192.168.1.19:4000/api/pasiens', {
+      const res = await fetch('http://192.168.50.24:4000/api/pasiens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

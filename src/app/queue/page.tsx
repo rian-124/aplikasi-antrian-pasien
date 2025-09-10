@@ -41,7 +41,6 @@ export default function QueuePage() {
     localStorage.removeItem("currentPatient");
   };
 
-  // === Recall Count Helpers ===
   const getRecallCount = (patientId: number) => {
     const recallData = JSON.parse(localStorage.getItem("recallCounts") || "{}");
     return recallData[patientId] || 0;
@@ -57,7 +56,6 @@ export default function QueuePage() {
     localStorage.setItem("recallCounts", JSON.stringify(recallData));
   };
 
-  // === Fetch initial data ===
   const fetchPatients = async () => {
     if (loading) return;
     setLoading(true);
@@ -66,13 +64,13 @@ export default function QueuePage() {
       if (!token) throw new Error("No access token");
 
       const [patientRes, outletRes, loketRes] = await Promise.all([
-        fetch("http://192.168.1.19:4000/api/antrian-pasien", {
+        fetch("http://192.168.50.24:4000/api/antrian-pasien", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://192.168.1.19:4000/api/outlet", {
+        fetch("http://192.168.50.24:4000/api/outlet", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://192.168.1.19:4000/api/lokets", {
+        fetch("http://192.168.50.24:4000/api/lokets", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -123,14 +121,12 @@ export default function QueuePage() {
     }
   };
 
-  // === Init data fetch ===
   useEffect(() => {
     fetchPatients();
     const savedLoket = localStorage.getItem("selectedLoket");
     if (savedLoket) setSelectedLoket(savedLoket);
   }, []);
 
-  // === Handlers ===
   const handleCallPatient = async (patient: Patient) => {
     if (patient.status !== "WAITING" && patient.status !== "SKIPPED") {
       alert("Hanya pasien WAITING / SKIPPED yang bisa dipanggil.");
@@ -144,7 +140,7 @@ export default function QueuePage() {
 
     try {
       const res = await fetch(
-        `http://192.168.1.19:4000/api/antrian-pasien/${patient.id}`,
+        `http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`,
         {
           method: "PATCH",
           headers: {
@@ -196,7 +192,7 @@ export default function QueuePage() {
 
     if (recallCount >= 2) {
       await fetch(
-        `http://192.168.1.19:4000/api/antrian-pasien/${patient.id}`,
+        `http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`,
         {
           method: "PATCH",
           headers: {
@@ -213,7 +209,7 @@ export default function QueuePage() {
     }
 
     await fetch(
-      `http://192.168.1.19:4000/api/antrian-pasien/${patient.id}`,
+      `http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`,
       {
         method: "PATCH",
         headers: {
@@ -225,51 +221,6 @@ export default function QueuePage() {
     );
     setRecallCount(patient.id, recallCount);
     fetchPatients();
-  };
-
-  const handleRecallClick = async () => {
-    const token = localStorage.getItem("access_token");
-    if (!currentPatient || !token) return;
-
-    if (!["CALL", "SKIPPED", "RECALL"].includes(currentPatient.status)) {
-      alert("Recall hanya bisa dilakukan setelah pasien dipanggil (CALL).");
-      return;
-    }
-
-    const nextBintang = currentPatient.bintang + 1;
-    let res: Response | undefined;
-
-    try {
-      res = await fetch(
-        `http://192.168.1.19:4000/api/antrian-pasien/${currentPatient.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            status: nextBintang >= 2 ? "CANCELED" : "RECALL",
-            bintang: nextBintang,
-          }),
-        }
-      );
-      if (!res.ok) throw new Error("Gagal recall pasien");
-      await fetchPatients();
-
-      const updatedPatient = patients.find((p) => p.id === currentPatient.id);
-      if (updatedPatient?.status === "CANCELED") {
-        clearCurrent();
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(err.message);
-      }
-      if (res) {
-        const errorText = await res.text();
-        console.error("Backend error:", errorText);
-      }
-    }
   };
 
   const filteredPatients = patients.filter(
@@ -312,6 +263,7 @@ export default function QueuePage() {
                 currentPatient={currentPatient}
                 disableCall={!selectedLoket}
                 selectedLoket={selectedLoket ? Number(selectedLoket) : null}
+                lokets={lokets}
               />
             </div>
             <div className="lg:col-span-6 h-full overflow-y-auto min-h-0">
