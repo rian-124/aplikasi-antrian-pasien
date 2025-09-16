@@ -273,6 +273,7 @@ export class UserService {
     });
 
     this.wsGateaway.broadcastToAdmin(loket);
+    this.wsGateaway.broadcastToAdminUsers(loket);
 
     return loket;
   }
@@ -308,6 +309,7 @@ export class UserService {
     });
 
     this.wsGateaway.broadcastToAdmin(checkoutUserByLoket);
+    this.wsGateaway.broadcastToAdminUsers(checkoutUserByLoket);
 
     return checkoutUserByLoket;
   }

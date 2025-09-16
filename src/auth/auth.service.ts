@@ -42,6 +42,7 @@ export class AuthService {
       include: {
         roles: true,
         outlets: true,
+        lokets: true,
       },
     });
 
@@ -62,6 +63,7 @@ export class AuthService {
       username: user.username,
       role: user.roles.name,
       outlet: user.outlets.nama_outlet,
+      loketId: user.lokets?.id,
       permission: [`view:${user.roles.name}`],
     };
 

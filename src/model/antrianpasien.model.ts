@@ -1,3 +1,23 @@
+export interface AntrianPasien {
+  id: number;
+  nomor_antrian: string;
+  bintang: number;
+  status: string;
+  tahap: string;
+  nomor_registrasi: string;
+  outlet: string;
+  loket: string | null;
+  user: {
+    name: string | null;
+  };
+  created_At: Date;
+  updated_At: Date;
+}
+
+export interface AntrianPasiensResponse {
+  antrian_pasiens: AntrianPasien[];
+}
+
 export class NomorAntrianPasienResponse {
   nomor_Antrian: string;
   users: { name: string } | null;

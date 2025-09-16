@@ -33,7 +33,7 @@ export class ErrorFilter implements ExceptionFilter {
         errors:
           exception instanceof Error
             ? exception.message
-            : 'Internar server error',
+            : 'Internal server error',
       });
     }
   }

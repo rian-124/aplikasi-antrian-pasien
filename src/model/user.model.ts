@@ -66,6 +66,7 @@ export class JwtUserResponsePayload {
   email: string;
   role: string;
   outlet: string;
+  loketId: number;
   permission: string[];
 }
 export type AuthenticatedRequest = Request & { user: JwtUserResponsePayload };

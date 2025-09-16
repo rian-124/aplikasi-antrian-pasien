@@ -21,6 +21,7 @@ import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/common/decorators/permission.decorator';
 import {
+  AntrianPasiensResponse,
   NomorAntrianPasienResponse,
   RecapAntrianPasienResponse,
 } from 'src/model/antrianpasien.model';
@@ -38,7 +39,7 @@ export class AntrianPasienController {
   @ApiOperation(AntrianPasienDocs.getAll)
   async getAntrianPasiensController(
     @Req() req: AuthenticatedRequest,
-  ): Promise<WebResponse<AntrianPasiens[]>> {
+  ): Promise<WebResponse<AntrianPasiensResponse>> {
     const result =
       await this.antrianPasienService.getAntrianPasiensService(req);
 
@@ -68,7 +69,7 @@ export class AntrianPasienController {
   @ApiOperation(AntrianPasienDocs.getDailyAntrianPasien)
   async getDailyAntrianPasiensController(
     @Req() req: AuthenticatedRequest,
-  ): Promise<WebResponse<AntrianPasiens[]>> {
+  ): Promise<WebResponse<AntrianPasiensResponse>> {
     const result =
       await this.antrianPasienService.getDailyStatusAntriansService(req);
 

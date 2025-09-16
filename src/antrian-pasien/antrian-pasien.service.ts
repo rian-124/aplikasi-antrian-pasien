@@ -10,11 +10,13 @@ import { AntrianPasiens } from '@prisma/client';
 import { AuthenticatedRequest } from 'src/model/user.model';
 import { UpdateStatusAntrianDto } from './dtos/update-statusAntrian';
 import {
+  AntrianPasiensResponse,
   NomorAntrianPasienResponse,
   RecapAntrianPasienResponse,
 } from 'src/model/antrianpasien.model';
 import { getDayRangeWib } from 'src/utils/date.utils';
 import { AntrianPasienRepository } from './antrian-pasien.repository';
+import { mapDBtoModelAntrianPasiens } from 'src/utils/mapDBTomodel';
 
 @Injectable()
 export class AntrianPasienService {
@@ -26,7 +28,7 @@ export class AntrianPasienService {
 
   async getAntrianPasiensService(
     req: AuthenticatedRequest,
-  ): Promise<AntrianPasiens[]> {
+  ): Promise<AntrianPasiensResponse> {
     const outlet = await this.prismaService.outlets.findUnique({
       where: {
         nama_outlet: req.user.outlet,
@@ -56,10 +58,13 @@ export class AntrianPasienService {
           },
         },
         lokets: true,
+        outlets: true,
       },
     });
 
-    return dataStatusAntrian;
+    return {
+      antrian_pasiens: mapDBtoModelAntrianPasiens(dataStatusAntrian),
+    };
   }
 
   async getRecapAntrianPasiensService(
@@ -193,7 +198,7 @@ export class AntrianPasienService {
 
   async getDailyStatusAntriansService(
     req: AuthenticatedRequest,
-  ): Promise<AntrianPasiens[]> {
+  ): Promise<AntrianPasiensResponse> {
     const outlet = await this.prismaService.outlets.findUnique({
       where: {
         nama_outlet: req.user.outlet,
@@ -229,10 +234,13 @@ export class AntrianPasienService {
           },
         },
         lokets: true,
+        outlets: true,
       },
     });
 
-    return result;
+    return {
+      antrian_pasiens: mapDBtoModelAntrianPasiens(result),
+    };
   }
 
   async searchStatusAntriansService(
@@ -308,8 +316,8 @@ export class AntrianPasienService {
     this.validateStatusChangeService(currentStatus, nextStatus);
 
     if (
-      (nextStatus === Status.RECALL && antrianPasien.bintang >= 3) ||
-      (nextStatus === Status.SKIPPED && antrianPasien.bintang >= 3)
+      (nextStatus === Status.RECALL && antrianPasien.bintang >= 2) ||
+      (nextStatus === Status.SKIPPED && antrianPasien.bintang >= 2)
     ) {
       nextStatus = Status.CANCELED;
       const newStatusAntrian =

@@ -24,7 +24,14 @@ export class LoketService {
       },
       where: {
         outlet_id: outlet.id,
-        users: null,
+        OR: [
+          { users: null },
+          {
+            users: {
+              id: request.user.sub,
+            },
+          },
+        ],
       },
     });
 
