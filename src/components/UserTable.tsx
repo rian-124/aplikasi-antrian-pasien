@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { User } from '@/classes/User';
-import { UserService } from '@/classes/UserService';
-import AddUserModal from './AddUserModal';
+import { useEffect, useState } from "react";
+import { User } from "@/classes/User";
+import { UserService } from "@/classes/UserService";
+import AddUserModal from "./AddUserModal";
 import { UserPlus2 } from "lucide-react";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { AuthService } from '@/classes/AuthService';
-import EditUserModal from './EditUserModal';
-import { Outlet } from '@/classes/UserModel';
-import Swal from 'sweetalert2';
-import 'sweetalert2/dist/sweetalert2.min.css';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { AuthService } from "@/classes/AuthService";
+import EditUserModal from "./EditUserModal";
+import { Outlet } from "@/classes/UserModel";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+import { io, Socket } from "socket.io-client";
 
 export default function UserTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,17 +22,56 @@ export default function UserTable() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
-  const [allLokets, setAllLokets] = useState<{id: number, nama_loket: string}[]>([]);
+  const [allLokets, setAllLokets] = useState<
+    { id: number; nama_loket: string }[]
+  >([]);
 
   const [searchText, setSearchText] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+
+  //  // ---------- WEBSOCKET ----------
+    useEffect(() => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+  
+      const socket: Socket = io("http://192.168.50.9:3000", {
+        auth: { token },
+        transports: ["websocket"],
+      });
+  
+      socket.on("connect", () => {
+        console.log("✅ Connected to WebSocket:", socket.id);
+  
+        // Join sesuai role (ADMIN atau ADMINUSERS)
+        socket.emit("join_room", { role: "ADMIN" });
+      });
+  
+      socket.on("joined: ", (msg) => {
+        console.log("ℹ️ Server message:", msg);
+      });
+  
+      // update user realtime
+      socket.on("users_update", (data) => {
+        console.log("📥 Update dari WS (users_update):", data);
+        // setelah terima update → refresh user
+        fetchUsers();
+      });
+  
+      socket.on("disconnect", () => {
+        console.log("❌ Disconnected from WebSocket");
+      });
+  
+      return () => {
+        socket.disconnect();
+      };
+    }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = AuthService.getToken();
-      const res = await fetch("http://192.168.50.24:4000/api/users", {
+      const res = await fetch("http://192.168.50.9:3000/api/users", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -62,23 +102,27 @@ export default function UserTable() {
 
   const handleDelete = async (userId: number) => {
     Swal.fire({
-      title: 'Konfirmasi Hapus',
-      text: 'Apakah Anda yakin ingin menghapus pengguna ini?',
-      icon: 'warning',
+      title: "Konfirmasi Hapus",
+      text: "Apakah Anda yakin ingin menghapus pengguna ini?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Ya, Hapus',
-      cancelButtonText: 'Batal',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6'
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await UserService.deleteUser(userId);
-          Swal.fire('Berhasil', 'Pengguna berhasil dihapus.', 'success');
+          Swal.fire("Berhasil", "Pengguna berhasil dihapus.", "success");
           fetchUsers();
         } catch (error: any) {
           console.error("Error hapus:", error);
-          Swal.fire('Gagal', error.message || 'Gagal menghapus pengguna', 'error');
+          Swal.fire(
+            "Gagal",
+            error.message || "Gagal menghapus pengguna",
+            "error"
+          );
         }
       }
     });
@@ -109,7 +153,7 @@ export default function UserTable() {
     }
   };
 
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users.filter((user) => {
     const searchMatch =
       user.username?.toLowerCase().includes(searchText.toLowerCase()) ||
       user.name?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -126,7 +170,7 @@ export default function UserTable() {
   useEffect(() => {
     const fetchLokets = async () => {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://192.168.50.24:4000/api/lokets", {
+      const res = await fetch("http://192.168.50.9:3000/api/lokets", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -190,7 +234,10 @@ export default function UserTable() {
             <option value="Table">Table</option>
           </select>
           <button
-            onClick={() => { setSearchText(""); setRoleFilter(""); }}
+            onClick={() => {
+              setSearchText("");
+              setRoleFilter("");
+            }}
             className="bg-gray-500 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-600 transition"
           >
             Reset
@@ -199,7 +246,9 @@ export default function UserTable() {
 
         <div className="overflow-x-auto">
           {loading ? (
-            <p className="text-sm text-gray-600 px-4 py-2">Memuat data pengguna...</p>
+            <p className="text-sm text-gray-600 px-4 py-2">
+              Memuat data pengguna...
+            </p>
           ) : error ? (
             <p className="text-sm text-red-500 px-4 py-2">{error}</p>
           ) : (
@@ -218,7 +267,7 @@ export default function UserTable() {
                   <th className="px-6 py-3">Username</th>
                   <th className="px-6 py-3">Nama</th>
                   <th className="px-6 py-3">Outlet</th>
-                  <th className="px-6 py-3">Loket</th> 
+                  <th className="px-6 py-3">Loket</th>
                   <th className="px-6 py-3">Hak Akses</th>
                   <th className="px-6 py-3">Aksi</th>
                 </tr>
@@ -231,19 +280,21 @@ export default function UserTable() {
                     <td className="px-6 py-4">{user.name}</td>
                     <td className="px-6 py-4">{user.outlet_id}</td>
                     <td className="px-6 py-4">
-                      {user.lokets?.nama_loket || <span className="text-gray-400 italic">-</span>}
+                      {user.lokets?.nama_loket || (
+                        <span className="text-gray-400 italic">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-blue-600 font-medium">
                       {getRoleName(user.role_id)}
                     </td>
                     <td className="px-6 py-4 space-x-2">
-                      <button 
+                      <button
                         className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs"
                         onClick={() => handleEdit(user)}
                       >
                         Edit
                       </button>
-                      <button 
+                      <button
                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"
                         onClick={() => handleDelete(user.id)}
                       >
@@ -258,7 +309,14 @@ export default function UserTable() {
         </div>
       </div>
 
-      <ToastContainer position="top-right" autoClose={2000} hideProgressBar newestOnTop closeOnClick pauseOnHover />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+      />
     </>
   );
 }

@@ -1,23 +1,27 @@
 "use client";
 
-import { UserService } from '@/classes/UserService';
-import { Role, Outlet } from '@/classes/UserModel';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { UserService } from "@/classes/UserService";
+import { Role, Outlet } from "@/classes/UserModel";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useEffect, useRef, useState } from "react";
 
 interface AddUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUserAdded: () => void; 
+  onUserAdded: () => void;
 }
 
-export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserModalProps) {
+export default function AddUserModal({
+  isOpen,
+  onClose,
+  onUserAdded,
+}: AddUserModalProps) {
   const [roles, setRoles] = useState<Role[]>([]);
   const [outlets, setOutlets] = useState<Outlet[]>([]);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [selectedOutletId, setSelectedOutletId] = useState<number | null>(null);
   const [loketId, setLoketId] = useState<number | null>(null);
@@ -38,7 +42,7 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
         setRoles(rolesData);
         setOutlets(outletsData);
       } catch (error) {
-        console.error('Failed to load roles or outlets:', error);
+        console.error("Failed to load roles or outlets:", error);
       }
     };
 
@@ -47,7 +51,7 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    fetch("http://192.168.50.24:4000/api/lokets", {
+    fetch("http://192.168.50.9:3000/api/lokets", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -55,7 +59,6 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
       .then((res) => res.json())
       .then((data) => setLokets(Array.isArray(data.data) ? data.data : []));
   }, []);
-
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -65,18 +68,24 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !password || !name || !selectedRoleId || !selectedOutletId) {
-      toast.error('Please fill all fields');
+    if (
+      !username ||
+      !password ||
+      !name ||
+      !selectedRoleId ||
+      !selectedOutletId
+    ) {
+      toast.error("Please fill all fields");
       return;
     }
 
@@ -94,20 +103,20 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
 
       await UserService.createUser(newUser);
 
-      toast.success('User created successfully');
+      toast.success("User created successfully");
       resetForm();
-      onUserAdded(); 
-      onClose();  
+      onUserAdded();
+      onClose();
     } catch (error: any) {
-      console.error('Error creating user:', error);
-      toast.error(error.message || 'An error occurred');
+      console.error("Error creating user:", error);
+      toast.error(error.message || "An error occurred");
     }
   };
 
   const resetForm = () => {
-    setUsername('');
-    setPassword('');
-    setName('');
+    setUsername("");
+    setPassword("");
+    setName("");
     setSelectedRoleId(null);
     setSelectedOutletId(null);
     setLoketId(null);
@@ -126,7 +135,9 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
           ref={modalRef}
           className="bg-white p-6 rounded-lg shadow-xl w-[500px] relative border border-gray-200"
         >
-          <h2 className="text-lg font-semibold mb-4 text-center">Add New User</h2>
+          <h2 className="text-lg font-semibold mb-4 text-center">
+            Add New User
+          </h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <InputField
               label="Username"
@@ -159,7 +170,10 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
               label="Loket"
               value={loketId}
               onChange={setLoketId}
-              options={filteredLokets.map((loket) => ({ id: loket.id, name: loket.nama_loket }))}
+              options={filteredLokets.map((loket) => ({
+                id: loket.id,
+                name: loket.nama_loket,
+              }))}
             />
             <SelectField
               label="User Role"
@@ -188,7 +202,14 @@ export default function AddUserModal({ isOpen, onClose, onUserAdded }: AddUserMo
           </form>
         </div>
       </div>
-      <ToastContainer position="top-right" autoClose={2000} hideProgressBar newestOnTop closeOnClick pauseOnHover />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+      />
     </>
   );
 }
@@ -208,7 +229,9 @@ function InputField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-semibold mb-2 text-gray-700">{label}</label>
+      <label className="block text-sm font-semibold mb-2 text-gray-700">
+        {label}
+      </label>
       <input
         type={type}
         value={value}
@@ -233,9 +256,11 @@ function SelectField({
 }) {
   return (
     <div>
-      <label className="block text-sm font-semibold mb-2 text-gray-700">{label}</label>
+      <label className="block text-sm font-semibold mb-2 text-gray-700">
+        {label}
+      </label>
       <select
-        value={value || ''}
+        value={value || ""}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
       >

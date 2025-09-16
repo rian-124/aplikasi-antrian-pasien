@@ -6,6 +6,7 @@ interface DecodedToken {
   username: string;
   role: string;
   outlet: string;
+  loketId: number;
   permission: string[];
   iat: number;
   exp: number;
@@ -19,7 +20,7 @@ export class AuthService {
       password: password,
     };
 
-    const res = await fetch("http://192.168.50.24:4000/api/users/login", {
+    const res = await fetch("http://192.168.50.9:3000/api/users/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -50,9 +51,14 @@ export class AuthService {
       username: decoded.username,
       role: decoded.role,
       outlet: decoded.outlet,
+      loketId: decoded.loketId,
     };
 
     localStorage.setItem("user", JSON.stringify(user));
+    // kalau user punya loketId → set juga selectedLoket
+    if (user?.loketId) {
+      localStorage.setItem("selectedLoket", String(user.loketId));
+    }
 
     return user;
   }
@@ -68,6 +74,7 @@ export class AuthService {
     if (typeof window !== "undefined") {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
+      localStorage.removeItem("selectedLoket");
       Cookies.remove("access_token");
     }
   }

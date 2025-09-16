@@ -20,8 +20,11 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stat[]>([]);
   const [activeFilter, setActiveFilter] = useState<string>("TOTAL");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [outletMap, setOutletMap] = useState<Map<number, string>>(new Map());
-  const [recapData, setRecapData] = useState<{ perday: any[]; permonth: any[]; peryear: any[] }>({
+  const [recapData, setRecapData] = useState<{
+    perday: any[];
+    permonth: any[];
+    peryear: any[];
+  }>({
     perday: [],
     permonth: [],
     peryear: [],
@@ -64,33 +67,25 @@ export default function DashboardPage() {
 
       const apiUrl =
         source === "all"
-          ? "http://192.168.50.24:4000/api/antrian-pasien"
-          : "http://192.168.50.24:4000/api/antrian-pasien/daily";
+          ? "http://192.168.50.9:3000/api/antrian-pasien"
+          : "http://192.168.50.9:3000/api/antrian-pasien/daily";
 
-      const [patientRes, outletRes] = await Promise.all([
+      const [patientRes] = await Promise.all([
         fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("http://192.168.50.24:4000/api/outlet", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
       ]);
 
-      if (!patientRes.ok || !outletRes.ok) throw new Error("Error fetching data");
+      if (!patientRes.ok) throw new Error("Error fetching data");
 
-      const [patientJson, outletJson] = await Promise.all([patientRes.json(), outletRes.json()]);
+      const [patientJson] = await Promise.all([patientRes.json()]);
 
-      const outlets = outletJson.data;
-      const map = new Map<number, string>();
-      outlets.forEach((o: any) => map.set(o.id, o.nama_outlet));
-      setOutletMap(map);
-
-      const fetchedPatients: Patient[] = patientJson.data.map((p: any, index: number) =>
-        Patient.fromJSON(p, index, map)
+      const fetchedPatients: Patient[] = patientJson.data.antrian_pasiens.map(
+        (p: any, index: number) => Patient.fromJSON(p, index)
       );
 
       setPatients(fetchedPatients);
       recalcStats(fetchedPatients);
     } catch (error) {
-      console.error("Failed to fetch patients or outlets:", error);
+      console.error("Failed to fetch patients:", error);
     }
   };
 
@@ -98,9 +93,12 @@ export default function DashboardPage() {
     try {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No access token");
-      const res = await fetch("http://192.168.50.24:4000/api/antrian-pasien/recap", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        "http://192.168.50.9:3000/api/antrian-pasien/recap",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (!res.ok) throw new Error("Error fetching recap");
       const json = await res.json();
       setRecapData(json.data);
@@ -118,18 +116,23 @@ export default function DashboardPage() {
     fetchPatients();
     fetchRecap();
 
-    const socket: Socket = io("http://192.168.50.24:4000", { auth: { token } });
+    const socket: Socket = io("http://192.168.50.9:3000", {
+      auth: { token },
+    });
 
     socket.on("connect", () => {
       console.log("WebSocket connected:", socket.id);
-      socket.emit("join_room", { role: "DASHBOARD" });
+      socket.emit("join_room", { role: "ADMINUSERS" });
     });
 
     socket.on("antrian_pasiens_update", (data: any) => {
-      if (!data || !Array.isArray(data)) return;
+      if (!data) return;
 
-      const updatedPatients: Patient[] = data.map((p: any, index: number) =>
-        Patient.fromJSON(p, index, outletMap)
+      const pasienArr = Array.isArray(data) ? data : data.antrian_pasiens;
+      if (!Array.isArray(pasienArr)) return;
+
+      const updatedPatients: Patient[] = pasienArr.map(
+        (p: any, index: number) => Patient.fromJSON(p, index)
       );
 
       setPatients(updatedPatients);
@@ -141,7 +144,7 @@ export default function DashboardPage() {
     return () => {
       socket.disconnect();
     };
-  }, [outletMap]);
+  }, []);
 
   useEffect(() => {
     fetchPatients(dataSource);

@@ -34,8 +34,10 @@ export default function QueueStats({
   const [loket, setLoket] = useState("");
 
   useEffect(() => {
-    setLoket(selectedLoket || "");
-  }, [selectedLoket]);
+    console.log("selectedLoket:", selectedLoket, "lokets:", lokets);
+    if (lokets.length > 0) setLoket(selectedLoket || "");
+  }, [selectedLoket, lokets]);
+
   const [availableLokets, setAvailableLokets] = useState<Loket[]>([]);
 
   useEffect(() => {
@@ -68,11 +70,16 @@ export default function QueueStats({
             value={loket}
             onChange={handleLoketChange}
             disabled={disableLoket}
-            className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
           >
             <option value="">Pilih Loket</option>
+            {selectedLoket &&
+              !availableLokets.find((l) => String(l.id) === selectedLoket) && (
+                <option value={selectedLoket}>
+                  Loket {selectedLoket} (Sedang digunakan)
+                </option>
+              )}
             {availableLokets.map((l) => (
-              <option key={l.id} value={l.id.toString()}>
+              <option key={l.id} value={String(l.id)}>
                 {l.nama_loket}
                 {l.id.toString() === loket
                   ? " (Sedang digunakan)"

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { User } from '@/classes/User';
-import { Outlet, Role } from '@/classes/UserModel';
-import { UserService } from '@/classes/UserService';
+import { useState, useEffect } from "react";
+import { User } from "@/classes/User";
+import { Outlet, Role } from "@/classes/UserModel";
+import { UserService } from "@/classes/UserService";
 
 interface Props {
   isOpen: boolean;
@@ -13,9 +13,15 @@ interface Props {
   outlets: Outlet[];
 }
 
-export default function EditUserModal({ isOpen, onClose, userData, onSave, outlets }: Props) {
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
+export default function EditUserModal({
+  isOpen,
+  onClose,
+  userData,
+  onSave,
+  outlets,
+}: Props) {
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [outletId, setOutletId] = useState<number | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
@@ -30,7 +36,7 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
         const roleData = await UserService.fetchRoles();
         setRoles(roleData);
       } catch (err) {
-        console.error('Failed to fetch roles:', err);
+        console.error("Failed to fetch roles:", err);
       }
     };
 
@@ -43,13 +49,13 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
       setName(userData.name);
       setOutletId(Number(userData.outlet_id));
       setSelectedRoleId(Number(userData.role_id));
-      setLoketId(userData.loket_id ? Number(userData.loket_id) : null); 
+      setLoketId(userData.loket_id ? Number(userData.loket_id) : null);
     }
   }, [userData, isOpen, outlets]);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    fetch("http://192.168.50.24:4000/api/lokets", {
+    fetch("http://192.168.50.9:3000/api/lokets", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -58,7 +64,7 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
 
   const handleSave = () => {
     if (outletId === null || selectedRoleId === null) {
-      alert('Please select an outlet and role');
+      alert("Please select an outlet and role");
       return;
     }
 
@@ -67,9 +73,9 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
       username,
       name,
       Number(outletId),
-      userData!.outlet_name, 
+      userData!.outlet_name,
       Number(selectedRoleId),
-      loketId 
+      loketId
     );
 
     onSave(updatedUser);
@@ -104,23 +110,29 @@ export default function EditUserModal({ isOpen, onClose, userData, onSave, outle
           label="Outlet"
           value={outletId}
           onChange={setOutletId}
-          options={outlets.map(o => ({ id: o.id, name: o.nama_outlet }))}
+          options={outlets.map((o) => ({ id: o.id, name: o.nama_outlet }))}
         />
         <SelectField
           label="User Role"
           value={selectedRoleId}
           onChange={setSelectedRoleId}
-          options={roles.map(r => ({ id: r.id, name: r.name }))}
+          options={roles.map((r) => ({ id: r.id, name: r.name }))}
         />
         <SelectField
           label="Loket"
           value={loketId}
           onChange={setLoketId}
-          options={filteredLokets.map((loket) => ({ id: loket.id, name: loket.nama_loket }))}
+          options={filteredLokets.map((loket) => ({
+            id: loket.id,
+            name: loket.nama_loket,
+          }))}
         />
 
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="text-sm px-4 py-2 border rounded-md">
+          <button
+            onClick={onClose}
+            className="text-sm px-4 py-2 border rounded-md"
+          >
             Cancel
           </button>
           <button
@@ -150,7 +162,9 @@ function InputField({
 }) {
   return (
     <div className="mb-3">
-      <label className="block text-sm font-semibold mb-2 text-gray-700">{label}</label>
+      <label className="block text-sm font-semibold mb-2 text-gray-700">
+        {label}
+      </label>
       <input
         type={type}
         value={value}
@@ -175,9 +189,11 @@ function SelectField({
 }) {
   return (
     <div className="mb-3">
-      <label className="block text-sm font-semibold mb-2 text-gray-700">{label}</label>
+      <label className="block text-sm font-semibold mb-2 text-gray-700">
+        {label}
+      </label>
       <select
-        value={value !== null ? String(value) : ''}
+        value={value !== null ? String(value) : ""}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
       >

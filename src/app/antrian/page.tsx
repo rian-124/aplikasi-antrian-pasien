@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import QueueCard from "@/components/QueueCard";
 import QueueHeader from "@/components/QueueHeader";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from "lucide-react";
 
 export default function AntrianPage() {
   const router = useRouter();
@@ -12,14 +12,17 @@ export default function AntrianPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   const options = [
-    { title: 'UMUM', image: '/icons/umum.svg', jenis: 'UMUM' },
-    { title: 'JAMINAN', image: '/icons/jaminan.svg', jenis: 'JAMINAN' },
+    { title: "UMUM", image: "/icons/umum.svg", jenis: "UMUM" },
+    { title: "JAMINAN", image: "/icons/jaminan.svg", jenis: "JAMINAN" },
   ];
 
   const handleEnterFullscreen = () => {
-    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+    if (
+      !document.fullscreenElement &&
+      document.documentElement.requestFullscreen
+    ) {
       document.documentElement.requestFullscreen().catch((err) => {
-        console.warn('Fullscreen error:', err);
+        console.warn("Fullscreen error:", err);
       });
     }
   };
@@ -28,29 +31,29 @@ export default function AntrianPage() {
     const handleFullscreenChange = () => {
       setIsFullscreen(document.fullscreenElement !== null);
     };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
   const handleCardClick = async (jenis: string) => {
-    if (jenis === 'UMUM') {
+    if (jenis === "UMUM") {
       await createAntrian(jenis);
-    } else if (jenis === 'JAMINAN') {
-      router.push('/antrian/jaminan');
+    } else if (jenis === "JAMINAN") {
+      router.push("/antrian/jaminan");
     }
   };
 
   const createAntrian = async (jenis: string) => {
     try {
-      const res = await fetch('http://192.168.50.24:4000/api/pasiens', {
-        method: 'POST',
+      const res = await fetch("http://192.168.50.9:3000/api/pasiens", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
-        body: JSON.stringify({ jenis })
+        body: JSON.stringify({ jenis }),
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
@@ -58,8 +61,8 @@ export default function AntrianPage() {
       const nomorAntrian = json.data.AntrianPasiens[0]?.nomor_Antrian;
       setMessage(`Nomor antrian ${nomorAntrian} berhasil dibuat.`);
     } catch (err) {
-      console.error('Gagal membuat antrian pasien:', err);
-      setMessage('Terjadi kesalahan saat membuat antrian.');
+      console.error("Gagal membuat antrian pasien:", err);
+      setMessage("Terjadi kesalahan saat membuat antrian.");
     }
   };
 
@@ -77,7 +80,7 @@ export default function AntrianPage() {
       {!isFullscreen && (
         <div className="absolute top-[72px] left-4">
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push("/dashboard")}
             className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-2xl shadow-sm transition"
           >
             <ArrowLeft className="w-4 h-4" />

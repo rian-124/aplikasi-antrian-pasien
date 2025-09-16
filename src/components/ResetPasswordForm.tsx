@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { ResetPasswordManager } from "@/classes/ResetPasswordManager";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 export default function ResetPasswordForm() {
   const manager = new ResetPasswordManager();
@@ -10,61 +10,65 @@ export default function ResetPasswordForm() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    newPassword: '',
-    confirmPassword: '',
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (formData.newPassword !== formData.confirmPassword) {
-    alert('Password dan konfirmasi tidak sama!');
-    return;
-  }
-
-  const token = localStorage.getItem('resetToken');
-  if (!token) {
-    alert('Token tidak ditemukan, silakan ulangi proses lupa password.');
-    router.push('/forgot-password');
-    return;
-  }
-
-  try {
-    const res = await fetch('http://192.168.50.24:4000/api/users/reset-password', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        token,
-        newPassword: formData.newPassword, 
-      }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert('Password berhasil direset, silakan login.');
-      localStorage.removeItem('resetToken');
-      router.push('/login');
-    } else {
-      alert(data.message || 'Gagal reset password');
+    if (formData.newPassword !== formData.confirmPassword) {
+      alert("Password dan konfirmasi tidak sama!");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert('Terjadi kesalahan. Coba lagi.');
-  }
-};
 
+    const token = localStorage.getItem("resetToken");
+    if (!token) {
+      alert("Token tidak ditemukan, silakan ulangi proses lupa password.");
+      router.push("/forgot-password");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "http://192.168.50.9:3000/api/users/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token,
+            newPassword: formData.newPassword,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Password berhasil direset, silakan login.");
+        localStorage.removeItem("resetToken");
+        router.push("/login");
+      } else {
+        alert(data.message || "Gagal reset password");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi kesalahan. Coba lagi.");
+    }
+  };
 
   return (
     <div className="bg-white p-10 rounded-xl shadow-md w-96">
       <h2 className="text-2xl font-bold text-center mb-1">Reset password</h2>
-      <p className="text-gray-500 text-center mb-6">Please enter the new password</p>
+      <p className="text-gray-500 text-center mb-6">
+        Please enter the new password
+      </p>
 
       <form onSubmit={handleSubmit}>
         {fields.map((field) => (
