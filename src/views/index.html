@@ -37,7 +37,9 @@
     </table>
 
     <h1>Daftar Users</h1>
-    <button onclick="playVoice('Nomor antrian', 'u025')">Panggil Antrian</button>
+    <button onclick="playVoice('Nomor antrian', 'u025')">
+      Panggil Antrian
+    </button>
 
     <table>
       <thead>
@@ -58,7 +60,7 @@
 
         const utter2 = new SpeechSynthesisUtterance(number.toString());
         utter2.lang = 'id-ID';
-        utter2.rate = 0.5
+        utter2.rate = 0.5;
 
         utter1.onend = () => {
           setTimeout(() => {

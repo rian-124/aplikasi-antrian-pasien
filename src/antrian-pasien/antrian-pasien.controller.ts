@@ -49,21 +49,6 @@ export class AntrianPasienController {
     );
   }
 
-  @Get('/recap')
-  @HttpCode(200)
-  @ApiOperation(AntrianPasienDocs.getRecap)
-  async getRecapAntrianPasiensController(
-    @Req() req: AuthenticatedRequest,
-  ): Promise<WebResponse<RecapAntrianPasienResponse>> {
-    const result =
-      await this.antrianPasienService.getRecapAntrianPasiensService(req);
-
-    return ResponseHelper.ok(
-      'Successfully get recap data antrian pasiens',
-      result,
-    );
-  }
-
   @Get('/daily')
   @HttpCode(200)
   @ApiOperation(AntrianPasienDocs.getDailyAntrianPasien)
@@ -71,7 +56,7 @@ export class AntrianPasienController {
     @Req() req: AuthenticatedRequest,
   ): Promise<WebResponse<AntrianPasiensResponse>> {
     const result =
-      await this.antrianPasienService.getDailyStatusAntriansService(req);
+      await this.antrianPasienService.getDailyAntrianPasiensService(req);
 
     return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
   }
@@ -84,18 +69,6 @@ export class AntrianPasienController {
   ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
     const result =
       await this.antrianPasienService.getNomorAntrianPasiensService(req);
-
-    return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
-  }
-
-  @Get('/nomor-antrian-pasien/daily')
-  @HttpCode(200)
-  @ApiOperation(AntrianPasienDocs.getDailyNomorAntrian)
-  async getDailyNomorAntriansController(
-    @Req() req: AuthenticatedRequest,
-  ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
-    const result =
-      await this.antrianPasienService.getDailyNomorAntriansService(req);
 
     return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
   }
@@ -129,5 +102,59 @@ export class AntrianPasienController {
       req,
     );
     return ResponseHelper.ok('Successfully updated id antrian pasiens', result);
+  }
+
+  @Get('/nomor-antrian-pasien/daily')
+  @HttpCode(200)
+  @ApiOperation(AntrianPasienDocs.getDailyNomorAntrian)
+  async getDailyNomorAntriansController(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WebResponse<NomorAntrianPasienResponse[]>> {
+    const result =
+      await this.antrianPasienService.getDailyNomorAntriansService(req);
+
+    return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
+  }
+
+  @Get('/user')
+  @HttpCode(200)
+  @ApiOperation(AntrianPasienDocs.getAll)
+  async getUserAntrianPasiensController(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WebResponse<AntrianPasiensResponse>> {
+    const result =
+      await this.antrianPasienService.getUserAntrianPasiensService(req);
+
+    return ResponseHelper.ok(
+      'Successfully get all data Antrian pasiens',
+      result,
+    );
+  }
+
+  @Get('/user/daily')
+  @HttpCode(200)
+  @ApiOperation(AntrianPasienDocs.getDailyAntrianPasien)
+  async getDailyUserAntrianPasiensController(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WebResponse<AntrianPasiensResponse>> {
+    const result =
+      await this.antrianPasienService.getDailyUserAntrianPasiensService(req);
+
+    return ResponseHelper.ok('Successfully get nomor antrian pasiens', result);
+  }
+
+  @Get('/user/recap')
+  @HttpCode(200)
+  @ApiOperation(AntrianPasienDocs.getRecap)
+  async getRecapAntrianPasiensController(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<WebResponse<RecapAntrianPasienResponse>> {
+    const result =
+      await this.antrianPasienService.getUserRecapAntrianPasiensService(req);
+
+    return ResponseHelper.ok(
+      'Successfully get recap data antrian pasiens',
+      result,
+    );
   }
 }

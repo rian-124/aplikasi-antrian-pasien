@@ -67,34 +67,50 @@ export class AntrianPasienService {
     };
   }
 
-  async getRecapAntrianPasiensService(
+  async getDailyAntrianPasiensService(
     req: AuthenticatedRequest,
-  ): Promise<RecapAntrianPasienResponse> {
-    const data = await this.antrianRepo.getRecapAntrianPasienRepository(req);
+  ): Promise<AntrianPasiensResponse> {
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        nama_outlet: req.user.outlet,
+      },
+    });
 
-    const perday = data.map((d) => ({
-      user_id: d.user_id,
-      total: Number(d.total),
-      perday: d.perday.toISOString().split('T')[0],
-    }));
+    if (!outlet) {
+      throw new NotFoundException(
+        'Outlet not found, unable to retrieve queue status.',
+      );
+    }
 
-    const permonth = data.map((d) => ({
-      user_id: d.user_id,
-      total: Number(d.total),
-      permonth:
-        d.permonth.getFullYear() + '-' + String(d.permonth.getMonth() + 1),
-    }));
+    const { startOfDay, endOfDay } = getDayRangeWib();
 
-    const peryear = data.map((d) => ({
-      user_id: d.user_id,
-      total: Number(d.total),
-      peryear: String(d.peryear.getFullYear()),
-    }));
+    const result = await this.prismaService.antrianPasiens.findMany({
+      where: {
+        outlet_id: outlet.id,
+        created_At: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      orderBy: {
+        id: 'desc',
+      },
+      include: {
+        tahap_antrian: true,
+        status_antrian: true,
+        pasien: true,
+        users: {
+          select: {
+            name: true,
+          },
+        },
+        lokets: true,
+        outlets: true,
+      },
+    });
 
     return {
-      perday,
-      permonth,
-      peryear,
+      antrian_pasiens: mapDBtoModelAntrianPasiens(result),
     };
   }
 
@@ -194,53 +210,6 @@ export class AntrianPasienService {
       });
 
     return dataNomorAntrianPasien;
-  }
-
-  async getDailyStatusAntriansService(
-    req: AuthenticatedRequest,
-  ): Promise<AntrianPasiensResponse> {
-    const outlet = await this.prismaService.outlets.findUnique({
-      where: {
-        nama_outlet: req.user.outlet,
-      },
-    });
-
-    if (!outlet) {
-      throw new NotFoundException(
-        'Outlet not found, unable to retrieve queue status.',
-      );
-    }
-
-    const { startOfDay, endOfDay } = getDayRangeWib();
-
-    const result = await this.prismaService.antrianPasiens.findMany({
-      where: {
-        outlet_id: outlet.id,
-        created_At: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-      },
-      orderBy: {
-        id: 'desc',
-      },
-      include: {
-        tahap_antrian: true,
-        status_antrian: true,
-        pasien: true,
-        users: {
-          select: {
-            name: true,
-          },
-        },
-        lokets: true,
-        outlets: true,
-      },
-    });
-
-    return {
-      antrian_pasiens: mapDBtoModelAntrianPasiens(result),
-    };
   }
 
   async searchStatusAntriansService(
@@ -408,5 +377,132 @@ export class AntrianPasienService {
         `Tidak dapat mengubah dari ${currentStatus} ke ${nextStatus}, karena status sudah final.`,
       );
     }
+  }
+
+  async getUserAntrianPasiensService(
+    req: AuthenticatedRequest,
+  ): Promise<AntrianPasiensResponse> {
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        nama_outlet: req.user.outlet,
+      },
+    });
+
+    if (!outlet) {
+      throw new NotFoundException(
+        'Outlet not found, unable to retrieve queue status.',
+      );
+    }
+
+    const dataStatusAntrian = await this.prismaService.antrianPasiens.findMany({
+      where: {
+        outlet_id: outlet.id,
+        user_id: req.user.sub,
+      },
+      orderBy: {
+        id: 'asc',
+      },
+      include: {
+        tahap_antrian: true,
+        status_antrian: true,
+        pasien: true,
+        users: {
+          select: {
+            name: true,
+          },
+        },
+        lokets: true,
+        outlets: true,
+      },
+    });
+
+    return {
+      antrian_pasiens: mapDBtoModelAntrianPasiens(dataStatusAntrian),
+    };
+  }
+
+  async getDailyUserAntrianPasiensService(
+    req: AuthenticatedRequest,
+  ): Promise<AntrianPasiensResponse> {
+    const outlet = await this.prismaService.outlets.findUnique({
+      where: {
+        nama_outlet: req.user.outlet,
+      },
+    });
+
+    if (!outlet) {
+      throw new NotFoundException(
+        'Outlet not found, unable to retrieve queue status.',
+      );
+    }
+
+    const { startOfDay, endOfDay } = getDayRangeWib();
+
+    const result = await this.prismaService.antrianPasiens.findMany({
+      where: {
+        outlet_id: outlet.id,
+        user_id: req.user.sub,
+        created_At: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      orderBy: {
+        id: 'desc',
+      },
+      include: {
+        tahap_antrian: true,
+        status_antrian: true,
+        pasien: true,
+        users: {
+          select: {
+            name: true,
+          },
+        },
+        lokets: true,
+        outlets: true,
+      },
+    });
+
+    return {
+      antrian_pasiens: mapDBtoModelAntrianPasiens(result),
+    };
+  }
+
+  async getUserRecapAntrianPasiensService(
+    req: AuthenticatedRequest,
+  ): Promise<RecapAntrianPasienResponse> {
+    const {
+      perday: dataPerday,
+      permonth: dataPermonth,
+      peryear: dataPeryear,
+    } = await this.antrianRepo.getRecapAntrianPasienRepository(req);
+
+    const perday = dataPerday.map((d) => ({
+      user_id: d.user_id,
+      total: Number(d.total),
+      perday: d.perday.toISOString().split('T')[0],
+    }));
+
+    const permonth = dataPermonth.map((d) => ({
+      user_id: d.user_id,
+      total: Number(d.total),
+      permonth:
+        d.permonth.getFullYear() + '-' + String(d.permonth.getMonth() + 1),
+    }));
+
+    const peryear = dataPeryear.map((d) => ({
+      user_id: d.user_id,
+      total: Number(d.total),
+      peryear: String(d.peryear.getFullYear()),
+    }));
+
+    return {
+      dataRecap: {
+        perday,
+        permonth,
+        peryear,
+      },
+    };
   }
 }
