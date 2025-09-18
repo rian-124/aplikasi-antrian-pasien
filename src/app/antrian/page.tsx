@@ -6,10 +6,16 @@ import QueueCard from "@/components/QueueCard";
 import QueueHeader from "@/components/QueueHeader";
 import { ArrowLeft } from "lucide-react";
 
+declare interface Window {
+  BrowserPrint?: any;
+}
+
 export default function AntrianPage() {
   const router = useRouter();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [printer, setPrinter] = useState<any>(null);
+  const [printerStatus, setPrinterStatus] = useState<string>("Mencari printer Zebra...");
 
   const options = [
     { title: "UMUM", image: "/icons/umum.svg", jenis: "UMUM" },
@@ -26,6 +32,26 @@ export default function AntrianPage() {
       });
     }
   };
+
+  // Inisialisasi printer Zebra saat halaman dibuka
+  useEffect(() => {
+    // @ts-ignore
+    if (window.BrowserPrint) {
+      // @ts-ignore
+      window.BrowserPrint.getDefaultDevice("printer", function(printerObj: any) {
+        if (printerObj) {
+          setPrinter(printerObj);
+          setPrinterStatus("Printer Zebra terdeteksi: " + printerObj.name);
+        } else {
+          setPrinterStatus("Printer Zebra tidak ditemukan.");
+        }
+      }, function(error: any) {
+        setPrinterStatus("Gagal mendapatkan printer: " + error);
+      });
+    } else {
+      setPrinterStatus("BrowserPrint SDK belum tersedia. Silakan install extension Zebra Browser Print.");
+    }
+  }, []);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -47,7 +73,7 @@ export default function AntrianPage() {
 
   const createAntrian = async (jenis: string) => {
     try {
-      const res = await fetch("http://192.168.50.9:3000/api/pasiens", {
+      const res = await fetch("http://172.20.10.2:4000/api/pasiens", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,10 +86,27 @@ export default function AntrianPage() {
       const json = await res.json();
       const nomorAntrian = json.data.AntrianPasiens[0]?.nomor_Antrian;
       setMessage(`Nomor antrian ${nomorAntrian} berhasil dibuat.`);
+
+      // Print menggunakan printer Zebra yang sudah ready
+  printNomorAntrian(nomorAntrian, jenis);
     } catch (err) {
       console.error("Gagal membuat antrian pasien:", err);
       setMessage("Terjadi kesalahan saat membuat antrian.");
     }
+  }  
+
+  // Fungsi print Zebra Browser Print
+  const printNomorAntrian = (nomor: string, jenis: string) => {
+  if (!printer) {
+      setMessage("Printer Zebra belum siap. Pastikan extension dan printer sudah terdeteksi.");
+      return;
+    }
+    // Format label sederhana
+    const label = `\nANTRIAN LABORATORIUM\n-------------------\nJenis: ${jenis}\nNomor: ${nomor}\n-------------------\n`;
+  // @ts-ignore
+  printer.send(label, undefined, function(error: any){
+      if (error) setMessage("Gagal print: " + error);
+    });
   };
 
   useEffect(() => {
@@ -91,6 +134,7 @@ export default function AntrianPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center">
         <h1 className="text-2xl font-semibold mb-4">Laboratorium PK & MK</h1>
+        <div className="mb-2 text-sm text-gray-500">{printerStatus}</div>
         <div className="flex gap-6 flex-wrap justify-center mb-4">
           {options.map((option, i) => (
             <div

@@ -25,10 +25,10 @@ export default function MonitoringPage() {
         if (!token) throw new Error("No access token");
 
         const [patientRes, outletRes] = await Promise.all([
-          fetch("http://192.168.50.9:3000/api/antrian-pasien", {
+          fetch("http://172.20.10.2:4000/api/antrian-pasien", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("http://192.168.50.9:3000/api/outlet", {
+          fetch("http://172.20.10.2:4000/api/outlet", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -47,7 +47,7 @@ export default function MonitoringPage() {
         setOutletMap(newOutletMap);
 
         const fetchedPatients: Patient[] = (patientJson.data || []).map(
-          (p: any, index: number) => Patient.fromJSON(p, index, newOutletMap)
+          (p: any, index: number) => Patient.fromJSON(p, index)
         );
         setPatients(fetchedPatients);
       } catch (error) {
@@ -60,7 +60,7 @@ export default function MonitoringPage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const socket: Socket = io("http://192.168.50.9:3000", {
+    const socket: Socket = io("http://172.20.10.2:4000", {
       auth: { token },
     });
 
@@ -77,17 +77,17 @@ export default function MonitoringPage() {
 
         if (Array.isArray(data)) {
           const updatedPatients = data.map((p: any, i: number) =>
-            Patient.fromJSON(p, i, outletMap)
+            Patient.fromJSON(p, i)
           );
           setPatients(updatedPatients);
         } else if (data && typeof data === "object") {
           setPatients((prev) => {
             const idx = prev.findIndex((p) => p.id === data.id);
             if (idx === -1) {
-              return [...prev, Patient.fromJSON(data, prev.length, outletMap)];
+              return [...prev, Patient.fromJSON(data, prev.length)];
             } else {
               const copy = [...prev];
-              copy[idx] = Patient.fromJSON(data, idx, outletMap);
+              copy[idx] = Patient.fromJSON(data, idx);
               return copy;
             }
           });
@@ -149,13 +149,12 @@ export default function MonitoringPage() {
     no: 0,
     patientNumber: "-",
     labReg: "-",
-    outletId: 0,
     outlet: "-",
     userName: "-",
     bintang: 0,
     jenisRegistrasiId: 0,
     status: "WAITING",
-    loketId: 0,
+    loket: "-",
     createdAt: new Date(),
     updatedAt: new Date(),
   };

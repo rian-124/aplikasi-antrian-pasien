@@ -67,8 +67,8 @@ export default function DashboardPage() {
 
       const apiUrl =
         source === "all"
-          ? "http://192.168.50.9:3000/api/antrian-pasien"
-          : "http://192.168.50.9:3000/api/antrian-pasien/daily";
+          ? "http://172.20.10.2:4000/api/antrian-pasien/user"
+          : "http://172.20.10.2:4000/api/antrian-pasien/user/daily";
 
       const [patientRes] = await Promise.all([
         fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } }),
@@ -94,14 +94,14 @@ export default function DashboardPage() {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("No access token");
       const res = await fetch(
-        "http://192.168.50.9:3000/api/antrian-pasien/recap",
+        "http://172.20.10.2:4000/api/antrian-pasien/user/recap",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       if (!res.ok) throw new Error("Error fetching recap");
       const json = await res.json();
-      setRecapData(json.data);
+      setRecapData(json.data.dataRecap);
     } catch (error) {
       console.error("Failed to fetch recap:", error);
     }
@@ -116,7 +116,7 @@ export default function DashboardPage() {
     fetchPatients();
     fetchRecap();
 
-    const socket: Socket = io("http://192.168.50.9:3000", {
+    const socket: Socket = io("http://172.20.10.2:4000", {
       auth: { token },
     });
 
