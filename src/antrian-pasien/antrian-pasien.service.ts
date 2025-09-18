@@ -438,11 +438,17 @@ export class AntrianPasienService {
 
     const { startOfDay, endOfDay } = getDayRangeWib();
 
+    console.log({
+      startOfDay,
+      endOfDay,
+      userId: req.user.sub,
+    });
+
     const result = await this.prismaService.antrianPasiens.findMany({
       where: {
         outlet_id: outlet.id,
         user_id: req.user.sub,
-        created_At: {
+        update_At: {
           gte: startOfDay,
           lte: endOfDay,
         },
