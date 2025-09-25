@@ -12,7 +12,6 @@ import { WebSocketGateaway } from 'src/common/websocket.gateaway';
 import { Pasiens } from '@prisma/client';
 import { UpdatePasiensDto } from './dtos/update-pasiens.dto';
 import { CreatePasiensDto } from './dtos/create-pasiens.dto';
-import { AuthenticatedRequest } from 'src/model/user.model';
 
 @Injectable()
 export class PasiensService {
@@ -24,7 +23,7 @@ export class PasiensService {
 
   async storePasienService(
     body: CreatePasiensDto,
-    req: AuthenticatedRequest,
+    outletId: number,
   ): Promise<Pasiens> {
     const jenis = await this.prismaService.jenisRegistrasis.findUnique({
       where: {
@@ -50,7 +49,7 @@ export class PasiensService {
 
     const outlet = await this.prismaService.outlets.findUnique({
       where: {
-        nama_outlet: req.user.outlet,
+        id: outletId,
       },
     });
 

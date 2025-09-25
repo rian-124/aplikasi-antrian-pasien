@@ -30,9 +30,6 @@ import { OutletDocs } from './docs/outlet.docs';
 
 @Controller('/api/outlet')
 @ApiTags('Outlet')
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@Permissions('view:ADMINUSERS', 'view:ADMIN')
 export class OutletController {
   constructor(private outletService: OutletService) {}
 
@@ -49,6 +46,9 @@ export class OutletController {
   @Post()
   @HttpCode(200)
   @ApiOperation(OutletDocs.storeOutlets)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMINUSERS', 'view:ADMIN')
   @ApiResponse({ status: 200, description: 'Berhasil menambahkan outlet.' })
   async storeOutletController(
     @Body() body: CreateOutletsDto,
@@ -61,6 +61,9 @@ export class OutletController {
   @Put(':id')
   @HttpCode(200)
   @ApiOperation(OutletDocs.updateOutlets)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMINUSERS', 'view:ADMIN')
   @ApiResponse({ status: 200, description: 'Berhasil memperbarui outlet.' })
   async updateOutletController(
     @Param('id', ParseIntPipe) id: number,
@@ -74,6 +77,9 @@ export class OutletController {
   @Delete(':id')
   @HttpCode(200)
   @ApiOperation(OutletDocs.deleteOutlets)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMINUSERS', 'view:ADMIN')
   @ApiResponse({ status: 200, description: 'Berhasil menghapus outlet.' })
   async deleteOutletController(
     @Param('id', ParseIntPipe) id: number,
