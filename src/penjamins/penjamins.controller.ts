@@ -24,9 +24,6 @@ import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { PenjaminsDocs } from './docs/penjamins.docs';
 
 @Controller('/api/penjamins')
-@ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
-@Permissions('view:ADMINUSERS', 'view:ADMIN')
 export class PenjaminsController {
   constructor(private penjaminsService: PenjaminsService) {}
 
@@ -42,6 +39,9 @@ export class PenjaminsController {
   @Get('jenis-registrasi')
   @HttpCode(200)
   @ApiOperation(PenjaminsDocs.getByJenisRegistrasi)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMINUSERS', 'view:ADMIN')
   async getPenjaminsJenisRegistrasiController(
     @Query('jenis') jenis: string,
   ): Promise<WebResponse<Penjamins[]>> {
@@ -57,6 +57,9 @@ export class PenjaminsController {
   @Post()
   @HttpCode(200)
   @ApiOperation(PenjaminsDocs.store)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMINUSERS', 'view:ADMIN')
   async storePenjaminsController(
     @Body()
     body: CreatePenjaminsDto,
@@ -69,6 +72,9 @@ export class PenjaminsController {
   @Put(':id')
   @HttpCode(200)
   @ApiOperation(PenjaminsDocs.update)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMINUSERS', 'view:ADMIN')
   async updatePenjaminsController(
     @Param('id') id: number,
     @Body() body: UpdatePenjaminsDto,
@@ -80,6 +86,9 @@ export class PenjaminsController {
 
   @Delete(':id')
   @ApiOperation(PenjaminsDocs.delete)
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @Permissions('view:ADMINUSERS', 'view:ADMIN')
   async deletePenjaminsController(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<WebResponse<Penjamins>> {
