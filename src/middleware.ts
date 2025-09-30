@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
 
   const protectedPaths = [
     "/dashboard",
-    "/antrian",
+    // "/antrian",
     "/monitoring",
     "/queue",
     "/user",

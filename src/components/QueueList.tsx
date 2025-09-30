@@ -3,7 +3,7 @@
 import { QueueItem } from "@/classes/Queue";
 
 interface QueueListProps {
-  items: QueueItem[];
+  items: (QueueItem & { status?: string })[];
 }
 
 export default function QueueList({ items }: QueueListProps) {
@@ -22,7 +22,7 @@ export default function QueueList({ items }: QueueListProps) {
           {limitedItems.map((item, index) => (
             <tr key={index} className="border-b border-gray-700 text-black text-lg text-center">
               <td className="py-4 px-6 align-middle">{item.number}</td>
-              <td className="py-4 px-6 align-middle text-yellow-400">WAITING</td>
+              <td className="py-4 px-6 align-middle text-yellow-400">{item.status ?? "WAITING"}</td>
             </tr>
           ))}
         </tbody>

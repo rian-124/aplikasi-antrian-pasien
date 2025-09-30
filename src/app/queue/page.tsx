@@ -27,7 +27,7 @@ export default function QueuePage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const socket: Socket = io("http://172.20.10.2:4000", {
+    const socket: Socket = io("http://192.168.50.24:4000", {
       auth: { token },
       transports: ["websocket"],
     });
@@ -120,10 +120,10 @@ useEffect(() => {
       if (!token) throw new Error("No access token");
 
       const [patientRes, loketRes] = await Promise.all([
-        fetch("http://172.20.10.2:4000/api/antrian-pasien", {
+        fetch("http://192.168.50.24:4000/api/antrian-pasien", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://172.20.10.2:4000/api/lokets", {
+        fetch("http://192.168.50.24:4000/api/lokets", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -189,7 +189,7 @@ useEffect(() => {
 
     try {
       const res = await fetch(
-        `http://172.20.10.2:4000/api/antrian-pasien/${patient.id}`,
+        `http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`,
         {
           method: "PATCH",
           headers: {
@@ -236,7 +236,7 @@ useEffect(() => {
     if (!token) return;
 
     try {
-      const res = await fetch("http://172.20.10.2:4000/api/users/loket", {
+      const res = await fetch("http://192.168.50.24:4000/api/users/loket", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -273,7 +273,7 @@ useEffect(() => {
 
     try {
       const res = await fetch(
-        "http://172.20.10.2:4000/api/users/loket/checkout",
+        "http://192.168.50.24:4000/api/users/loket/checkout",
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
@@ -302,7 +302,7 @@ useEffect(() => {
     const recallCount = getRecallCount(patient.id) + 1;
 
     if (recallCount >= 2) {
-      await fetch(`http://172.20.10.2:4000/api/antrian-pasien/${patient.id}`, {
+      await fetch(`http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -315,7 +315,7 @@ useEffect(() => {
       return;
     }
 
-    await fetch(`http://172.20.10.2:4000/api/antrian-pasien/${patient.id}`, {
+    await fetch(`http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,

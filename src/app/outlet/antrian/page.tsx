@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import QueueCard from "@/components/QueueCard";
 import QueueHeader from "@/components/QueueHeader";
 import { ArrowLeft } from "lucide-react";
+import Script from "next/script";
 
 declare interface Window {
   BrowserPrint?: any;
@@ -33,21 +34,24 @@ export default function AntrianPage() {
     }
   };
 
-  // Inisialisasi printer Zebra saat halaman dibuka
   useEffect(() => {
     // @ts-ignore
     if (window.BrowserPrint) {
       // @ts-ignore
-      window.BrowserPrint.getDefaultDevice("printer", function(printerObj: any) {
-        if (printerObj) {
-          setPrinter(printerObj);
-          setPrinterStatus("Printer Zebra terdeteksi: " + printerObj.name);
-        } else {
-          setPrinterStatus("Printer Zebra tidak ditemukan.");
+      window.BrowserPrint.getDefaultDevice(
+        "printer",
+        function(printerObj: any) {
+          if (printerObj) {
+            setPrinter(printerObj);
+            setPrinterStatus("Printer Zebra terdeteksi: " + printerObj.name);
+          } else {
+            setPrinterStatus("Printer Zebra tidak ditemukan.");
+          }
+        },
+        function(error: any) {
+          setPrinterStatus("Gagal mendapatkan printer: " + error);
         }
-      }, function(error: any) {
-        setPrinterStatus("Gagal mendapatkan printer: " + error);
-      });
+      );
     } else {
       setPrinterStatus("BrowserPrint SDK belum tersedia. Silakan install extension Zebra Browser Print.");
     }
@@ -67,13 +71,18 @@ export default function AntrianPage() {
     if (jenis === "UMUM") {
       await createAntrian(jenis);
     } else if (jenis === "JAMINAN") {
-      router.push("/antrian/jaminan");
+      router.push("/outlet/antrian/jaminan");
     }
   };
 
   const createAntrian = async (jenis: string) => {
     try {
-      const res = await fetch("http://172.20.10.2:4000/api/pasiens", {
+      const outletId = typeof window !== "undefined" ? localStorage.getItem("selected_outlet_id") : null;
+      if (!outletId) {
+        setMessage("Outlet belum dipilih.");
+        return;
+      }
+      const res = await fetch(`http://192.168.50.24:4000/api/pasiens/${outletId}/outlet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,23 +97,29 @@ export default function AntrianPage() {
       setMessage(`Nomor antrian ${nomorAntrian} berhasil dibuat.`);
 
       // Print menggunakan printer Zebra yang sudah ready
-  printNomorAntrian(nomorAntrian, jenis);
+      printNomorAntrian(nomorAntrian, jenis);
     } catch (err) {
       console.error("Gagal membuat antrian pasien:", err);
       setMessage("Terjadi kesalahan saat membuat antrian.");
     }
   }  
 
-  // Fungsi print Zebra Browser Print
   const printNomorAntrian = (nomor: string, jenis: string) => {
-  if (!printer) {
+    if (!printer) {
       setMessage("Printer Zebra belum siap. Pastikan extension dan printer sudah terdeteksi.");
       return;
     }
-    // Format label sederhana
-    const label = `\nANTRIAN LABORATORIUM\n-------------------\nJenis: ${jenis}\nNomor: ${nomor}\n-------------------\n`;
-  // @ts-ignore
-  printer.send(label, undefined, function(error: any){
+    const zpl = `^XA
+^PW203
+^LL203
+^CF0,30
+^FO0,70^FB203,1,0,C,0^FDANTRIAN LAB^FS
+^CF0,20
+^FO0,110^FB203,1,0,C,0^FDJenis: ${jenis}^FS
+^CF0,40
+^FO0,150^FB203,1,0,C,0^FD${nomor}^FS
+^XZ`;
+    printer.send(zpl, undefined, function(error: any){
       if (error) setMessage("Gagal print: " + error);
     });
   };
@@ -116,6 +131,8 @@ export default function AntrianPage() {
     }
   }, [message]);
 
+  const outletId = typeof window !== "undefined" ? localStorage.getItem("selected_outlet_id") : null;
+
   return (
     <div className="w-full h-screen flex flex-col bg-white relative">
       <QueueHeader />
@@ -123,7 +140,7 @@ export default function AntrianPage() {
       {!isFullscreen && (
         <div className="absolute top-[72px] left-4">
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/outlet")}
             className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-2xl shadow-sm transition"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -162,6 +179,8 @@ export default function AntrianPage() {
           className="w-10 h-10 fixed bottom-4 right-4 opacity-80 hover:opacity-100 transition cursor-pointer"
         />
       )}
+
+      <Script src="/js/BrowserPrint-3.0.216.min.js" strategy="beforeInteractive" />
     </div>
   );
 }

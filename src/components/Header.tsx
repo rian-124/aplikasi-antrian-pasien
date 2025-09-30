@@ -17,7 +17,7 @@ export default function Header() {
       '/queue': 'Queue Managements',
       '/user': 'Users',
       '/monitoring': 'Monitoring Antrian',
-      '/antrian': 'Pilih Antrian',
+      // '/antrian': 'Pilih Antrian',
     };
     return map[path] || 'Page';
   }
@@ -89,7 +89,7 @@ export default function Header() {
             <ul className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-10">
               <li><a href="/dashboard" className="block px-4 py-2 hover:bg-gray-100 text-sm font-semibold text-gray-700">Antrian</a></li>
               <li><a href="/monitoring" className="block px-4 py-2 hover:bg-gray-100 text-sm font-semibold text-gray-700">Monitoring Antrian</a></li>
-              <li><a href="/antrian" className="block px-4 py-2 hover:bg-gray-100 text-sm font-semibold text-gray-700">Pilih Antrian</a></li>
+              {/* <li><a href="/antrian" className="block px-4 py-2 hover:bg-gray-100 text-sm font-semibold text-gray-700">Pilih Antrian</a></li> */}
               <li>
                 <button
                   onClick={handleLogout}
