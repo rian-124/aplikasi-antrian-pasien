@@ -25,10 +25,10 @@ export default function MonitoringPage() {
         if (!token) throw new Error("No access token");
 
         const [patientRes, outletRes] = await Promise.all([
-          fetch("http://192.168.50.24:4000/api/antrian-pasien", {
+          fetch("http://192.168.50.222:4000/api/antrian-pasien", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("http://192.168.50.24:4000/api/outlet", {
+          fetch("http://192.168.50.222:4000/api/outlet", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -63,7 +63,7 @@ export default function MonitoringPage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const socket: Socket = io("http://192.168.50.24:4000", {
+    const socket: Socket = io("http://192.168.50.222:4000", {
       auth: { token },
     });
 

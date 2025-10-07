@@ -23,7 +23,7 @@ const [isFullscreen, setIsFullscreen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    fetch("http://192.168.50.24:4000/api/outlet")
+    fetch("http://192.168.50.222:4000/api/outlet")
       .then((res) => res.json())
       .then((json) => setOutlets(json.data || []));
   }, []);

@@ -73,7 +73,7 @@ export default function JaminanPage() {
 
   const fetchPenjamins = async () => {
     try {
-      const res = await fetch("http://192.168.50.24:4000/api/penjamins");
+      const res = await fetch("http://192.168.50.222:4000/api/penjamins");
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -95,7 +95,7 @@ export default function JaminanPage() {
       return;
     }
     try {
-      const res = await fetch(`http://192.168.50.24:4000/api/pasiens/${outletId}/outlet`, {
+      const res = await fetch(`http://192.168.50.222:4000/api/pasiens/${outletId}/outlet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

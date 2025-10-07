@@ -82,7 +82,7 @@ export default function AntrianPage() {
         setMessage("Outlet belum dipilih.");
         return;
       }
-      const res = await fetch(`http://192.168.50.24:4000/api/pasiens/${outletId}/outlet`, {
+      const res = await fetch(`http://192.168.50.222:4000/api/pasiens/${outletId}/outlet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
