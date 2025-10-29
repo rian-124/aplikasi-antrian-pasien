@@ -15,11 +15,15 @@ import Script from "next/script";
 export default function JaminanPage() {
   const router = useRouter();
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [penjamins, setPenjamins] = useState<{ id: number; nama: string }[]>([]);
+  const [penjamins, setPenjamins] = useState<{ id: number; nama: string }[]>(
+    []
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [printer, setPrinter] = useState<any>(null);
-  const [printerStatus, setPrinterStatus] = useState<string>("Mencari printer Zebra...");
+  const [printerStatus, setPrinterStatus] = useState<string>(
+    "Mencari printer Zebra..."
+  );
   // Inisialisasi printer Zebra
   useEffect(() => {
     // @ts-ignore
@@ -27,7 +31,7 @@ export default function JaminanPage() {
       // @ts-ignore
       window.BrowserPrint.getDefaultDevice(
         "printer",
-        function(printerObj: any) {
+        function (printerObj: any) {
           if (printerObj) {
             setPrinter(printerObj);
             setPrinterStatus("Printer Zebra terdeteksi: " + printerObj.name);
@@ -35,12 +39,14 @@ export default function JaminanPage() {
             setPrinterStatus("Printer Zebra tidak ditemukan.");
           }
         },
-        function(error: any) {
+        function (error: any) {
           setPrinterStatus("Gagal mendapatkan printer: " + error);
         }
       );
     } else {
-      setPrinterStatus("BrowserPrint SDK belum tersedia. Silakan install extension Zebra Browser Print.");
+      setPrinterStatus(
+        "BrowserPrint SDK belum tersedia. Silakan install extension Zebra Browser Print."
+      );
     }
   }, []);
 
@@ -73,12 +79,14 @@ export default function JaminanPage() {
 
   const fetchPenjamins = async () => {
     try {
-      const res = await fetch("http://192.168.50.24:4000/api/penjamins");
+      const res = await fetch("http://192.168.50.222:5000/api/penjamins");
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       const json = await res.json();
-      const filtered = (json.data || []).filter((p: any) => p.jenis_registrasi_id === 2);
+      const filtered = (json.data || []).filter(
+        (p: any) => p.jenis_registrasi_id === 2
+      );
       setPenjamins(filtered);
     } catch (err) {
       console.error("Gagal mengambil data penjamin:", err);
@@ -88,23 +96,29 @@ export default function JaminanPage() {
 
   const createAntrian = async (penjamin_id: number) => {
     setLoading(true);
-    const outletId = typeof window !== "undefined" ? localStorage.getItem("selected_outlet_id") : null;
+    const outletId =
+      typeof window !== "undefined"
+        ? localStorage.getItem("selected_outlet_id")
+        : null;
     if (!outletId) {
       setMessage("Outlet belum dipilih.");
       setLoading(false);
       return;
     }
     try {
-      const res = await fetch(`http://192.168.50.24:4000/api/pasiens/${outletId}/outlet`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jenis: "JAMINAN",
-          penjamin_id: penjamin_id,
-        }),
-      });
+      const res = await fetch(
+        `http://192.168.50.222:5000/api/pasiens/${outletId}/outlet`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            jenis: "JAMINAN",
+            penjamin_id: penjamin_id,
+          }),
+        }
+      );
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -125,11 +139,13 @@ export default function JaminanPage() {
   // Fungsi print Zebra Browser Print
   const printNomorAntrian = (nomor: string) => {
     if (!printer) {
-      setMessage("Printer Zebra belum siap. Pastikan extension dan printer sudah terdeteksi.");
+      setMessage(
+        "Printer Zebra belum siap. Pastikan extension dan printer sudah terdeteksi."
+      );
       return;
     }
-  // Susunan dan penataan sama persis dengan UMUM
-  const zpl = `^XA
+    // Susunan dan penataan sama persis dengan UMUM
+    const zpl = `^XA
 ^PW203
 ^LL203
 ^CF0,30
@@ -139,7 +155,7 @@ export default function JaminanPage() {
 ^CF0,40
 ^FO0,150^FB203,1,0,C,0^FD${nomor}^FS
 ^XZ`;
-    printer.send(zpl, undefined, function(error: any){
+    printer.send(zpl, undefined, function (error: any) {
       if (error) setMessage("Gagal print: " + error);
     });
   };
@@ -202,7 +218,10 @@ export default function JaminanPage() {
           className="w-10 h-10 fixed bottom-4 right-4 opacity-80 hover:opacity-100 transition cursor-pointer"
         />
       )}
-    <Script src="/js/BrowserPrint-3.0.216.min.js" strategy="beforeInteractive" />
-  </div>
+      <Script
+        src="/js/BrowserPrint-3.0.216.min.js"
+        strategy="beforeInteractive"
+      />
+    </div>
   );
 }

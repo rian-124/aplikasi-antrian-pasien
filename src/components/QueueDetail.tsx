@@ -35,7 +35,7 @@ export default function QueueDetail({
     }
 
     try {
-      const res = await fetch(`http://192.168.50.24:4000/api/${endpoint}`, {
+      const res = await fetch(`http://192.168.50.222:5000/api/${endpoint}`, {
         method,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -118,7 +118,7 @@ export default function QueueDetail({
       );
       if (success) {
         const updatedPatient = { ...currentPatient, ...body };
-        localStorage.setItem("currentPatient", JSON.stringify(updatedPatient))
+        localStorage.setItem("currentPatient", JSON.stringify(updatedPatient));
         setCurrentPatient(updatedPatient);
       }
     }
@@ -246,33 +246,33 @@ export default function QueueDetail({
             </thead>
             <tbody className="text-gray-800">
               {patients.map((patient, i) => (
-                  <tr
-                    key={i}
-                    className="bg-white border-b last:border-b-0 border-gray-300 shadow-sm hover:shadow-md transition rounded-lg"
-                  >
-                    <td className="px-4 py-3">{i + 1}</td>
-                    <td className="px-4 py-3 font-semibold">
-                      {patient.patientNumber}
-                    </td>
-                    <td className="px-4 py-3">{patient.labReg}</td>
-                    <td className="px-4 py-3">{patient.outlet}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          patient.status === "WAITING"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : patient.status === "SKIPPED"
-                            ? "bg-blue-100 text-blue-700"
-                            : patient.status === "RECALL"
-                            ? "bg-purple-100 text-purple-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {patient.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                <tr
+                  key={i}
+                  className="bg-white border-b last:border-b-0 border-gray-300 shadow-sm hover:shadow-md transition rounded-lg"
+                >
+                  <td className="px-4 py-3">{i + 1}</td>
+                  <td className="px-4 py-3 font-semibold">
+                    {patient.patientNumber}
+                  </td>
+                  <td className="px-4 py-3">{patient.labReg}</td>
+                  <td className="px-4 py-3">{patient.outlet}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        patient.status === "WAITING"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : patient.status === "SKIPPED"
+                          ? "bg-blue-100 text-blue-700"
+                          : patient.status === "RECALL"
+                          ? "bg-purple-100 text-purple-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {patient.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

@@ -30,48 +30,48 @@ export default function UserTable() {
   const [roleFilter, setRoleFilter] = useState("");
 
   //  // ---------- WEBSOCKET ----------
-    useEffect(() => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
-  
-      const socket: Socket = io("http://192.168.50.24:4000", {
-        auth: { token },
-        transports: ["websocket"],
-      });
-  
-      socket.on("connect", () => {
-        console.log("✅ Connected to WebSocket:", socket.id);
-  
-        // Join sesuai role (ADMIN atau ADMINUSERS)
-        socket.emit("join_room", { role: "ADMIN" });
-      });
-  
-      socket.on("joined: ", (msg) => {
-        console.log("ℹ️ Server message:", msg);
-      });
-  
-      // update user realtime
-      socket.on("users_update", (data) => {
-        console.log("📥 Update dari WS (users_update):", data);
-        // setelah terima update → refresh user
-        fetchUsers();
-      });
-  
-      socket.on("disconnect", () => {
-        console.log("❌ Disconnected from WebSocket");
-      });
-  
-      return () => {
-        socket.disconnect();
-      };
-    }, []);
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    const socket: Socket = io("http://192.168.50.222:5000", {
+      auth: { token },
+      transports: ["websocket"],
+    });
+
+    socket.on("connect", () => {
+      console.log("✅ Connected to WebSocket:", socket.id);
+
+      // Join sesuai role (ADMIN atau ADMINUSERS)
+      socket.emit("join_room", { role: "ADMIN" });
+    });
+
+    socket.on("joined: ", (msg) => {
+      console.log("ℹ️ Server message:", msg);
+    });
+
+    // update user realtime
+    socket.on("users_update", (data) => {
+      console.log("📥 Update dari WS (users_update):", data);
+      // setelah terima update → refresh user
+      fetchUsers();
+    });
+
+    socket.on("disconnect", () => {
+      console.log("❌ Disconnected from WebSocket");
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = AuthService.getToken();
-      const res = await fetch("http://192.168.50.24:4000/api/users", {
+      const res = await fetch("http://192.168.50.222:5000/api/users", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -170,7 +170,7 @@ export default function UserTable() {
   useEffect(() => {
     const fetchLokets = async () => {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://192.168.50.24:4000/api/lokets", {
+      const res = await fetch("http://192.168.50.222:5000/api/lokets", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -27,7 +27,7 @@ export default function QueuePage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const socket: Socket = io("http://192.168.50.24:4000", {
+    const socket: Socket = io("http://192.168.50.222:5000", {
       auth: { token },
       transports: ["websocket"],
     });
@@ -59,22 +59,18 @@ export default function QueuePage() {
     };
   }, []);
 
- const [initialized, setInitialized] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
-useEffect(() => {
-  if (initialized || lokets.length === 0) return;
+  useEffect(() => {
+    if (initialized || lokets.length === 0) return;
 
-  const savedLoket = localStorage.getItem("selectedLoket");
-  if (savedLoket) {
-    setSelectedLoket(savedLoket);
-  }
+    const savedLoket = localStorage.getItem("selectedLoket");
+    if (savedLoket) {
+      setSelectedLoket(savedLoket);
+    }
 
-  setInitialized(true);
-}, [lokets, initialized]);
-
-
-
-
+    setInitialized(true);
+  }, [lokets, initialized]);
 
   // ---------- STORAGE UTILS ----------
   const saveCurrentToStorage = (patient: Patient) =>
@@ -120,10 +116,10 @@ useEffect(() => {
       if (!token) throw new Error("No access token");
 
       const [patientRes, loketRes] = await Promise.all([
-        fetch("http://192.168.50.24:4000/api/antrian-pasien", {
+        fetch("http://192.168.50.222:5000/api/antrian-pasien", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://192.168.50.24:4000/api/lokets", {
+        fetch("http://192.168.50.222:5000/api/lokets", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -189,7 +185,7 @@ useEffect(() => {
 
     try {
       const res = await fetch(
-        `http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`,
+        `http://192.168.50.222:5000/api/antrian-pasien/${patient.id}`,
         {
           method: "PATCH",
           headers: {
@@ -236,7 +232,7 @@ useEffect(() => {
     if (!token) return;
 
     try {
-      const res = await fetch("http://192.168.50.24:4000/api/users/loket", {
+      const res = await fetch("http://192.168.50.222:5000/api/users/loket", {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -273,7 +269,7 @@ useEffect(() => {
 
     try {
       const res = await fetch(
-        "http://192.168.50.24:4000/api/users/loket/checkout",
+        "http://192.168.50.222:5000/api/users/loket/checkout",
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
@@ -302,20 +298,23 @@ useEffect(() => {
     const recallCount = getRecallCount(patient.id) + 1;
 
     if (recallCount >= 2) {
-      await fetch(`http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: "CANCELED", bintang: recallCount }),
-      });
+      await fetch(
+        `http://192.168.50.222:5000/api/antrian-pasien/${patient.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "CANCELED", bintang: recallCount }),
+        }
+      );
       resetRecallCount(patient.id);
       fetchPatients();
       return;
     }
 
-    await fetch(`http://192.168.50.24:4000/api/antrian-pasien/${patient.id}`, {
+    await fetch(`http://192.168.50.222:5000/api/antrian-pasien/${patient.id}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -341,7 +340,6 @@ useEffect(() => {
       return a.no - b.no;
     })
     .map((p) => ({ ...p, isRecalled: getRecallCount(p.id) > 0 }));
-
 
   const stats = {
     TOTAL: patients.length,
@@ -381,17 +379,17 @@ useEffect(() => {
               />
             </div>
             <div className="lg:col-span-3 h-full overflow-y-auto min-h-0">
-                <QueueStats
-                  stats={stats}
-                  activeFilter={activeFilter}
-                  onFilterChange={setActiveFilter}
-                  onLoketChange={handleUpdateUserLoket}
-                  onExit={handleCheckoutUserLoket}
-                  lokets={lokets}
-                  selectedLoket={selectedLoket}
-                  disableLoket={!!selectedLoket}
-                  disableExit={false}
-                />
+              <QueueStats
+                stats={stats}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                onLoketChange={handleUpdateUserLoket}
+                onExit={handleCheckoutUserLoket}
+                lokets={lokets}
+                selectedLoket={selectedLoket}
+                disableLoket={!!selectedLoket}
+                disableExit={false}
+              />
             </div>
           </div>
         </div>

@@ -16,7 +16,9 @@ export default function AntrianPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [printer, setPrinter] = useState<any>(null);
-  const [printerStatus, setPrinterStatus] = useState<string>("Mencari printer Zebra...");
+  const [printerStatus, setPrinterStatus] = useState<string>(
+    "Mencari printer Zebra..."
+  );
 
   const options = [
     { title: "UMUM", image: "/icons/umum.svg", jenis: "UMUM" },
@@ -40,7 +42,7 @@ export default function AntrianPage() {
       // @ts-ignore
       window.BrowserPrint.getDefaultDevice(
         "printer",
-        function(printerObj: any) {
+        function (printerObj: any) {
           if (printerObj) {
             setPrinter(printerObj);
             setPrinterStatus("Printer Zebra terdeteksi: " + printerObj.name);
@@ -48,12 +50,14 @@ export default function AntrianPage() {
             setPrinterStatus("Printer Zebra tidak ditemukan.");
           }
         },
-        function(error: any) {
+        function (error: any) {
           setPrinterStatus("Gagal mendapatkan printer: " + error);
         }
       );
     } else {
-      setPrinterStatus("BrowserPrint SDK belum tersedia. Silakan install extension Zebra Browser Print.");
+      setPrinterStatus(
+        "BrowserPrint SDK belum tersedia. Silakan install extension Zebra Browser Print."
+      );
     }
   }, []);
 
@@ -77,19 +81,25 @@ export default function AntrianPage() {
 
   const createAntrian = async (jenis: string) => {
     try {
-      const outletId = typeof window !== "undefined" ? localStorage.getItem("selected_outlet_id") : null;
+      const outletId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("selected_outlet_id")
+          : null;
       if (!outletId) {
         setMessage("Outlet belum dipilih.");
         return;
       }
-      const res = await fetch(`http://192.168.50.24:4000/api/pasiens/${outletId}/outlet`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify({ jenis }),
-      });
+      const res = await fetch(
+        `http://192.168.50.222:5000/api/pasiens/${outletId}/outlet`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: JSON.stringify({ jenis }),
+        }
+      );
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
       const json = await res.json();
@@ -102,11 +112,13 @@ export default function AntrianPage() {
       console.error("Gagal membuat antrian pasien:", err);
       setMessage("Terjadi kesalahan saat membuat antrian.");
     }
-  }  
+  };
 
   const printNomorAntrian = (nomor: string, jenis: string) => {
     if (!printer) {
-      setMessage("Printer Zebra belum siap. Pastikan extension dan printer sudah terdeteksi.");
+      setMessage(
+        "Printer Zebra belum siap. Pastikan extension dan printer sudah terdeteksi."
+      );
       return;
     }
     const zpl = `^XA
@@ -119,7 +131,7 @@ export default function AntrianPage() {
 ^CF0,40
 ^FO0,150^FB203,1,0,C,0^FD${nomor}^FS
 ^XZ`;
-    printer.send(zpl, undefined, function(error: any){
+    printer.send(zpl, undefined, function (error: any) {
       if (error) setMessage("Gagal print: " + error);
     });
   };
@@ -131,7 +143,10 @@ export default function AntrianPage() {
     }
   }, [message]);
 
-  const outletId = typeof window !== "undefined" ? localStorage.getItem("selected_outlet_id") : null;
+  const outletId =
+    typeof window !== "undefined"
+      ? localStorage.getItem("selected_outlet_id")
+      : null;
 
   return (
     <div className="w-full h-screen flex flex-col bg-white relative">
@@ -180,7 +195,10 @@ export default function AntrianPage() {
         />
       )}
 
-      <Script src="/js/BrowserPrint-3.0.216.min.js" strategy="beforeInteractive" />
+      <Script
+        src="/js/BrowserPrint-3.0.216.min.js"
+        strategy="beforeInteractive"
+      />
     </div>
   );
 }

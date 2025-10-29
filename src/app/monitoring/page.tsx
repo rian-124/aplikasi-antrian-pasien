@@ -25,10 +25,10 @@ export default function MonitoringPage() {
         if (!token) throw new Error("No access token");
 
         const [patientRes, outletRes] = await Promise.all([
-          fetch("http://192.168.50.24:4000/api/antrian-pasien", {
+          fetch("http://192.168.50.222:5000/api/antrian-pasien", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("http://192.168.50.24:4000/api/outlet", {
+          fetch("http://192.168.50.222:5000/api/outlet", {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -63,7 +63,7 @@ export default function MonitoringPage() {
     const token = localStorage.getItem("access_token");
     if (!token) return;
 
-    const socket: Socket = io("http://192.168.50.24:4000", {
+    const socket: Socket = io("http://192.168.50.222:5000", {
       auth: { token },
     });
 
@@ -182,7 +182,7 @@ export default function MonitoringPage() {
     <div className="relative w-full h-screen overflow-x-hidden bg-white">
       <QueueHeader />
       <div className="flex flex-col md:flex-row h-full w-full mt-6 md:mt-20">
-  <div className="w-full md:w-1/3 lg:w-1/4 border-gray-700 overflow-y-auto px-2 md:px-4 flex flex-col gap-2 md:gap-4 justify-start">
+        <div className="w-full md:w-1/3 lg:w-1/4 border-gray-700 overflow-y-auto px-2 md:px-4 flex flex-col gap-2 md:gap-4 justify-start">
           <QueueList
             items={patients
               .filter((p) => p.status === "WAITING")
@@ -206,7 +206,7 @@ export default function MonitoringPage() {
           </div>
         </div>
 
-  <div className="flex flex-col flex-1 space-y-2 md:space-y-4 p-2 md:p-4 items-center">
+        <div className="flex flex-col flex-1 space-y-2 md:space-y-4 p-2 md:p-4 items-center">
           <div className="flex justify-center items-start w-full min-h-[400px]">
             <div className="w-full max-w-md h-[400px] flex items-start justify-center mx-auto">
               <div className="bg-white rounded-3xl p-7 shadow-xl border border-neutral-200 flex flex-col justify-between w-full max-w-md mx-auto">

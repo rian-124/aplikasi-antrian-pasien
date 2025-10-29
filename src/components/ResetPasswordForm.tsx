@@ -36,7 +36,7 @@ export default function ResetPasswordForm() {
 
     try {
       const res = await fetch(
-        "http://192.168.50.24:4000/api/users/reset-password",
+        "http://192.168.50.222:5000/api/users/reset-password",
         {
           method: "POST",
           headers: {
