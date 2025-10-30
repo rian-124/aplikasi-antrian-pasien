@@ -12,7 +12,7 @@ WORKDIR /usr/src/app
 COPY --chown=node:node package*.json ./
 
 # Install app dependencies
-RUN npm config set registry https://registry.npmmirror.com && npm ci
+RUN npm config set registry https://registry.npmmirror.com && npm ci --include=dev
 
 # Bundle app source
 COPY --chown=node:node . .
