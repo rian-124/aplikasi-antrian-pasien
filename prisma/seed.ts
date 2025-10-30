@@ -1,4 +1,4 @@
-import { Seeder } from './seeds/index.js';
+import { Seeder } from './seeds/index';
 
 async function main() {
   const seeder = new Seeder();
