@@ -46,8 +46,6 @@ COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 COPY --chown=node:node --from=build /usr/src/app/prisma ./prisma
 COPY --chown=node:node --from=build /usr/src/app/.env ./.env
 
-
-RUN chown -R node:node /usr/src/app
 # set user to node
 USER node
 
